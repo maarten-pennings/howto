@@ -23,6 +23,9 @@ However, if the $N$ samples are a subset, the variance is computed using Bessel'
   V = \frac{1}{N-1} \sum_{i=1}^{N} (x_{i} - \bar{x})^2
 ```
 
+
+## Optimize computation of variance
+
 To compute the variance using this formula requires storing all $x_{i}$ samples.
 Fortunately there is an alternative. 
 For this we reform the sum in the definition of variance.
@@ -55,7 +58,7 @@ For this we reform the sum in the definition of variance.
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2\cdot N
 ```
 
-= { \sum x_{i} = N\cdot \bar{x} }
+= { $\sum x_{i} = N\cdot \bar{x}$ }
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\cdot N \cdot\bar{x} + N \cdot \bar{x}^2
