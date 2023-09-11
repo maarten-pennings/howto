@@ -30,44 +30,63 @@ For this we reform the sum in the definition of variance.
 ```math
   \sum_{i=1}^{N} \left( x_{i} - \bar{x} \right)^2
 ```
+
 expand square
+
 ```math
   \sum_{i=1}^{N} \left( x_{i}^2 - 2\cdot x_{i}\cdot\bar{x} + \bar{x}^2 \right)
 ```
+
 associate sum over - and +
+
 ```math
   \sum_{i=1}^{N} x_{i}^2 - \sum_{i=1}^{N} 2\cdot x_{i}\cdot\bar{x} + \sum_{i=1}^{N} \bar{x}^2
 ```
+
 distribute constants out
+
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2 \sum_{i=1}^{N} 1
 ```
+
 sum of $N$ terms 1
+
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2\cdot N
 ```
+
 $\sum_{i=1}^{N} x_{i} = N\cdot \bar{x}$
+
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\cdot N \cdot\bar{x} + N \cdot \bar{x}^2
 ```
-```
+
 calculus
+
 ```math
   \sum_{i=1}^{N} x_{i}^2 - N \cdot \bar{x}^2
 ```
+
 $\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_{i}$
+
 ```math
   \sum_{i=1}^{N} x_{i}^2 - N \cdot \left \frac{1}{N} \sum_{i=1}^{N} x_{i} \right)^2
 ```
+
 calculus
+
 ```math
   \sum_{i=1}^{N} x_{i}^2 - \frac{1}{N} \left( \sum_{i=1}^{N} x_{i} \right)^2
 ```
+
 introduce two constants
+
 ```math
   \mbox{_sum_sq} - \frac{1}{N} \mbox(_sum)^2
 ```
+
 calculus
+
 ```math
   \left( N\cdot\mbox{_sum_sq} - \mbox(_sum)^2 \right) / N
 ```
@@ -128,3 +147,5 @@ divided by the standard deviation (`_sd`). We express that in decibel (dB).
     return _db;
   }
 ```
+
+(end)
