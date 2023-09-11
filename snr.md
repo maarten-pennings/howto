@@ -30,47 +30,44 @@ For this we reform the sum in the definition of variance.
 ```math
   \sum_{i=1}^{N} \left( x_{i} - \bar{x} \right)^2
 ```
-  _expand square_
+expand square
 ```math
   \sum_{i=1}^{N} \left( x_{i}^2 - 2\cdot x_{i}\cdot\bar{x} + \bar{x}^2 \right)
 ```
-  _associate sum over - and +_
+associate sum over - and +
 ```math
   \sum_{i=1}^{N} x_{i}^2 - \sum_{i=1}^{N} 2\cdot x_{i}\cdot\bar{x} + \sum_{i=1}^{N} \bar{x}^2
 ```
-  _distribute constants out_
+distribute constants out
 ```math
-  \sum_{i=1}^{N} x_{i}^2 - 2\cdot\\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2 \sum_{i=1}^{N} 1
+  \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2 \sum_{i=1}^{N} 1
 ```
-  _sum of $N$ terms 1_
+sum of $N$ terms 1
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2\cdot N
 ```
-  _$\sum_{i=1}^{N} x_{i} = N\cdot \bar{x}$_
+$\sum_{i=1}^{N} x_{i} = N\cdot \bar{x}$
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\cdot N \cdot\bar{x} + N \cdot \bar{x}^2
 ```
-  _calculus_
-```math
-  \sum_{i=1}^{N} x_{i}^2 - 2\cdot N \cdot\bar{x}^2 + N \cdot \bar{x}^2
 ```
-  _calculus_
+calculus
 ```math
   \sum_{i=1}^{N} x_{i}^2 - N \cdot \bar{x}^2
 ```
-  _$\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_{i}$_
+$\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_{i}$
 ```math
-  \sum_{i=1}^{N} x_{i}^2 - N \cdot \left \frac{1}{N} \sum_{i=1}^{N} x_{i} \right^2
+  \sum_{i=1}^{N} x_{i}^2 - N \cdot \left \frac{1}{N} \sum_{i=1}^{N} x_{i} \right)^2
 ```
-  _calculus_
+calculus
 ```math
-  \sum_{i=1}^{N} x_{i}^2 - \frac{1}{N} \left( \sum_{i=1}^{N} x_{i} \right^2
+  \sum_{i=1}^{N} x_{i}^2 - \frac{1}{N} \left( \sum_{i=1}^{N} x_{i} \right)^2
 ```
-  _introduce two constants_
+introduce two constants
 ```math
   \mbox{_sum_sq} - \frac{1}{N} \mbox(_sum)^2
 ```
-  _calculus_
+calculus
 ```math
   \left( N\cdot\mbox{_sum_sq} - \mbox(_sum)^2 \right) / N
 ```
