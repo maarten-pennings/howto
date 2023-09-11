@@ -55,37 +55,37 @@ For this we reform the sum in the definition of variance.
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2\cdot N
 ```
 
-= $$\sum_{i=1}^{N} x_{i} = N\cdot \bar{x}$$
+= { \sum x_{i} = N\cdot \bar{x} }
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\cdot N \cdot\bar{x} + N \cdot \bar{x}^2
 ```
 
-= calculus
+= { calculus }
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - N \cdot \bar{x}^2
 ```
 
-= $\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_{i}$
+= { $\bar{x} = \frac{1}{N} \sum x_{i}$ }
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - N \cdot \left( \frac{1}{N} \sum_{i=1}^{N} x_{i} \right)^2
 ```
 
-= calculus
+= { calculus }
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - \frac{1}{N} \left( \sum_{i=1}^{N} x_{i} \right)^2
 ```
 
-= introduce two constants
+= { introduce two constants }
 
 ```math
-  \mbox{\_sum\_sq} - \frac{1}{N} \mbox(\_sum)^2
+  \mbox{\_sum\_sq} - \frac{1}{N} \mbox{\_sum}^2
 ```
 
-= calculus
+= { calculus }
 
 ```math
   \left( N\cdot\mbox{\_sum\_sq} - \mbox{\_sum}^2 \right) / N
@@ -147,7 +147,7 @@ divided by the standard deviation (`_sd`). We express that in decibel (dB).
     float    _mu    = (float)_sum / _n;
     float    _snr   = _mu / _sd;
     float    _db    = 20 * log( _snr ) / log(10);
-    return _db;
+    return   _db;
   }
 ```
 
