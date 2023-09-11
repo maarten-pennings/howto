@@ -70,7 +70,7 @@ calculus
 $\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_{i}$
 
 ```math
-  \sum_{i=1}^{N} x_{i}^2 - N \cdot \left \frac{1}{N} \sum_{i=1}^{N} x_{i} \right)^2
+  \sum_{i=1}^{N} x_{i}^2 - N \cdot \left( \frac{1}{N} \sum_{i=1}^{N} x_{i} \right)^2
 ```
 
 calculus
