@@ -3,7 +3,7 @@
 Computing the signal to noise ratio (SNR) from a series of measurements.
 
 
-## Definition 
+## Definition of variance
 
 We assume that we have $N$ measurement results $x_i$ (for $i=1..N$).
 The average $\bar{x}$ of these measurements is
@@ -37,64 +37,67 @@ expand square
   \sum_{i=1}^{N} \left( x_{i}^2 - 2\cdot x_{i}\cdot\bar{x} + \bar{x}^2 \right)
 ```
 
-associate sum over - and +
+= associate sum over - and +
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - \sum_{i=1}^{N} 2\cdot x_{i}\cdot\bar{x} + \sum_{i=1}^{N} \bar{x}^2
 ```
 
-distribute constants out
+= distribute constants out
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2 \sum_{i=1}^{N} 1
 ```
 
-sum of $N$ terms 1
+= sum of $N$ terms 1
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2\cdot N
 ```
 
-$\sum_{i=1}^{N} x_{i} = N\cdot \bar{x}$
+= $\sum_{i=1}^{N} x_{i} = N\cdot \bar{x}$
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\cdot N \cdot\bar{x} + N \cdot \bar{x}^2
 ```
 
-calculus
+= calculus
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - N \cdot \bar{x}^2
 ```
 
-$\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_{i}$
+= $\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_{i}$
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - N \cdot \left( \frac{1}{N} \sum_{i=1}^{N} x_{i} \right)^2
 ```
 
-calculus
+= calculus
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - \frac{1}{N} \left( \sum_{i=1}^{N} x_{i} \right)^2
 ```
 
-introduce two constants
+= introduce two constants
 
 ```math
-  \mbox{_sum_sq} - \frac{1}{N} \mbox(_sum)^2
+  \mbox{\_sum\_sq} - \frac{1}{N} \mbox(\_sum)^2
 ```
 
-calculus
+= calculus
 
 ```math
-  \left( N\cdot\mbox{_sum_sq} - \mbox(_sum)^2 \right) / N
+  \left( N\cdot\mbox{\_sum\_sq} - \mbox(\_sum)^2 \right) / N
 ```
+
+
+## Formula for variance
 
 This results in a new formula for variance.
 
 ```math
-  \mbox{_var} = \left( N\cdot\mbox{_sum_sq} - \mbox(_sum)^2 \right) / N / (N-1)
+  \mbox{\_var} = \left( N\cdot\mbox{\_sum\_sq} - \mbox(\_sum)^2 \right) / N / (N-1)
 ```
 
 
