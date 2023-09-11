@@ -31,31 +31,31 @@ For this we reform the sum in the definition of variance.
   \sum_{i=1}^{N} \left( x_{i} - \bar{x} \right)^2
 ```
 
-expand square
+= { expand square }
 
 ```math
   \sum_{i=1}^{N} \left( x_{i}^2 - 2\cdot x_{i}\cdot\bar{x} + \bar{x}^2 \right)
 ```
 
-= associate sum over - and +
+= { associate sum over - and + }
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - \sum_{i=1}^{N} 2\cdot x_{i}\cdot\bar{x} + \sum_{i=1}^{N} \bar{x}^2
 ```
 
-= distribute constants out
+= { distribute constants out }
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2 \sum_{i=1}^{N} 1
 ```
 
-= sum of $N$ terms 1
+= { sum of $N$ terms 1 }
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\sum_{i=1}^{N} x_{i} + \bar{x}^2\cdot N
 ```
 
-= $\sum_{i=1}^{N} x_{i} = N\cdot \bar{x}$
+= $$\sum_{i=1}^{N} x_{i} = N\cdot \bar{x}$$
 
 ```math
   \sum_{i=1}^{N} x_{i}^2 - 2\cdot\bar{x}\cdot N \cdot\bar{x} + N \cdot \bar{x}^2
@@ -88,7 +88,7 @@ expand square
 = calculus
 
 ```math
-  \left( N\cdot\mbox{\_sum\_sq} - \mbox(\_sum)^2 \right) / N
+  \left( N\cdot\mbox{\_sum\_sq} - \mbox{\_sum}^2 \right) / N
 ```
 
 
@@ -97,7 +97,7 @@ expand square
 This results in a new formula for variance.
 
 ```math
-  \mbox{\_var} = \left( N\cdot\mbox{\_sum\_sq} - \mbox(\_sum)^2 \right) / N / (N-1)
+  \mbox{\_var} = \left( N\cdot\mbox{\_sum\_sq} - \mbox{\_sum}^2 \right) / N / (N-1)
 ```
 
 
