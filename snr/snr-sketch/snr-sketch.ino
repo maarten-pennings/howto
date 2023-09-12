@@ -1,3 +1,7 @@
+// snr-sketch.ino - Arduino sketch to compute SNR from samples
+// see https://github.com/maarten-pennings/howto
+
+
 uint16_t x[] = {52, 51, 45, 50, 50, 46, 55, 46, 49, 51, 55, 52, 48, 45, 45, 55, 52, 46, 55, 48, 49, 45, 53, 45, 45, 53, 51, 49, 55, 55, 45, 49, 50, 52, 51, 46, 51, 55, 54, 51};
 
 uint16_t _n      = 0;
