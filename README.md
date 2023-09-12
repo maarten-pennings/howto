@@ -3,8 +3,13 @@ Assortment of "How to xxx" I want to remember.
 
 
 ## Fast GPIO writes on an ESP32
-Set or clear ESP32 GPIO pins via direct register access; an example [sketch](esp32-fast-gpio/esp32-fast-gpio.md).
-This is much faster than via the Arduino API.
+Set or clear ESP32 GPIO pins via direct register access; this is much faster than via the Arduino API.
+For an example and explanation see [esp32-fast-gpio](esp32-fast-gpio/esp32-fast-gpio.md).
+
+
+## Open drain on an ESP32
+Unlike traditional Arduino boards, the ESP32 allows configuring its GPIO pins as open drain. 
+For an example and explanation see [esp32-opendrain](esp32-opendrain/esp32-opendrain.md).
 
 
 ## SNR
