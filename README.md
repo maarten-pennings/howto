@@ -16,4 +16,9 @@ For an example and explanation see [esp32-opendrain](esp32-opendrain/esp32-opend
 Computing the signal to noise ratio [SNR](snr/snr.md) of a series of measurements.
 
 
+## Open drain on an ESP32
+The Serial Plotter in Arduino 2.0 has a too narrow x-axis. That can be patched wider.
+For an example and explanation see [arduino2.0-wideplot](arduino2.0-wideplot/arduino2.0-wideplot.md).
+
+
 (end)
