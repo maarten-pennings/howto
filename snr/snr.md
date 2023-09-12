@@ -17,7 +17,8 @@ If these $N$ samples are the entire population, the variance is defined as
   V = \frac{1}{N} \sum_{i=1}^{N} (x_{i} - \bar{x})^2
 ```
 
-However, if the $N$ samples are a subset, the variance is computed using Bessel's correction
+However, if the $N$ samples are a subset, the variance is computed using 
+Bessel's correction (eq 1)
 
 ```math
   V = \frac{1}{N-1} \sum_{i=1}^{N} (x_{i} - \bar{x})^2
@@ -153,5 +154,26 @@ divided by the standard deviation (`_sd`). We express that in decibel (dB).
     return   _db;
   }
 ```
+
+## Arduino
+
+An implementation of the C-code is given in this [Arduino sketch](snr-sketch).
+
+This is the output of the example
+
+```text
+Welcome to SNR
+
+_n 40 _sum 2000 _sum_sq 100482
+_numer 19280 _var 12.358974 _sd 3.515533 _mu 50.000000
+_snr 14.222593 _db
+snr = 23.059576 dB
+```
+
+Compare that with this [spreadsheet](snr.xlsx).
+Observe that the spreadsheet has three implementations:
+- yellow, using the math formula (eq 1)
+- green, using excel's built-in formula's
+- blue, the c-code from this howto (but then in excel).
 
 (end)
