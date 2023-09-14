@@ -83,28 +83,53 @@ See the Arduino sketch [esp32-opendrain](esp32-opendrain.ino) as an example.
 Note the line
 
 ```C
-pinMode(OD_PIN, OUTPUT_OPEN_DRAIN | PULLUP ); // engage built-in pull-up
+pinMode(OD_PIN, INPUT | OUTPUT_OPEN_DRAIN | PULLUP ); 
 ```
 
-This is a sample run, where we grounded pin 23 for while (in release mode).
+This is a bit more complex than appears at first sight 
+(from [esp32-hal-gpio.h](https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-gpio.h)).
+I explicitly OR-in the `INPUT`, because the latest package I can download is 2.0.11.
+I explicitly OR-in the `PULLUP`, because I wanted this script to be testable with as little around the board as possible.
+
+
+| bit | value | macro               | description                             |
+|:---:|:-----:|:--------------------|:----------------------------------------|
+|  0  | 0x01  | `INPUT`             | port can be read                        |
+|  1  | 0x02  | `OUTPUT`            | port can be written (until 2.0.3)       |
+|     | 0x03  | `OUTPUT`            | port can be written&read (from 2.0.4)   |
+|  2  | 0x04  | `PULLUP`            | engage pullup on pin                    |
+|     | 0x05  | `INPUT_PULLUP`      | input pin with pullup                   |
+|  3  | 0x08  | `PULLDOWN`          | engages pulldown on pin                 |
+|     | 0x09  | `INPUT_PULLDOWN`    | input pin with pullup                   |
+|  4  | 0x10  | `OPEN_DRAIN`        | engages open drain on pin               |
+|     | 0x12  | `OUTPUT_OPEN_DRAIN` | open drain with write (until 2.0.11)    |
+|     | 0x13  | `OUTPUT_OPEN_DRAIN` | open drain with write&read (from 2.0.12)|
+
+
+
+Below is a sample run, where we grounded pin 23 once in a while.
 
 
 ```text
 Welcome to esp32-opendrain
-
-
-Feel free to ground the pin
 od  : pin 23 can output 1
+od  : feel free to ground pin (eg during release)
 od  : init
 
-od  : pulldown
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-od  : release
-11111111111111111111111111111111100000000001111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
-od  : pulldown
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-od  : release
-11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+od  : engaged pulldown (always 0)
+od  : reading 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+od  : engaged release (typically 1, except when externally grounded
+od  : reading 1111111111111111111110000000000000000111111111111111111000000000000000111111111111111111111111111111
+od  : engaged pulldown (always 0)
+od  : reading 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+od  : engaged release (typically 1, except when externally grounded
+od  : reading 1111111111110000001111111111111011111111111111111111111111111111111111111111111111111111111111111111
+od  : engaged pulldown (always 0)
+od  : reading 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+od  : engaged release (typically 1, except when externally grounded
+od  : reading 11111111
 ```
+
+
 (end)
 
