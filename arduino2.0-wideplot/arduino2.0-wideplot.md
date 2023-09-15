@@ -23,7 +23,7 @@ the x-axis is only 50, and can not be configured.
 
 ## Making the serial plotter wider
 
-Someone found out (forgot source :-( ) that the serial plotter is a web application.
+[Someone found out](https://github.com/arduino/arduino-ide/issues/803#issuecomment-1338149431) that the serial plotter is a web application.
 The source of that web application (html, css, js) are part of the Arduino intall, otherwise it could not be run.
 But that also means we can change that source.
 
