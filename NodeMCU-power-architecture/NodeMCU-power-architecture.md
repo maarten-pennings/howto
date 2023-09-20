@@ -3,6 +3,8 @@
 The NodeMCU board (ESP8266, ESP32) have several pins related to power.
 What do these pins offer?
 
+This is copied from [WordClock](https://github.com/maarten-pennings/WordClock).
+
 
 ## Power architecture
 
@@ -11,7 +13,7 @@ These boards have a voltage regulator (LDO) that converts 5V to 3V3. The boards 
 connects to the regulator. This allows us to use an external power supply (4.3V-12V) instead of 
 power over USB.
 
-![Power architecture](imgs/powerarch.png)
+![Power architecture](powerarch.png)
 
 Note that there is a diode between the USB port and VIN. 
 If you would externally power the NodeMCU board via VIN (say 9V), and you would also have connected the
@@ -47,5 +49,6 @@ As en example see an "old" and a "new" DOIT ESP32 DEV KIT V1 board: the diode is
 
 By the way, notice the extra cap on the new board.
 Presumable they make the Arduino reset and flash firmware via serial work (with the user pressing the boot button).
+
 
 (end)
