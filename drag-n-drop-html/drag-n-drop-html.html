@@ -7,36 +7,36 @@
       var drag=null;
       function _ondragstart(src) {
         drag=src;
-	    document.getElementById("log").innerHTML += `_ondragstart ${drag}<br/>`;
+        document.getElementById("log").innerHTML += `_ondragstart ${drag}<br/>`;
       }      
       function _ondragover(event) {
         event.preventDefault();
       }      
       function _ondrop(dst) {
-	    document.getElementById("log").innerHTML += `_ondrop ${drag} on ${dst}<br/>`;
+        document.getElementById("log").innerHTML += `_ondrop ${drag} on ${dst}<br/>`;
       }      
     </script>
-	<style>
-	  span { font-size:40px; padding:8px; border:1px solid black; display:inline-block; width:40px; padding:10px; text-align:center; margin:10px; }
+    <style>
+      span { font-size:40px; padding:8px; border:1px solid black; display:inline-block; width:40px; padding:10px; text-align:center; margin:10px; }
     </style>
   </head>
 
   <body style="padding:8px">
     <div>
-	  Drag tile to other tile
-	</div>
-	<div>
+      Drag tile to other tile
+    </div>
+    <div> <!-- see https://www.w3schools.com/jsref/event_ondragend.asp -->
       <span draggable="true" ondragstart="_ondragstart('sA')" ondragover="_ondragover(event)" ondrop="_ondrop('dA')" style="background:pink;">A</span>
       <span draggable="true" ondragstart="_ondragstart('sB')" ondragover="_ondragover(event)" ondrop="_ondrop('dB')" style="background:lightgreen; ">B</span>
       <span draggable="true" ondragstart="_ondragstart('sC')" ondragover="_ondragover(event)" ondrop="_ondrop('dC')" style="background:lightblue;  ">C</span>
     </div>
-	<div>
+    <div>
       <span draggable="true" ondragstart="_ondragstart('sX')" ondragover="_ondragover(event)" ondrop="_ondrop('dX')" style="background:red;">X</span>
       <span draggable="true" ondragstart="_ondragstart('sY')" ondragover="_ondragover(event)" ondrop="_ondrop('dY')" style="background:green; ">Y</span>
       <span draggable="true" ondragstart="_ondragstart('sZ')" ondragover="_ondragover(event)" ondrop="_ondrop('dZ')" style="background:blue;  ">Z</span>
     </div>
-	<div id="log">
-	  Log:<br/>
+    <div id="log">
+      Log:<br/>
     </div>
   </body>
 
