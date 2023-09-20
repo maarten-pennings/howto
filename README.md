@@ -28,6 +28,7 @@ For an example and explanation see [arduino2.0-wideplot](arduino2.0-wideplot/ard
 
 ## Drag and drop in HTML
 For an example and explanation see [drag-n-drop-html](drag-n-drop-html/drag-n-drop-html.html).
+Or see it in [action](https://htmlpreview.github.io/?https://github.com/maarten-pennings/howto/blob/main/drag-n-drop-html/drag-n-drop-html.html).
 
 
 (end)
