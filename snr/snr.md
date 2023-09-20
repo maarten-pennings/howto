@@ -11,13 +11,13 @@ The average $\bar{x}$ of these measurements is
   \bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_{i}
 ```
 
-If these $N$ samples are the entire population, the variance is defined as
+If these $N$ samples are the _entire_ population, the variance is defined as
 
 ```math
   V = \frac{1}{N} \sum_{i=1}^{N} (x_{i} - \bar{x})^2
 ```
 
-However, if the $N$ samples are a subset, the variance is computed using 
+However, if the $N$ samples are a _subset_, the variance is computed using 
 Bessel's correction (eq 1)
 
 ```math
@@ -27,9 +27,11 @@ Bessel's correction (eq 1)
 
 ## Optimize computation of variance
 
-To compute the variance using this formula requires storing all $x_{i}$ samples.
-Fortunately there is an alternative. 
-For this we reform the sum in the definition of variance.
+To compute the variance using this formula requires storing all $x_{i}$ samples,
+so that we can compute the differences once the average is known.
+Fortunately there is an alternative.
+ 
+We rewrite the sum in the definition of variance.
 
 ```math
   \sum_{i=1}^{N} \left( x_{i} - \bar{x} \right)^2
@@ -131,17 +133,23 @@ We restrict the number of samples (`_n`) to 65535, or 16 bits too.
 This means that the maximum value of `_sum` fits in 32 bits.
 Since a data sample is 16 bits, its square is 32 bits, and summing 16 bits of those
 leads to a maximum size for `_sum_sq` of 48 bits.
+So, by limiting `_n` to 65535, `_n`, `_sum`, and `_sum_sq` fit in the assigned data types
+(and the data type for `_sum_sq` is even 16 bits too large).
+Also note the last expression `x * (uint32_t)x` has a typecast.
+This is needed because `x` is 16 bit, and this code might be compiled on a 16 bit platform:
+we need to widen the expression to 32 bits to ensure the result of the multiplication is 32 bits.
 
 To compute the variance, we start by computing its numerator `_n * _sum_sq  -  _sum * _sum`.
 Observe that the first term is 16 bits times 48 bits, so 64 bits, and the
-second term is 32 bits time 32 bits so also 64 bits. Also note that the variance
-is never negative so it fits in `uint64_t`. Finally note the since we compute the
-numerator as integer, we do not have floating point accuracy errors.
+second term is 32 bits time 32 bits so also 64 bits. 
+Both terms are positive, and the second is subtracted from the first so there can be no overflow at MAX_UNIT64.
+Also note that the variance is never negative so there can be no underflow at 0. 
+Finally note the since we compute the numerator as integer, we do not have floating point accuracy errors.
 
-Next, we compute the variance (numerator divided by denominator), but this
-requires we switch to float. The standard deviation is the square root
-of the variance. The signal to noise ratio is defined as the average (`_mu`)
-divided by the standard deviation (`_sd`). We express that in decibel (dB).
+Next, we compute the _variance_ (numerator divided by denominator), but this
+requires we switch to float (again a typecast). The _standard deviation_ is the square root
+of the variance. The _signal to noise ratio_ is defined as the average (`_mu`)
+divided by the standard deviation (`_sd`). As a last step, we express that in decibel (dB).
 
 ```c
   float snr_in_dB() {

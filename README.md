@@ -2,6 +2,11 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## Fast GPIO writes on an ATMEGA
+Set or clear ATMEGA GPIO pins via direct register access; this is much faster than via the Arduino API.
+For an example and explanation see [atmega-fast-gpio](atmega-fast-gpio/atmega-fast-gpio.md).
+
+
 ## Fast GPIO writes on an ESP32
 Set or clear ESP32 GPIO pins via direct register access; this is much faster than via the Arduino API.
 For an example and explanation see [esp32-fast-gpio](esp32-fast-gpio/esp32-fast-gpio.md).

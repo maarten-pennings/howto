@@ -7,6 +7,7 @@ The typical way to set a GPIO pin on an ESP32 (in Arduino)
 is to use the Arduino API:
 
 ```C
+#define PIN_TEST2 23
 digitalWrite( PIN_TEST2, LOW );
 ```
 
@@ -19,7 +20,7 @@ A faster way is to write directly to the special function register ("SFR")
 that controls the pin state.
 
 ```C
-*(uint32_t*)0x3FF4400C = 0b100000000000000000000000;
+*(uint32_t*)0x3FF4400C = 0b100000000000000000000000; // 23 zeros
 ```
 
 This is not very readable and error prone.
@@ -40,7 +41,7 @@ GPIO.out_w1tc = 1UL << PIN_TEST2;
 See the Arduino sketch [esp32-fast-gpio](esp32-fast-gpio) as an example.
 
 from the logic analyzer, we see that two consecutive 0-writes to two different ports
-now takes below 50 ns.
+now takes 50 ns.
 
 ![scope](scope_capture.png)
 
