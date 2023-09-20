@@ -17,6 +17,11 @@ Unlike traditional Arduino boards, the ESP32 allows configuring its GPIO pins as
 For an example and explanation see [esp32-opendrain](esp32-opendrain/esp32-opendrain.md).
 
 
+## NodeMCU power architecture
+The NodeMCU board (ESP8266, ESP32) have several pins related to power.
+See [NodeMCU-power-architecture](NodeMCU-power-architecture/NodeMCU-power-architecture.md) for an explanation of the pins.
+
+
 ## SNR
 Computing the signal to noise ratio [SNR](snr/snr.md) of a series of measurements.
 
