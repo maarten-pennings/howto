@@ -26,4 +26,8 @@ The Serial Plotter in Arduino 2.0 has a too narrow x-axis. That can be patched w
 For an example and explanation see [arduino2.0-wideplot](arduino2.0-wideplot/arduino2.0-wideplot.md).
 
 
+## Drag and drop in HTML
+For an example and explanation see [drag-n-drop-html](drag-n-drop-html/drag-n-drop-html.html).
+
+
 (end)
