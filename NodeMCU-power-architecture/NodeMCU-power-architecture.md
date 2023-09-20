@@ -48,7 +48,7 @@ As en example see an "old" and a "new" DOIT ESP32 DEV KIT V1 board: the diode is
 ![DOIT-ESP32-DEV-KIT-V1 with 0ohm](DOIT-ESP32-DEV-KIT-V1.jpg)
 
 By the way, notice the extra cap on the new board.
-Presumable they make the Arduino reset and flash firmware via serial work (with the user pressing the boot button).
+Presumable they make the Arduino reset and flash firmware via serial work (without the user pressing the boot button).
 
 
 (end)
