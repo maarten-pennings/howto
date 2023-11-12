@@ -36,4 +36,9 @@ For an example and explanation see [drag-n-drop-html](drag-n-drop-html/drag-n-dr
 Or see it in [action](https://htmlpreview.github.io/?https://github.com/maarten-pennings/howto/blob/main/drag-n-drop-html/drag-n-drop-html.html).
 
 
+## Control an 128x64 LCD screen
+I was given an 128x64 LCD module from POWERTIP ("PG12864WRF"). It uses an NT7108 as controller.
+Took quite some time to get it [running](NT7108-12864LCD/NT7108-12864LCD.md).
+
+
 (end)
