@@ -64,7 +64,7 @@ void loop(void) {
   do {
     u8g2.setFont(u8g2_font_ncenB10_tr);
     u8g2.drawStr(5,20,"Elektro Club");
-    u8g2.drawStr(18,40,"de Pracht");
+    u8g2.drawStr(5,40,"de Pracht");
     u8g2.drawFrame(0,0,128,64);
     u8g2.drawFrame(2,2,124,60);
     u8g2.drawXBM( 93, 27, u8g_logo_width, u8g_logo_height, (uint8_t*)u8g_logo_bits);
