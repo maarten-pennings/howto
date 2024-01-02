@@ -35,10 +35,12 @@ So our final version is
 GPIO.out_w1tc = 1UL << PIN_TEST2;
 ```
 
+The `c` here means clear, there is also a `s` set: `GPIO.out_w1ts = 1UL << PIN_TEST2;`.
+
 
 ## Example
 
-See the Arduino sketch [esp32-fast-gpio](esp32-fast-gpio) as an example.
+See the Arduino sketch [esp32-fast-gpio.ino](esp32-fast-gpio.ino) as an example.
 
 from the logic analyzer, we see that two consecutive 0-writes to two different ports
 now takes 50 ns.
