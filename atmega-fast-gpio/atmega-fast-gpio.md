@@ -57,4 +57,12 @@ Input example of a single pin
 
 These example are taken from an [ATMEGA that feeds a 6502](https://github.com/maarten-pennings/6502/blob/master/2emulation/2560shield-hwtest/2560shield-hwtest.ino).
 
+
+## Nano ports
+
+Here is a map of the ports of the Arduino **Nano** (rest of the document focuses on ATMEGA 256).
+
+![Arduino Nano ports](nano-ports.drawio.png)
+
+
 (end)
