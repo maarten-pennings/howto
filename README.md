@@ -40,5 +40,8 @@ Or see it in [action](https://htmlpreview.github.io/?https://github.com/maarten-
 I was given an 128x64 LCD module from POWERTIP ("PG12864WRF"). It uses an NT7108 as controller.
 Took quite some time to get it [running](NT7108-12864LCD/NT7108-12864LCD.md).
 
+## PWM on ESP32
+Project [esp32pwm](esp32pwm/readme.md) shows how to use PWM on an ESP32, 
+with an exponential curve and a transistor to drive a high power LED.
 
 (end)
