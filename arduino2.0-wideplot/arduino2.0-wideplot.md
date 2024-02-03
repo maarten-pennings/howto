@@ -25,15 +25,16 @@ the x-axis is only 50, and can not be configured.
 
 [Someone found out](https://github.com/arduino/arduino-ide/issues/803#issuecomment-1338149431) that the serial plotter is a web application.
 The source of that web application (html, css, js) are part of the Arduino intall, otherwise it could not be run.
-But that also means we can change that source.
+But that also means we can change that source. We need to change the file `main.35ae02cb.chunk.js`,
+but I found it in different directories:
 
-On one PC, I have the source in this directory
-`…\AppData\Local\Programs\Arduino IDE 2\resources\app\node_modules\arduino-serial-plotter-webapp\build\static\js`
-but on another PC is is in this directory
-`C:\Program Files\ArduinoIDE2\Arduino IDE\resources\app\lib\backend\resources\arduino-serial-plotter-webapp\static\js`.
+ - `…\AppData\Local\Programs\Arduino IDE 2\resources\app\node_modules\arduino-serial-plotter-webapp\build\static\js`
+ - `…\AppData\Local\Programs\Arduino IDE\resources\app\lib\backend\resources\arduino-serial-plotter-webapp\static\js`
+ - `C:\Program Files\ArduinoIDE2\Arduino IDE\resources\app\lib\backend\resources\arduino-serial-plotter-webapp\static\js`,
+
 I'm note sure where the difference comes from (install for one user, install for all).
 
-Anyhow, locate the file `main.35ae02cb.chunk.js` in that directory, search for `(50)` and 
+Anyhow, locate the file `main.35ae02cb.chunk.js`, search for `(50)` and 
 change `Object(o.useState)(50)` to `Object(o.useState)(500)`
 
 ![A (500 wide) plot](wide.png).
