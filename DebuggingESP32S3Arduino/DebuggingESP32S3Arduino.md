@@ -53,7 +53,7 @@ And the Arduino 2.x IDE has a debugger for the controller.
 
 ## Experiments
 
-### Serial over COM
+### Single USB cable
 
 We begin we a simple test: blinking the built-in LED, writing over Serial, and 
 using the hardware serial.
@@ -115,7 +115,7 @@ using the hardware serial.
 - Test completes successfully.
 
 
-### Serial over internal USB block
+### Second USB cable
 
 We will now try to use the same sketch, but use the other USB port.
 
@@ -129,6 +129,9 @@ We will now try to use the same sketch, but use the other USB port.
   therefore Windows assigns a new COM port: "COM4" (this is probably different for you).
   
   However, we keep the Serial Monitor Port to COM5.
+  
+  I have to admit that I have no idea what COM4 is used for.
+  I expected it to carry a second Serial channel (e.g. `Serial1`) but I can't get it to work.
   
 - Changed the sketch the sketch a bit so that we are sure the firmware is
   updates (e.g. change the initial value of n to 8000, or the delay).
