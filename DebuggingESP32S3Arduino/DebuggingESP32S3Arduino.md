@@ -6,12 +6,12 @@
 I'm trying to use the debugger in the Arduino IDE to debug the 
 [ESP32-S3-DevKitC-1](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html).
 
-![ESP32S3-DevKit-C1](ESP32S3DevKitC1.jpg)
+![ESP32S3-DevKitC-1](ESP32S3DevKitC1.jpg)
 
-The ESP32S3-DevKit-C1 board is made by Espressif - but mine is a clone. 
+The ESP32S3-DevKitC-1 board is made by Espressif - but mine is a clone. 
 It contains the ESP32-S3, which has a built-in USB controller.
 This USB controller allows the ESP to act as a HID device (keyboard), CDC device (serial port) or even have JTAG (debug).
-The ESP32S3-DevKit-C1 board has _two_ USB connectors, one for the built-in USB controller, and one traditional:
+The ESP32S3-DevKitC-1 board has _two_ USB connectors, one for the built-in USB controller, and one traditional:
 connecting the ESP32 serial lines via a serial-to-USB chip. On my board the first is labeled "USB",
 the other "COM" - at the back side of the PCB; I have written those labels on the connectors.
 
@@ -21,7 +21,7 @@ driver for Neopixels, so `neopixelWrite(LED_BUILTIN,100,0,100)` switches the bui
 purple (red+blue); (2) `digitalWrite` accepts pin numbers that are "virtual", so 
 `digitalWrite(LED_BUILTIN,HIGH)` actually calls `neopixelWrite()`.
 
-I have one of the "bigger" ESP32S3-DevKit-C1 boards, known as N16R8, which presumably means 16M external flash and 8M external psram. 
+I have one of the "bigger" ESP32S3-DevKitC-1 boards, known as N16R8, which presumably means 16M external flash and 8M external psram. 
 I got it from [AliExpress](https://nl.aliexpress.com/item/1005005481618843.html).
 
 Due to the two USB connectors, this board might be a bit more generic/flexible than the 
@@ -48,7 +48,7 @@ And the Arduino 2.x IDE has a debugger for the controller.
    - "USB JTAG/serial debug uint (Interface **0**)" to USB Serial (CDC) - usbser
    - "USB JTAG/serial debug uint (Interface **2**)" to WinUSB
    
-  But for me those drivers were installed by default, so I did'nt use Zadig.
+  But for me those drivers were installed by default, so I didn't use Zadig.
 
 
 ## Experiments
@@ -119,22 +119,21 @@ using the hardware serial.
 
 We will now try to use the same sketch, but use the other USB port.
 
-- Swap the connection to the development PC from the port labeled "COM" 
-  to the port labeled "USB". 
-  On my PC this means COM5 disappears, but COM4 appears.
+- With a second USB cable connect the port labeled "USB" also to the development PC.
+  On my PC this means COM4 appears.
   Also a JTAG device pops up (if not, maybe you need Zadig, see section Installs above).
   
   ![Devices 2](devices2.png)
 
-  We now have a physically different USB (VID 303A, PID 1001, i.e. "Espressif Incorporated ...") 
-  and Windows assigns a new COM port: "COM4" (this is probably different for you).
+  COM4 has a physically different USB (VID 303A, PID 1001, i.e. "Espressif Incorporated ...") 
+  therefore Windows assigns a new COM port: "COM4" (this is probably different for you).
   
   However, we keep the Serial Monitor Port to COM5.
   
 - Changed the sketch the sketch a bit so that we are sure the firmware is
-  updates (eg change the initial value of n to 8000, or the delay).
+  updates (e.g. change the initial value of n to 8000, or the delay).
   
-- Compile and Upload.
+- Compile and Upload.  
   We hear some USB disconnect and connect beeps from the PC.
   This is due to the fact that during an upload the ESP32 is
   reset, and this resets the new COM4 port.
@@ -169,7 +168,7 @@ We will now try to debug the program.
   
   ![Compiler optimizations](optimize3.png)
   
-- For some reason the debug button in the ribbon is disabled.
+- For some reason the debug button in the ribbon stays disabled.
 
   ![Debug disabled](disabled3.png)
 
@@ -177,10 +176,11 @@ We will now try to debug the program.
   
   ![Start debugging](start3.png)
   
-- Have a bit if patience for all tools have started.
-  The gdb-server tab in the bottom pane of the Arduino IDE should start up.
+- Have a bit if patience for all tools to start.
+  The gdb-server tab in the bottom pane of the Arduino IDE should pop up.
 
   ![Debugger](debugger3.png)
+
 
 ## Debug tips
 
@@ -188,7 +188,7 @@ We will now try to debug the program.
 
 - When starting the debugger, it is not always at the first line of `setup`.
   I typically have a break point early in `setup` and press `Continue` to reach it.
-- Continue button (blue trinagle) toggles between running and pausing the firmware.
+- Continue button (blue triangle) toggles between running and pausing the firmware.
 - The next three buttons are Step Over, Step Into and Step Out.
 - The green circular button restarts the program.
   I'm not completely sure what the difference with the first button `Reset device` is.
@@ -208,9 +208,9 @@ The bottom pane of the Arduino IDE may contain an assortment of tabs.
 
 ![Bottom pane](bottompane.png)
 
-- `Output` shows output from compiler and uploader.
+- `Output` shows output from compiler and flasher.
 
-- `gdb-server` shows feedback from the gdbb server.
+- `gdb-server` shows feedback from the gdb server.
 
 - `Debug Console` shows feedback from GDB and allows entering gdb commands.
 
