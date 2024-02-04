@@ -206,14 +206,16 @@ We will now try to debug the program.
 
 The bottom pane of the Arduino IDE may contain an assortment of tabs.
 
+![Bottom pane](bottompane.png)
+
 - `Output` shows output from compiler and uploader.
 
-- `Serial Monitor` (get via Tools > Serial Monitor).
+- `gdb-server` shows feedback from the gdbb server.
 
 - `Debug Console` shows feedback from GDB and allows entering gdb commands.
 
   ![Debug console](debugconsole.png)
-  
-- `gdb-server` shows feedback from the gdbb server.
 
+- `Serial Monitor` shows Serial output from the firmware - get via Tools > Serial Monitor).
+  
 (end)
