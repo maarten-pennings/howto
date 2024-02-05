@@ -27,7 +27,7 @@ I got it from [AliExpress](https://nl.aliexpress.com/item/1005005481618843.html)
 Due to the two USB connectors, this board might be a bit more generic/flexible than the 
 [Arduino Nano ESP32](https://store.arduino.cc/products/nano-esp32),
 but it is very similar. Both have the ESP32-S3. 
-And the Arduino 2.x IDE has a debugger for the controller.
+And the Arduino 2.x IDE has a debugger for this CPU.
 
 
 ## Installs
@@ -55,14 +55,15 @@ And the Arduino 2.x IDE has a debugger for the controller.
 
 ### Single USB cable
 
-We begin we a simple test: blinking the built-in LED, writing over Serial, and 
-using the hardware serial.
+We begin with a simple test: blinking the built-in LED, writing over Serial, and 
+using the hardware serial USB connector.
 
 - Connect the development PC with a USB-C cable to the ESP board 
   **using the port labeled "COM"** (not "USB").
   My board has these labels at the backside of the PCB.
   
-  After plugging in, my device manager shows a new COM port: COM5.
+  After plugging in, the Windows _Device Manager_ shows a new COM port: COM5
+  (this is probably different for you).
   
   ![Devices 1](devices1.png)
 
@@ -93,16 +94,16 @@ using the hardware serial.
   ```
   
 - In the Tools menu (or the "Select Other Board and Port" drop down in the ribbon)
-  select board "ESP32S3 Dev Module" and the "COM5" we found in the first step 
-  (this is probably different for you).
+  select board "ESP32S3 Dev Module" and the "COM5" we found in the first step.
 
-- I believe I used all the default settings, except for flash. 
+- I believe I used all the default compiler settings, except for flash. 
   Maybe I should have configured PSRAM too.
   
   ![Configuration 1](tools1.png)
 
-
 - Compile and Upload.
+  Note that the "COM" USB port works as on any Arduino (ESP) board:
+  it can be used to flash new firmware.
 
 - The "Serial Monitor" shows what we expect, and the Neopixel is blinking.
   Since this connection is via the USB-serial, make sure the baud rate on the 
@@ -114,8 +115,6 @@ using the hardware serial.
   Serial : 1002
   Serial : 1003
   ```
-  
-- Test completes successfully.
 
 
 ### Second USB cable
@@ -129,14 +128,15 @@ We will now try to use the same sketch, but use the other USB port.
   
   ![Devices 2](devices2.png)
 
-  COM4 has a physically different USB (VID 303A, PID 1001, i.e. "Espressif Incorporated ...") 
-  therefore Windows assigns a new COM port: "COM4" (this is probably different for you).
+  COM4 is a physically different USB (VID 303A, PID 1001, i.e. "Espressif Incorporated ...") 
+  therefore Windows assigns a new COM port "COM4" in my case.
   
   However, we keep the Serial Monitor Port to COM5.
   
   I have to admit that I have no idea what COM4 is used for.
   I expected it to carry a second Serial channel (e.g. `Serial1`) but I can't get it to work.
-  I did once succeed in routing the `Serial` not over the "COM" but over the "USB" connector, by changing something in Tools.
+  I did once succeed in routing the `Serial` not over the "COM" but over the "USB" connector,
+  by changing something in Tools.
   But I think I prefer tp keep the Serial feedback ("COM") separated from the debugger ("USB").
   
 - Change the sketch a bit so that we are sure the firmware is updated
@@ -145,7 +145,7 @@ We will now try to use the same sketch, but use the other USB port.
 - Compile and Upload.  
   We hear some USB disconnect and connect beeps from the PC.
   This is due to the fact that during an upload the ESP32 is
-  reset, and this resets the new COM4 port.
+  reset, and this resets the new COM4 port which is implemented by the ESP.
 
 - The "Serial Monitor" shows what we expect.
 
@@ -158,6 +158,7 @@ We will now try to use the same sketch, but use the other USB port.
   Serial : 8005
   ```
 
+
 ### Debugging
 
 We will now try to _debug_ this sketch.
@@ -168,10 +169,11 @@ We will now try to _debug_ this sketch.
   
 - This JTAG support needs to be flashed. So we compile and upload.
   After this completes, the IDE has generated debug files.
+  This is a bit of a surprise; the debug files are ESP32S3 specific, but why does a _compile_ generated them?
   
   ![Debug files](files3.png)
 
-  I believe the presence of these debug files are crucial, for the IDE willing to start the debugger.
+  I believe the presence of these debug files is crucial, for the IDE willing to start the debugger.
 
 - Optionally, we could disable compiler optimizations. 
   This makes the firmware image larger and slower, but also makes debugging easier.
@@ -179,7 +181,7 @@ We will now try to _debug_ this sketch.
   
   ![Compiler optimizations](optimize3.png)
   
-- For some reason the debug button in the ribbon stays disabled.
+- For some reason the debug button in the IDE ribbon stays disabled.
 
   ![Debug disabled](disabled3.png)
 
@@ -197,20 +199,27 @@ We will now try to _debug_ this sketch.
 
 ![buttons](buttons.png)
 
-- When starting the debugger, it is not always at the first line of `setup`.
+- When starting the debugger, it not always starts at the first line of `setup`.
   I typically have a break point early in `setup` and press `Continue` to reach it.
+  
 - Continue button (blue triangle) toggles between running and pausing the firmware.
+  
 - The next three buttons are Step Over, Step Into and Step Out.
+  
 - The green circular button restarts the program.
   I'm not completely sure what the difference with the first button `Reset device` is.
+  
 - The last button (red square) is important: it stops debugging.
-  While the debugger is running, it lock the elf file generated by the
+  While the debugger is running, it locks the elf file generated by the
   compiler, so a new compile will fail.
+  
 - To set a break point, click in the gutter. A red dot appears, and the line
   is listed in the debugger pane in the BREAKPOINTS section.
   I believe the red dot even has a right-click context menu to add a condition (expression).
+  
 - Somehow the VARIABLES section doesn't work for me.
   But variables (actually expressions) can be viewed in the WATCH section.
+  
 - To change the value of a variable go to the last line of the Debug console
   and type e.g. `set var n = 10` (assuming variable `n` is in scope). 
   
