@@ -72,6 +72,8 @@ using the hardware serial.
   This confirms we are using the USB to serial bridge IC.
   
 - Use a small test sketch with a blinking led and printf's.
+  As explained in the intro, `digitalWrite` also supports the Neopixel on the board.
+  
   ```C++
   int n;
 
@@ -90,7 +92,8 @@ using the hardware serial.
   }
   ```
   
-- Select board "ESP32S3 Dev Module" and the "COM5" we found in the first step 
+- In the Tools menu (or the "Select Other Board and Port" drop down in the ribbon)
+  select board "ESP32S3 Dev Module" and the "COM5" we found in the first step 
   (this is probably different for you).
 
 - I believe I used all the default settings, except for flash. 
@@ -101,7 +104,7 @@ using the hardware serial.
 
 - Compile and Upload.
 
-- The "Serial Monitor" shows what we expect.
+- The "Serial Monitor" shows what we expect, and the Neopixel is blinking.
   Since this connection is via the USB-serial, make sure the baud rate on the 
   PC side Serial Monitor is set to 115200 just as we have in the sketch.
   
@@ -122,6 +125,7 @@ We will now try to use the same sketch, but use the other USB port.
 - With a second USB cable connect the port labeled "USB" also to the development PC.
   On my PC this means COM4 appears.
   Also a JTAG device pops up (if not, maybe you need Zadig, see section Installs above).
+  In other words, we deal with a composite USB device with two services JTAG and CDC.
   
   ![Devices 2](devices2.png)
 
@@ -132,9 +136,11 @@ We will now try to use the same sketch, but use the other USB port.
   
   I have to admit that I have no idea what COM4 is used for.
   I expected it to carry a second Serial channel (e.g. `Serial1`) but I can't get it to work.
+  I did once succeed in routing the `Serial` not over the "COM" but over the "USB" connector, by changing something in Tools.
+  But I think I prefer tp keep the Serial feedback ("COM") separated from the debugger ("USB").
   
-- Changed the sketch the sketch a bit so that we are sure the firmware is
-  updates (e.g. change the initial value of n to 8000, or the delay).
+- Change the sketch a bit so that we are sure the firmware is updated
+  (e.g. change the initial value of n to 8000, or change the delay).
   
 - Compile and Upload.  
   We hear some USB disconnect and connect beeps from the PC.
@@ -154,7 +160,7 @@ We will now try to use the same sketch, but use the other USB port.
 
 ### Debugging
 
-We will now try to debug the program.
+We will now try to _debug_ this sketch.
 
 - The crucial step is to enable the JTAG.
 
@@ -164,6 +170,8 @@ We will now try to debug the program.
   After this completes, the IDE has generated debug files.
   
   ![Debug files](files3.png)
+
+  I believe the presence of these debug files are crucial, for the IDE willing to start the debugger.
 
 - Optionally, we could disable compiler optimizations. 
   This makes the firmware image larger and slower, but also makes debugging easier.
@@ -200,6 +208,7 @@ We will now try to debug the program.
   compiler, so a new compile will fail.
 - To set a break point, click in the gutter. A red dot appears, and the line
   is listed in the debugger pane in the BREAKPOINTS section.
+  I believe the red dot even has a right-click context menu to add a condition (expression).
 - Somehow the VARIABLES section doesn't work for me.
   But variables (actually expressions) can be viewed in the WATCH section.
 - To change the value of a variable go to the last line of the Debug console
