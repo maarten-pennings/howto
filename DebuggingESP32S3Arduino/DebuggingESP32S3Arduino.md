@@ -6,7 +6,7 @@
 I'm trying to use the debugger in the Arduino IDE to debug the 
 [ESP32-S3-DevKitC-1](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html).
 
-![ESP32S3-DevKitC-1](ESP32S3DevKitC1.jpg)
+![ESP32S3-DevKitC-1](imgs/ESP32S3DevKitC1.jpg)
 
 The ESP32S3-DevKitC-1 board is made by Espressif - but mine is a clone. 
 It contains the ESP32-S3, which has a built-in USB controller.
