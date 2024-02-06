@@ -179,6 +179,11 @@ We will now try to debug the program.
   
   ![Start debugging](start3.png)
   
+  **Warning** Note that debugger has a _debug configuration_, namely
+  "Arduino on ESP32-S3". That is good. However, when I tried this 
+  on another PC, the _debug cnfiguration_ drop down was empty ("No Configurations").
+  See the Appendix.
+  
 - Have a bit if patience for all tools to start.
   The gdb-server tab in the bottom pane of the Arduino IDE should pop up.
 
@@ -204,6 +209,7 @@ We will now try to debug the program.
   But variables (actually expressions) can be viewed in the WATCH section.
 - To change the value of a variable go to the last line of the Debug console
   and type e.g. `set var n = 10` (assuming variable `n` is in scope). 
+
   
 ## Output Windows
 
@@ -220,5 +226,53 @@ The bottom pane of the Arduino IDE may contain an assortment of tabs.
   ![Debug console](debugconsole.png)
 
 - `Serial Monitor` shows Serial output from the firmware - get via Tools > Serial Monitor).
-  
+
+
+## Appendix - No configuration
+
+When I tried the steps in document on another PC it did not work.
+Where it failed was that the _debug configuration_ is empty.
+
+![Configuration](launch0.png)
+
+Pressing the _launch configuration_ button results in an empty-ish file
+instead of the following, whcih I get on the PC were the debugging works.
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "cwd": "${workspaceRoot}",
+      "name": "Arduino on ESP32-S3",
+      "request": "attach",
+      "type": "cortex-debug",
+      "executable": "C:\\Users\\maarten\\AppData\\Local\\Temp\\arduino\\sketches\\9FF916268DD3C6EAC0FEA0B48F086DFA/DebuggingESP32S3Arduino.ino.elf",
+      "servertype": "openocd",
+      "serverpath": "C:\\Users\\maarten\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\openocd-esp32\\v0.11.0-esp32-20221026/bin/openocd",
+      "armToolchainPath": "C:\\Users\\maarten\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\xtensa-esp-elf-gdb\\11.2_20220823/bin/",
+      "configFiles": [
+        "debug.cfg"
+      ],
+      "toolchainPrefix": "xtensa-esp32s3-elf",
+      "svdFile": "debug.svd",
+      "overrideAttachCommands": [
+        "set remote hardware-watchpoint-limit 2",
+        "monitor reset halt",
+        "monitor gdb_sync",
+        "thb setup",
+        "c"
+      ],
+      "overrideRestartCommands": [
+        "monitor reset halt",
+        "monitor gdb_sync"
+      ]
+    }
+  ]
+}
+```
+
+On the working PC, a new sketch for ESP32-S3 also doesn't debug.
+Hmm, what did I do the first time to make that project work?
+
 (end)
