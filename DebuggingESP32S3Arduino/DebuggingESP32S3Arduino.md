@@ -65,7 +65,7 @@ using the hardware serial USB connector.
   After plugging in, the Windows _Device Manager_ shows a new COM port: COM5
   (this is probably different for you).
   
-  ![Devices 1](devices1.png)
+  ![Devices 1](imgs/devices1.png)
 
   Device manager > COM5 > Properties > Details > Property "Hardware Ids" shows
   a vendor ID (VID) of 1A86 and a product ID (PID) 55D3, 
@@ -99,7 +99,7 @@ using the hardware serial USB connector.
 - I believe I used all the default compiler settings, except for flash. 
   Maybe I should have configured PSRAM too.
   
-  ![Configuration 1](tools1.png)
+  ![Configuration 1](imgs/tools1.png)
 
 - Compile and Upload.
   Note that the "COM" USB port works as on any Arduino (ESP) board:
@@ -126,7 +126,7 @@ We will now try to use the same sketch, but use the other USB port.
   Also a JTAG device pops up (if not, maybe you need Zadig, see section Installs above).
   In other words, we deal with a composite USB device with two services JTAG and CDC.
   
-  ![Devices 2](devices2.png)
+  ![Devices 2](imgs/devices2.png)
 
   COM4 is a physically different USB (VID 303A, PID 1001, i.e. "Espressif Incorporated ...") 
   therefore Windows assigns a new COM port "COM4" in my case.
@@ -165,13 +165,13 @@ We will now try to _debug_ this sketch.
 
 - The crucial step is to enable the JTAG.
 
-  ![Debug](debug3.png)
+  ![Debug](imgs/debug3.png)
   
 - This JTAG support needs to be flashed. So we compile and upload.
   After this completes, the IDE has generated debug files.
   This is a bit of a surprise; the debug files are ESP32S3 specific, but why does a _compile_ generated them?
   
-  ![Debug files](files3.png)
+  ![Debug files](imgs/files3.png)
 
   I believe the presence of these debug files is crucial, for the IDE willing to start the debugger.
 
@@ -179,15 +179,15 @@ We will now try to _debug_ this sketch.
   This makes the firmware image larger and slower, but also makes debugging easier.
   You need to compile and upload after changing this option.
   
-  ![Compiler optimizations](optimize3.png)
+  ![Compiler optimizations](imgs/optimize3.png)
   
 - For some reason the debug button in the IDE ribbon stays disabled.
 
-  ![Debug disabled](disabled3.png)
+  ![Debug disabled](imgs/disabled3.png)
 
   But we can convince the IDE to start the debugger nonetheless.
   
-  ![Start debugging](start3.png)
+  ![Start debugging](imgs/start3.png)
   
   **Warning** Note that debugger has a _debug configuration_, namely
   "Arduino on ESP32-S3". That is good. However, when I tried this 
@@ -197,12 +197,12 @@ We will now try to _debug_ this sketch.
 - Have a bit if patience for all tools to start.
   The gdb-server tab in the bottom pane of the Arduino IDE should pop up.
 
-  ![Debugger](debugger3.png)
+  ![Debugger](imgs/debugger3.png)
 
 
 ## Debug tips
 
-![buttons](buttons.png)
+![buttons](imgs/buttons.png)
 
 - When starting the debugger, it not always starts at the first line of `setup`.
   I typically have a break point early in `setup` and press `Continue` to reach it.
@@ -233,7 +233,7 @@ We will now try to _debug_ this sketch.
 
 The bottom pane of the Arduino IDE may contain an assortment of tabs.
 
-![Bottom pane](bottompane.png)
+![Bottom pane](imgs/bottompane.png)
 
 - `Output` shows output from compiler and flasher.
 
@@ -241,7 +241,7 @@ The bottom pane of the Arduino IDE may contain an assortment of tabs.
 
 - `Debug Console` shows feedback from GDB and allows entering gdb commands.
 
-  ![Debug console](debugconsole.png)
+  ![Debug console](imgs/debugconsole.png)
 
 - `Serial Monitor` shows Serial output from the firmware - get via Tools > Serial Monitor).
 
@@ -251,7 +251,7 @@ The bottom pane of the Arduino IDE may contain an assortment of tabs.
 When I tried the steps in document on another PC it did not work.
 Where it failed was that the _debug configuration_ is empty.
 
-![Configuration](launch0.png)
+![Configuration](imgs/launch0.png)
 
 Pressing the _launch configuration_ button results in an empty-ish file
 instead of the following, whcih I get on the PC were the debugging works.
