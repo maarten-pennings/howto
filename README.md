@@ -46,7 +46,7 @@ with an exponential curve and a transistor to drive a high power LED.
 
 ## Debugging and ESP32S3 using Arduino IDE
 It took many tries, but I have the debugger in the Arduino IDE
-running on the ESP32S3-DevKit-C1 board (without any probe).
+running on the ESP32S3-DevKitC-1 board (without any probe).
 See [DebuggingESP32S3Arduino](DebuggingESP32S3Arduino/DebuggingESP32S3Arduino.md).
 
 (end)
