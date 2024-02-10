@@ -1,7 +1,7 @@
 # Debugging ESP32S3 in Arduino
 
 
-## Introduction
+## 1. Introduction
 
 I'm trying to use the debugger in the Arduino IDE to debug the 
 [ESP32-S3-DevKitC-1](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html).
@@ -30,7 +30,7 @@ but it is very similar. Both have the ESP32-S3.
 And the Arduino 2.x IDE has a debugger for this CPU.
 
 
-## Installs
+## 2. Installs
 
 - Install the [Arduino 2 IDE](https://www.arduino.cc/en/software).
   This also installs all kinds of USB drivers.
@@ -57,9 +57,9 @@ And the Arduino 2.x IDE has a debugger for this CPU.
   I have version 2.0.13.
 
 
-## Experiments
+## 3. Experiments
 
-### Single USB cable
+### 3.1. Single USB cable
 
 We begin with a simple test: blinking the built-in LED, writing over Serial, and 
 using the hardware serial USB connector.
@@ -123,7 +123,7 @@ using the hardware serial USB connector.
   ```
 
 
-### Second USB cable
+### 3.2. Second USB cable
 
 We will now try to use the same sketch, but use the other USB port.
 
@@ -164,7 +164,7 @@ We will now try to use the same sketch, but use the other USB port.
   ```
 
 
-### Debugging
+### 3.3. Debugging
 
 We will now try to _debug_ this sketch.
 
@@ -221,7 +221,9 @@ We will now try to _debug_ this sketch.
   ![Debugger](imgs/debugger3.png)
 
 
-## Debug tips
+## 4. Tips
+
+### 4.1. Debugging tips
 
 ![buttons](imgs/buttons.png)
 
@@ -241,16 +243,17 @@ We will now try to _debug_ this sketch.
   
 - To set a break point, click in the gutter. A red dot appears, and the line
   is listed in the debugger pane in the BREAKPOINTS section.
-  I believe the red dot even has a right-click context menu to add a condition (expression).
   
-- Somehow the VARIABLES section doesn't work for me.
-  But variables (actually expressions) can be viewed in the WATCH section.
+- Somehow the VARIABLES section doesn't show globals for me.
+  But globals (actually expressions) can be viewed in the WATCH section.
+  Once in a function locals can be viewed.
   
 - To change the value of a variable go to the last line of the Debug console
   and type e.g. `set var n = 10` (assuming variable `n` is in scope). 
+  Also this doe snot work completely for me. I can only set globals.
 
   
-## Output Windows
+### 4.2. Output Windows
 
 The bottom pane of the Arduino IDE may contain an assortment of tabs.
 
@@ -267,7 +270,9 @@ The bottom pane of the Arduino IDE may contain an assortment of tabs.
 - `Serial Monitor` shows Serial output from the firmware - get via Tools > Serial Monitor).
 
 
-## Appendix - No configuration
+## A. Appendix 
+
+### A.1 No debug configuration
 
 When I tried the steps in document on another PC it did not work.
 Where it failed was that the _debug configuration_ is empty.
@@ -322,7 +327,7 @@ Things I tried but which do not seem to help
  - In DEBUG pane Add Configuration (this creates `.theia\launch.json"` in the project dir)
 
 
-## Appendix - USB
+### A.2 USB connections
 
 The USB setup is not very clear to me.
 This is how I understand it.
