@@ -34,13 +34,15 @@ And the Arduino 2.x IDE has a debugger for this CPU.
 
 - Install the [Arduino 2 IDE](https://www.arduino.cc/en/software).
   This also installs all kinds of USB drivers.
-  I have IDE version 2.2.1.
+  I have IDE version [2.2.1](https://downloads.arduino.cc/arduino-ide/arduino-ide_2.2.1_Windows_64bit.exe) (installed for All Users").
   
-- In Arduino, using the "boards manager", install "esp32 _by Espressif Systems_".
+  **Do not use version 2.3.0** as there is [Temporary loss of debugger support for ESP32 boards](https://forum.arduino.cc/t/arduino-ide-2-3-0-is-now-available/1221189).
+  But a newer version might work (again).
+  
+- In Arduino, using the BOARDS MANAGER, install "esp32 _by Espressif Systems_".
   I have version 2.0.11.
   This does contain the "ESP32S3 Dev Module".
-  Note that this is the Espressif package, not the recent libraries from Arduino
-  for their Arduino Nano ESP32.
+  Note that this is the Espressif package, not the recent libraries from Arduino for their Arduino Nano ESP32.
 
 - Some sites/[videos](https://www.youtube.com/watch?v=HGB9PI3IDL0) claim that 
   you have to download [Zadig](https://zadig.akeo.ie/) so that you can alter
@@ -49,6 +51,10 @@ And the Arduino 2.x IDE has a debugger for this CPU.
    - "USB JTAG/serial debug uint (Interface **2**)" to WinUSB
    
   But for me those drivers were installed by default, so I didn't use Zadig.
+  
+- I'm not sure, but maybe the debugger itself comes with the Arduino ESP32 board.
+  In Arduino, using the BOARDS MANAGER, install "Arduino ESP32 Boards _by Arduino_".
+  I have version 2.0.13.
 
 
 ## Experiments
@@ -94,7 +100,7 @@ using the hardware serial USB connector.
   ```
   
 - In the Tools menu (or the "Select Other Board and Port" drop down in the ribbon)
-  select board "ESP32S3 Dev Module" and the "COM5" we found in the first step.
+  select board **ESP32S3 Dev Module** and the "COM5" we found in the first step.
 
 - I believe I used all the default compiler settings, except for flash. 
   Maybe I should have configured PSRAM too.
@@ -133,11 +139,10 @@ We will now try to use the same sketch, but use the other USB port.
   
   However, we keep the Serial Monitor Port to COM5.
   
-  I have to admit that I have no idea what COM4 is used for.
-  I expected it to carry a second Serial channel (e.g. `Serial1`) but I can't get it to work.
-  I did once succeed in routing the `Serial` not over the "COM" but over the "USB" connector,
-  by changing something in Tools.
-  But I think I prefer tp keep the Serial feedback ("COM") separated from the debugger ("USB").
+  I believe that COM4 can be used for Serial output, but we have to tell
+  the compiler to remap `Serial` from tx/rx pins to USB.
+  This is done by selecting "Enabled" in Tools > USB CDC On Boot.
+  From then on the `Serial` is no longer mapped to tx/rx but to USB; use `Serial0` to still use tx/rx.
   
 - Change the sketch a bit so that we are sure the firmware is updated
   (e.g. change the initial value of n to 8000, or change the delay).
@@ -174,6 +179,23 @@ We will now try to _debug_ this sketch.
   ![Debug files](imgs/files3.png)
 
   I believe the presence of these debug files is crucial, for the IDE willing to start the debugger.
+  
+  The file `C:\Users\maarten\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.11\platform.txt`
+  has these sections, which are probably responsible for generating the three debug files.
+  
+  ```text
+  # Generate debug.cfg (must be postbuild)
+  recipe.hooks.postbuild.1.pattern=bash -c "[ {build.copy_jtag_files} -eq 0 ] || cp -f "{debug.server.openocd.scripts_dir}"board/{build.openocdscript} "{build.source.path}"/debug.cfg"
+  recipe.hooks.postbuild.1.pattern.windows=cmd /c IF {build.copy_jtag_files}==1 COPY /y "{debug.server.openocd.scripts_dir}board\{build.openocdscript}" "{build.source.path}\debug.cfg"
+
+  # Generate debug_custom.json
+  recipe.hooks.postbuild.2.pattern=bash -c "[ {build.copy_jtag_files} -eq 0 ] || cp -f "{runtime.platform.path}"/tools/ide-debug/{build.mcu}.json "{build.source.path}"/debug_custom.json"
+  recipe.hooks.postbuild.2.pattern.windows=cmd /c IF {build.copy_jtag_files}==1 COPY /y "{runtime.platform.path}\tools\ide-debug\{build.mcu}.json" "{build.source.path}\debug_custom.json"
+
+  # Generate chip.svd
+  recipe.hooks.postbuild.3.pattern=bash -c "[ {build.copy_jtag_files} -eq 0 ] || cp -f "{runtime.platform.path}"/tools/ide-debug/svd/{build.mcu}.svd "{build.source.path}"/debug.svd"
+  recipe.hooks.postbuild.3.pattern.windows=cmd /c IF {build.copy_jtag_files}==1 COPY /y "{runtime.platform.path}\tools\ide-debug\svd\{build.mcu}.svd" "{build.source.path}\debug.svd"
+  ```
 
 - Optionally, we could disable compiler optimizations. 
   This makes the firmware image larger and slower, but also makes debugging easier.
@@ -181,7 +203,7 @@ We will now try to _debug_ this sketch.
   
   ![Compiler optimizations](imgs/optimize3.png)
   
-- For some reason the debug button in the IDE ribbon stays disabled.
+- Sometimes the debug button in the IDE ribbon stays disabled.
 
   ![Debug disabled](imgs/disabled3.png)
 
@@ -190,9 +212,8 @@ We will now try to _debug_ this sketch.
   ![Start debugging](imgs/start3.png)
   
   **Warning** Note that debugger has a _debug configuration_, namely
-  "Arduino on ESP32-S3". That is good. However, when I tried this 
-  on another PC, the _debug cnfiguration_ drop down was empty ("No Configurations").
-  See the Appendix.
+  "Arduino on ESP32-S3". That is good. However, sometimes the _debug configuration_ 
+  drop down is empty ("No Configurations"). That is not good. See the Appendix.
   
 - Have a bit if patience for all tools to start.
   The gdb-server tab in the bottom pane of the Arduino IDE should pop up.
@@ -292,5 +313,38 @@ instead of the following, whcih I get on the PC were the debugging works.
 
 On the working PC, a new sketch for ESP32-S3 also doesn't debug.
 Hmm, what did I do the first time to make that project work?
+
+Things I tried but which do not seem to help
+
+ - Place a checkmark at Tools > Programmes > Esptool
+ - Switch to COM4
+ - Sketch > Upload Using Programmer 
+ - In DEBUG pane Add Configuration (this creates `.theia\launch.json"` in the project dir)
+
+
+## Appendix - USB
+
+The USB setup is not very clear to me.
+This is how I understand it.
+
+- The USB port labeled COM uses [Qinheng Microelectronics CH343 USB to serial adapter](https://www.wch-ic.com/products/CH343.html)
+  to bridge the tx/rx lines of the ESP32 to USB.
+  
+- The USB port labeled USB connects directly into the ESP32, to either of two blocks: 
+  USB OTG or USB Serial/JTAG
+
+  - The USB port labeled USB can be hardwired to the Serial/JTAG hardware block
+    and thus perform those functions.
+    
+  - The USB port labeled USB can be hardwired to OTG block.
+    In this case firmware determines what this USB port does (again it could be serial).
+    A typical software stack controlling OTG hardware is TinyUSB.
+
+  We learn this from [Espressif docs](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/usb-serial-jtag-console.html)
+  
+  > The USB Serial/JTAG Controller is a fixed-function USB device that is implemented entirely in hardware, meaning that it cannot be reconfigured to perform any function other than a serial port and JTAG debugging functionality. This is in contrast to the USB OTG controllers in some ESP chips that can be configured to perform the function of multiple types of USB devices.
+
+  ![ESP32S3 blocks](imgs/esp32-s3-block-diagram.png)
+
 
 (end)
