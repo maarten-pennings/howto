@@ -52,7 +52,7 @@ And the Arduino 2.x IDE has a debugger for this CPU.
    
   But for me those drivers were installed by default, so I didn't use Zadig.
   
-- I'm not sure, but maybe the debugger itself comes with the Arduino ESP32 board.
+- I'm not sure, but maybe the debugger itself comes with the Arduino ESP32 boards package.
   In Arduino, using the BOARDS MANAGER, install "Arduino ESP32 Boards _by Arduino_".
   I have version 2.0.13.
 
@@ -142,7 +142,8 @@ We will now try to use the same sketch, but use the other USB port.
   I believe that COM4 can be used for Serial output, but we have to tell
   the compiler to remap `Serial` from tx/rx pins to USB.
   This is done by selecting "Enabled" in Tools > USB CDC On Boot.
-  From then on the `Serial` is no longer mapped to tx/rx but to USB; use `Serial0` to still use tx/rx.
+  From then on the `Serial` is no longer mapped to tx/rx but to USB; however `Serial0` is now mapped to tx/rx.
+  We have two CDC connections.
   
 - Change the sketch a bit so that we are sure the firmware is updated
   (e.g. change the initial value of n to 8000, or change the delay).
@@ -162,13 +163,16 @@ We will now try to use the same sketch, but use the other USB port.
   Serial : 8004
   Serial : 8005
   ```
-
+  
+- Compared to the previous experiment (single USB cable) nothing much has changed.
+  There is a second cable, but we are not using it.
+  
 
 ### 3.3. Debugging
 
 We will now try to _debug_ this sketch.
 
-- The crucial step is to enable the JTAG.
+- The crucial step is to enable the JTAG. This will run over the second USB cable.
 
   ![Debug](imgs/debug3.png)
   
@@ -274,13 +278,13 @@ The bottom pane of the Arduino IDE may contain an assortment of tabs.
 
 ### A.1 No debug configuration
 
-When I tried the steps in document on another PC it did not work.
+When I tried the steps in this document on another PC it did not work.
 Where it failed was that the _debug configuration_ is empty.
 
 ![Configuration](imgs/launch0.png)
 
 Pressing the _launch configuration_ button results in an empty-ish file
-instead of the following, whcih I get on the PC were the debugging works.
+instead of the following, which I get on the PC were the debugging works.
 
 ```json
 {
@@ -321,10 +325,10 @@ Hmm, what did I do the first time to make that project work?
 
 Things I tried but which do not seem to help
 
- - Place a checkmark at Tools > Programmes > Esptool
- - Switch to COM4
- - Sketch > Upload Using Programmer 
- - In DEBUG pane Add Configuration (this creates `.theia\launch.json"` in the project dir)
+ - Place a checkmark at Tools > Programmes > Esptool.
+ - Switch to COM4.
+ - Sketch > Upload Using Programmer.
+ - In DEBUG pane Add Configuration (this creates `.theia\launch.json"` in the project dir) but that seems useless (my working project doesn't have it).
 
 
 ### A.2 USB connections
@@ -338,12 +342,12 @@ This is how I understand it.
 - The USB port labeled USB connects directly into the ESP32, to either of two blocks: 
   USB OTG or USB Serial/JTAG
 
-  - The USB port labeled USB can be hardwired to the Serial/JTAG hardware block
+  - The USB port labeled USB can be wired to the Serial/JTAG hardware block
     and thus perform those functions.
     
-  - The USB port labeled USB can be hardwired to OTG block.
+  - The USB port labeled USB can be wired to the OTG block.
     In this case firmware determines what this USB port does (again it could be serial).
-    A typical software stack controlling OTG hardware is TinyUSB.
+    A typical software stack controlling the OTG hardware is TinyUSB.
 
   We learn this from [Espressif docs](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/usb-serial-jtag-console.html)
   
