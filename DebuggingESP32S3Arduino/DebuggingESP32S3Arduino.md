@@ -34,7 +34,8 @@ And the Arduino 2.x IDE has a debugger for this CPU.
 
 - Install the [Arduino 2 IDE](https://www.arduino.cc/en/software).
   This also installs all kinds of USB drivers.
-  I have IDE version [2.2.1](https://downloads.arduino.cc/arduino-ide/arduino-ide_2.2.1_Windows_64bit.exe) (installed for All Users").
+  I have IDE version [2.2.1](https://downloads.arduino.cc/arduino-ide/arduino-ide_2.2.1_Windows_64bit.exe) (installed for All Users"),
+  other [releases](https://github.com/arduino/arduino-ide/releases).
   
   **Do not use version 2.3.0** as there is [Temporary loss of debugger support for ESP32 boards](https://forum.arduino.cc/t/arduino-ide-2-3-0-is-now-available/1221189).
   But a newer version might work (again).
