@@ -14,8 +14,8 @@ side by side in a git repository.
 
 I learned that Windows Vista (?) and up has symbolic links; shortcuts that are transparent for applications.
 In this repo, there is
- - An application `myapp`, whose [sketch](mypapp\myapp.ino) uses `mylib`, namely `mylib_succ()`.
- - A library `mylib`, whose [source](mylib\src\mylib.cpp) implements `mylib_succ()`.
+ - An application `myapp`, whose [sketch](mypapp/myapp.ino) uses `mylib`, namely `mylib_succ()`.
+ - A library `mylib`, whose [source](mylib/src/mylib.cpp) implements `mylib_succ()`.
  - Those are side by side - but `myapp` can not find `mylib`.
  - A batch file [link.bat](link.bat) that uses `mklink` to create a link 
    `C:\Users\maarten\Documents\Arduino\libraries\mylib`
