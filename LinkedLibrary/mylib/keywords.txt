@@ -1,0 +1,2 @@
+mylib	KEYWORD1
+mylib_succ	KEYWORD2
