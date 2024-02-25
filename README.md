@@ -2,6 +2,12 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## SPI modes
+SPI communication knows much more variation than e.g. I2C.
+This [how to](SPImodes/readme.md) looks at the four modes induced
+by CPOL (default clock state) and CPHA (data valid phase).
+
+
 ## Using Windows' symbolic links to manage Arduino Libraries
 The Arduino IDE is a bit poor in managing (files of) bigger projects.
 The [LinkedLibrary howto](LinkedLibrary/readme.md) explains how you can use Windows' `mklink` to
