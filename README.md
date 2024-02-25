@@ -4,7 +4,7 @@ Assortment of "How to xxx" I want to remember.
 
 ## Using Windows' symbolic links to manage Arduino Libraries
 The Arduino IDE is a bit poor in managing (files of) bigger projects.
-The [LinkedLibrary howto](LinkedLibrary\readme.md) explains how you can use Windows' `mklink` to
+The [LinkedLibrary howto](LinkedLibrary/readme.md) explains how you can use Windows' `mklink` to
 share libraries but store them in the same repository as the using applications.
 
 
