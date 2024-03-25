@@ -11,4 +11,6 @@ to [these](https://www.aliexpress.com/item/1005006027765315.html).
 ## Sketch
 For the sketch see [esp32pwm.ino](esp32pwm.ino).
 
+To compute the mapping from brightness to pwm yourself (replacing the lookup table in the above ino file) see the explanation of the gamma curve at [adafruit](https://learn.adafruit.com/led-tricks-gamma-correction).
+
 (end)
