@@ -47,5 +47,15 @@ now takes 50 ns.
 
 ![scope](scope_capture.png)
 
+
+## Higher pins
+
+[Note](https://esp32.com/viewtopic.php?t=27963) that `GPIO.out_w1ts` and `GPIO.out_w1tc` 
+are the set and clear bitmask for the first 32 GPIO pins.
+For the pins from 32 and higher you need "out1" instead of "out", but also "val":
+`GPIO.out1_w1ts.val` and `GPIO.out1_w1tc.val`.
+
+This also works for ESP32-S3.
+
 (end)
 
