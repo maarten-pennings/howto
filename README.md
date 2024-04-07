@@ -1,6 +1,10 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+## Using ESP SPI slave without SSEL
+I needed to connect an SPI mastering sensor to an ESP32S3.
+The sensor does not have an SSEL, which is a no-go for ESP.
+I tried various [solutions](spitest), but **failed** - an "how not to".
 
 ## SPI modes
 SPI communication knows much more variation than e.g. I2C.
