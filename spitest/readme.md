@@ -23,15 +23,15 @@ Unfortunately, the experiment **FAILED**.
 # Introduction
 
 We have one transmitter ("TX").
-It is a plain ESP32 (DOIT ESP32 DEVKIT V1).
-It has one GPIO configured as input (GPIO4), its trigger pin.
+It is a plain ESP32 (DOIT ESP32 DEVKIT V1), pretending to be the sensor.
+It has one GPIO configured as input (GPIO4), its incoming trigger pin.
 When the TX sees a pulse on the trigger pin, it sends a message over SPI.
 The message is 3 bytes long; it consists of a counter value, its complement, and the counter value.
 Then the counter is incremented.
 
 We have one receiver ("RX").
 It is an ESP32S3 (ESP32S3 DEVKIT C1).
-It has one GPIO configured as output (GPIO17), its trigger pin.
+It has one GPIO configured as output (GPIO17), its outhoing trigger pin.
 The receiver periodically wants a message.
 For that it sends a pulse over the trigger pin, and waits till it gets the message over SPI.
 
