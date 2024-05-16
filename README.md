@@ -1,6 +1,13 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+
+## How to create a Python Virtual enviroment and use a local package
+This [pythonpackage](pythonpackage/readme.md) is an empty 
+python application which uses an empty package,
+all in a virtual enviroment.
+
+
 ## Using ESP SPI slave without SSEL
 I needed to connect an SPI mastering sensor to an ESP32S3.
 The sensor does not have an SSEL, which is a no-go for ESP.
