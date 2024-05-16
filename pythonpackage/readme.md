@@ -211,6 +211,8 @@ root
     +-- mypkg.egg-info   <=== lots of generated stuff
 ```
 
+You may use `clean.bat` to remove the generated files.
+
 
 ## Running run.bat
 
