@@ -107,7 +107,8 @@ CALL env\Scripts\activate.bat
 env\Scripts\python -m pip install --upgrade pip setuptools wheel
 IF EXIST requirements.txt (
    pip install -r requirements.txt
-)```
+)
+```
 
 What does differ per project is the `requirements.txt` file.
 Normally it has lines like `numpy` and `matplotlib`.
@@ -132,19 +133,19 @@ The files we store in the repo are as follows.
 
 ```text
 root
-+-- readme.md
 +-- app
 |   +-- app.py
 |   +-- requirements.txt
 |   +-- run.bat
 |   +-- setup.bat
 +--mypkg
-   +-- license.txt
-   +-- readme.md
-   +-- setup.py
-   +-- mypkg
-       +-- mymod.py
-       +-- __init__.py
+|  +-- license.txt
+|  +-- readme.md
+|  +-- setup.py
+|  +-- mypkg
+|      +-- mymod.py
+|      +-- __init__.py
++-- clean.bat
 ```
 
 We open `cmd` in the `app` directory and run `setup.bat`.
@@ -192,7 +193,6 @@ The `setup` also creates and two directories in `mypkg`.
 These and `env` do not have to be stored in the repo.
 
 ```text
-root
 +-- readme.md
 +-- app
 |   +-- app.py
@@ -201,14 +201,15 @@ root
 |   +-- setup.bat
 |   +-- env              <=== lots of generated stuff
 +-- mypkg
-    +-- license.txt
-    +-- readme.md
-    +-- setup.py
-    +-- build            <=== lots of generated stuff
-    +-- mypk
-    |   +-- mymod.py
-    |   +-- __init__.py
-    +-- mypkg.egg-info   <=== lots of generated stuff
+|   +-- license.txt
+|   +-- readme.md
+|   +-- setup.py
+|   +-- build            <=== lots of generated stuff
+|   +-- mypk
+|   |   +-- mymod.py
+|   |   +-- __init__.py
+|   +-- mypkg.egg-info   <=== lots of generated stuff
++-- clean.bat
 ```
 
 You may use `clean.bat` to remove the generated files.
