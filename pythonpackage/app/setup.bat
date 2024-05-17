@@ -1,3 +1,5 @@
+@ECHO OFF
+
 SET LOCATION=C:\Users\maarten\AppData\Local\Programs\Python\Python39\
 
 %LOCATION%python.exe -m venv env
