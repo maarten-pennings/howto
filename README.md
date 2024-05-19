@@ -2,7 +2,12 @@
 Assortment of "How to xxx" I want to remember.
 
 
-## How to create a Python Virtual enviroment and use a local package
+## How to do animations in HTML
+A small set of animation demos in html.
+See [html-animation](html-animation/readme.md) for soure and demo.
+
+
+## How to create a Python Virtual environment and use a local package
 This [pythonpackage](pythonpackage/readme.md) is an empty 
 python application which uses an empty package,
 all in a virtual enviroment.
@@ -42,7 +47,7 @@ Took quite some time to get it [running](NT7108-12864LCD/NT7108-12864LCD.md).
 
 
 ## Drag and drop in HTML
-For an example and explanation see [drag-n-drop-html](drag-n-drop-html/drag-n-drop-html.html).
+For an example and explanation see [drag-n-drop-html](drag-n-drop-html/readme.md).
 Or see it in [action](https://htmlpreview.github.io/?https://github.com/maarten-pennings/howto/blob/main/drag-n-drop-html/drag-n-drop-html.html).
 
 

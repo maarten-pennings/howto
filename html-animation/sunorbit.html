@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!-- https://www.youtube.com/watch?v=IJUl4nh5xrU -->
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background-color: dimgray;
+      }
+      .container {
+        font-size: 10px;
+        width: 40em;
+        height: 40em;
+        position: relative;
+        background-color: black;
+      }
+      .sun {
+        position: absolute;
+        top: 15em;
+        left: 15em;
+        width: 10em;
+        height: 10em;
+        background-color: yellow;
+        border-radius: 50%;
+        box-shadow: 0 0 5em white;
+      }
+      .earth, .moon {
+        position: absolute;
+        border-style: solid;
+        border-color: transparent transparent transparent white;
+        border-width: 0.2em 0.0em 0.0em 0.2em;
+        border-radius: 50%;
+      }
+      .earth {
+        top: 5em;
+        left: 5em;
+        width: 30em;
+        height: 30em;
+        animation: orbit 36.5s linear infinite;
+      }
+      .moon {
+        top: 0em;
+        left: 0em;
+        width: 8em;
+        height: 8em;
+        animation: orbit 2.7s linear infinite;
+      }
+      .earth::before, .moon::before {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+      }
+      .earth::before {
+        top: 2.8em;
+        left: 2.8em;
+        width: 3em;
+        height: 3em;
+        background-color: aqua;
+      }
+      .moon::before {
+        top: 0.8em;
+        left: 0.2em;
+        width: 1.2em;
+        height: 1.2em;
+        background-color: silver;
+      }
+      @keyframes orbit {
+        to { transform: rotate(360deg); }
+      }
+    </style>    
+  </head>
+  <body>
+    <div class="container">
+      <div class="sun"/></div>
+      <div class="earth">
+        <div class="moon"></div>
+      </div>
+    </div>
+  </body>
+</html>
