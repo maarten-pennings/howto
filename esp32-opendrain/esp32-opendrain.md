@@ -59,19 +59,19 @@ if one of the other devices has pulled it low.
 The reason to use open drain is that multiple devices can connect to the same line.
 There is one pull-up on the line.
 Normally all devices have their "register set to 1", so all FATs are open, so the pull-up pulls the line high.
-One or more devices can set their "register to 0", than the line goes low.
+One or more devices can set their "register to 0", then the line goes low.
 
 ![Open drain bus](opendrainbus.drawio.png)
 
-Note this in this case zeror or more devices can set the line to 0 (pulling to th GND), 
+Note that in this schematic zero or more devices can set the line to 0 (pulling to th GND), 
 while at the same time zero or more devices can set the line to 1 (have it float).
 There is no infinite current, no burn-out.
 
 This scheme is used in I2C for the SCL and the SDA line.
 
-It is sometimes also used for the INT lines of devices.
-In the latter case, multiple devices can wire their INT line to one GPIO pin of the MCU.
-That is, when the MCU configures that GPIO as open drain.
+It is sometimes also used for the INT line of devices.
+In the latter case, multiple devices can wire their INT line to one GPIO pin of the MCU ("wired or").
+The MCU configures that GPIO as open drain.
 
 Fortunately, ESP32 supports open drain pins, and the Arduino API for ESP32 suppoprts that too.
 
