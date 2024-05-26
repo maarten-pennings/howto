@@ -1,6 +1,11 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+## Iterators and generators
+
+An [article](https://github.com/maarten-pennings/Lego-Mindstorms/tree/main/ms4/multitask/iteratorstudy) about what iterators and generators are, using Python.
+An excellent [article](https://btmc.substack.com/p/implementing-generators-yield-in) of how to implement generators in C. I was wondering if setjmp/longjmp would work/help here?
+
 
 ## How to do animations in HTML
 A small set of animation demos in html.
