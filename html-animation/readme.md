@@ -17,4 +17,6 @@ There are three demo's, copied from [Learning Axis](https://www.youtube.com/@lea
   [action](https://html-preview.github.io/?url=https://github.com/maarten-pennings/howto/blob/main/html-animation/threedots.html).  
   ![threedots](threedots.png)
 
+Shapes in [CCS](https://www.smashingmagazine.com/2024/05/modern-guide-making-css-shapes).
+
 (end)
