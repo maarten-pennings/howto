@@ -1,6 +1,13 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+
+## Arduino library naming
+
+How should I name an Arduino library, so that it fits well in the Arduino IDE.
+Some [notes](ArduinoLibraryNaming/ArduinoLibraryNaming.md).
+
+
 ## Iterators and generators
 
 An [article](https://github.com/maarten-pennings/Lego-Mindstorms/tree/main/ms4/multitask/iteratorstudy) about what iterators and generators are, using Python.
