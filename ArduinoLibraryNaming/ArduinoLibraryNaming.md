@@ -41,9 +41,10 @@ of `name`:
 
 > Library names must contain only basic letters (A-Z or a-z) and numbers (0-9), spaces ( ), underscores (_), dots (.) and dashes (-). They must start with a letter or number. They must contain at least one letter. Note that libraries with a name value starting with `Arduino` will no longer be allowed addition to the Library Manager index as these names are now reserved for official Arduino libraries.
 
-However, if you try to register a library you might stumble of "soft" requirements.
+However, if you try to register a library you might stumble on "soft" requirements.
 
 > WARNING: library.properties name value xxx is longer than the recommended length of 16 characters.
+> 
 > WARNING: library.properties name xxx contains spaces. Although supported, best practices is to not use  spaces.
 
 The `name` is defined in `library.properties`, where is it used?
@@ -52,7 +53,7 @@ The `name` is defined in `library.properties`, where is it used?
 ### `name` usage in `library.properties`
 
 The first place where a `name` is used is in the `library.properties` file
-nmely in the `depends` section. The line has the form
+namely in the `depends` section. The line has the form
 
 ```text
 depends=name1,name2,name3
@@ -78,7 +79,7 @@ As before, they are used as they occur in the `name` definition (with spaces if 
 When a library is installed (via the Arduino Library manager), the IDE creates
 a directory for that library in `C:\users\<user>\Documents\Arduino\libraries`.
 
-The directory is a mangeled version of `name`: all spaces are replaced with underscores.
+The directory is a mangled version of `name`: all spaces are replaced with underscores.
 
 By the way, the name of the directory that stores a library is not relevant; it can be changed to whatever.
 The Arduino build system finds libraries - I believe - via a header file that is included in an (ino) file.
