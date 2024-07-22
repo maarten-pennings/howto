@@ -139,5 +139,14 @@ Once a library repo is registered with Arduino, every release of that library is
 However, when you change the `name` the new release is not taken over. For this you need to submit 
 an [issue](https://github.com/arduino/library-registry/blob/main/FAQ.md#how-can-i-change-a-librarys-name)
 
+### Checking Arduino registration
+
+Once a library repo is registered with Arduino, the repo is "scraped" by Arduino.
+The log of scraping repo `https://github.com/<account>/<repo>` is public under the url
+`https://downloads.arduino.cc/libraries/logs/github.com/<account>/<repo>/`.
+Note the termination slash.
+
+As an example, eg check my [ENS210 library](https://downloads.arduino.cc/libraries/logs/github.com/maarten-pennings/ENS210/).
+
 (end)
 
