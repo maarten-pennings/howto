@@ -1,12 +1,20 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+
 ## Use the Arduino CLI
 
 Arduino had an IDE (v1.8), which started to feel outdated.
 Then came the IDE v2.0 with syntax highlighting and (still not working) integrated debugger.
 But now there is also a Command Line Interface.
 How does that [work](Arduino-CLI/readme.md)?
+
+
+## Arduino library naming
+
+How should I name an Arduino library, so that it fits well in the Arduino IDE.
+Some [notes](ArduinoLibraryNaming/ArduinoLibraryNaming.md).
+
 
 ## Iterators and generators
 
@@ -29,6 +37,7 @@ all in a virtual enviroment.
 I needed to connect an SPI mastering sensor to an ESP32S3.
 The sensor does not have an SSEL, which is a no-go for ESP.
 I tried various [solutions](spitest), but **failed** - an "how not to".
+
 
 ## SPI modes
 SPI communication knows much more variation than e.g. I2C.
