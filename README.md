@@ -1,6 +1,13 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+## Use the Arduino CLI
+
+Arduino had an IDE (v1.8), which started to feel outdated.
+Then came the IDE v2.0 with syntax highlighting and (still not working) integrated debugger.
+But now there is also a Command Line Interface.
+How does that [work](Arduino-CLI/readme.md)?
+
 ## Iterators and generators
 
 An [article](https://github.com/maarten-pennings/Lego-Mindstorms/tree/main/ms4/multitask/iteratorstudy) about what iterators and generators are, using Python.
