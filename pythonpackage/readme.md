@@ -41,7 +41,7 @@ mypkg
 
 In order to convert this into an _installable_  package, we need to create 
 a container directory with - again - the package name, store some meta files, and
-store the above create package directory there.
+store the above created package directory inside.
 
 ```text
 mypkg
@@ -84,7 +84,7 @@ if __name__ == "__main__":
   main()
 ```
 
-I like to develop python projects in a virtual environment.
+I like to develop python projects in a _virtual environment_.
 This allows different versions of package to be used by
 different projects. Maybe even more important, environments
 allow installing packages in those environments, instead of
@@ -189,7 +189,7 @@ The `(env)` in the prompt indicates that the virtual environment has been
 activated; basically, this means that `root\app\env` has been prepended
 to the system search `path`.
  
-The `setup` also creates and two directories in `mypkg`. 
+The `setup` also creates two directories in `mypkg`. 
 These and `env` do not have to be stored in the repo.
 
 ```text
