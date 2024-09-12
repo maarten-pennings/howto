@@ -57,5 +57,39 @@ For the pins from 32 and higher you need "out1" instead of "out", but also "val"
 
 This also works for ESP32-S3.
 
+
+## Input
+
+The above is all about _output_ is there also an SFR for fast _input_?
+Yes, it is in the same `GPIO` struct, it is appropriately called `in`.
+
+The below fragment configures pin `BUT` (this is typically mapped to the BOOT 
+button on the ESP32 board) as input (and pin `LED` as output).
+This takes place in `setup()`, using the Arduino way (`pinMode`). 
+Then it uses slow (`digitalRead(BUT)`) and fast (`GPIO.in & (1<<BUT)`) access
+to read the button pin.
+
+
+```C
+#include "soc/gpio_struct.h" // GPIO
+
+#define LED LED_BUILTIN
+#define BUT 0 // Boot button
+
+void setup() {
+  Serial.begin(115200);
+  Serial.printf("ESP32 fast gpio read\n");
+  pinMode(LED, OUTPUT);
+  pinMode(BUT, INPUT);
+}
+
+void loop() {
+  digitalWrite(LED, digitalRead(BUT) );
+  int but = GPIO.in & (1<<BUT);
+  Serial.printf("%d\n", but );
+}
+```
+
+
 (end)
 

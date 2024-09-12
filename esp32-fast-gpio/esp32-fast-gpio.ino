@@ -1,5 +1,6 @@
 // esp32-fast-gpio.ino - set ESP32 GPIO pins via direct register access
 // see https://github.com/maarten-pennings/howto
+#include "soc/gpio_struct.h" // GPIO.out_w1tc
 
 
 // Pick the GPIO pins
