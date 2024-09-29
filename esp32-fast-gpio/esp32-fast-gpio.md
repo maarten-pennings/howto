@@ -85,7 +85,7 @@ void setup() {
 
 void loop() {
   digitalWrite(LED, digitalRead(BUT) );
-  int but = GPIO.in & (1<<BUT);
+  int but = GPIO.in & (1<<BUT); // or GPIO.in.val for some ESP derivatives
   Serial.printf("%d\n", but );
 }
 ```
