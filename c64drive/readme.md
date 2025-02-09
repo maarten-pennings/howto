@@ -7,13 +7,13 @@ The computer sends a command (a string) to the drive, and the drive interprets t
 
 ## Communication
 
-Drives devices are connected to a serial bus.
+Drive devices are connected to a serial bus.
 The C64 has _one_ serial port. Typically, a serial cable is plugged into that port and the other end is plugged into a drive device.
-A drive device has _two_ serial port; they are identical. The other port can be used to plug in a cable to run to a second drive device (or a printer or a ...).
-Devices are daisy chained_ on the serial bus. Every device on the bus has a hardwired (typically with dip switches on that device) _device number_.
+A drive device has _two_ serial port; they are identical. The other port can be used to plug in another cable to run to a second drive device (or a printer or a ...).
+In other words, devices are _daisy chained_ on the serial bus. Every device on the bus has a hardwired (typically with dip switches on that device) _device number_.
 Disk drive device numbers range from 8 up to 15.
 
-Within a drive device - a physical enclosure with an incoming serial port, and outgoing serial port and a set of 
+Within a drive device - a physical enclosure with an incoming serial port, an outgoing serial port and a set of 
 dip switches that configure a device number, there could be two drive units - a spindle and head and an opening to insert a disk. 
 When sending a command to a drive device, the command string includes a drive number (0 or 1).
 If the drive number is absent, it usually defaults to 0.
@@ -25,10 +25,10 @@ Therefore, in the remainder of this document, we will no longer use the term "dr
 
 Since a program might have more then one file open on a drive (remember that the disk operating system is in the drive),
 a drive has a so-called secondary address. A secondary address is a virtual communication pipe to that drive.
-One aspects of a secondary address is that it has a 256 byte buffer on the drive; other aspects are and pointers 
+One aspects of a secondary address is that it has a 256 byte buffer on the drive; other aspects are pointers 
 to the current track, sector and (byte) offset.
 
-To [open](https://www.c64-wiki.com/wiki/OPEN) a file the following basic command is given.
+To [open](https://www.c64-wiki.com/wiki/OPEN) a file the following command is given.
 
 ```
 open <logical_file_number> , <device_number> , <secondary_address> , <command_string>
@@ -60,7 +60,7 @@ OPEN 1, 8, 15, "N0:DISKNAME,ID"
 For other examples see [c64-wiki](https://www.c64-wiki.com/wiki/Commodore_1541), or [manual](https://www.mocagh.org/cbm/c1541II-manual.pdf).
 
 
-An example of a complex administrative command, the following seems to change the [device number](https://www.c64-wiki.com/wiki/Device_number).
+An example of a complex administrative command is the following: it seems to change the [device number](https://www.c64-wiki.com/wiki/Device_number).
 
 ```
 OPEN 2,8,15:PRINT#2,"M-W";CHR$(119);CHR$(0);CHR$(2);CHR$(devnum+32);CHR$(devnum+64):CLOSE 2
@@ -86,7 +86,7 @@ This basic program copies a file from device 8 to 9.
 
 This basic program prints one "raw" sector of a disk.
 Note that it uses the command address (secondary address 15) to send the block-read command `U1`,
-and a plan secondary address 5 to get the block bytes.
+and a plain secondary address 5 to get the block bytes.
 
 ![sectordump](sectordump.png)
 
