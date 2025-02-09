@@ -1,6 +1,6 @@
 # Vice keyboard
 
-[VICE](https://vice-emu.sourceforge.io/) is a PC program that emulates amonst other the Commodore 64 (C64).
+[VICE](https://vice-emu.sourceforge.io/) is a PC program that emulates amongst others the Commodore 64 (C64).
 I was running the [TMP (Turbo Macro Pro)](https://turbo.style64.org/) assembler on it.
 TMP is a bit like VI: the left arrow key (the upper left key on the C64 keyboard with the symbol `←`) 
 is the command key. See official [doc](https://turbo.style64.org/docs/turbo-macro-pro-editor) or 
@@ -19,7 +19,7 @@ This document explains how to change that key mapping.
 
 The first step is to enable user key mapping, and make that persistent.
 
-Start VICE, go to Preferences Settings and select Symbolic (user).
+Start VICE, go to Preferences Settings > Input devices > Keyboard, and select Symbolic (user).
 Also click "Save settings on exit".
 
 ![VICE Settings](settings.png)
