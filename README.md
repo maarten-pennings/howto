@@ -1,6 +1,11 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+## Commodore 64 drives
+
+The 1541 disk drive for the commodore 64 is "smart".
+This [how to](c64drive) explains what that means.
+
 ## Remapping keys in VICE
 
 I was playing with VICE the C64 (Commodore 64) emulator.
@@ -43,7 +48,7 @@ See [html-animation](html-animation/readme.md) for soure and demo.
 ## How to create a Python Virtual environment and use a local package
 This [pythonpackage](pythonpackage/readme.md) is an empty 
 python application which uses an empty package,
-all in a virtual enviroment.
+all in a virtual environment.
 
 
 ## Using ESP SPI slave without SSEL
