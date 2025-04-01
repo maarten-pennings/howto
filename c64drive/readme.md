@@ -20,14 +20,13 @@ If the drive unit id is absent, it usually defaults to 0.
 
 ![Serial bus](drives.drawio.png)
 
-In the past maybe there were drive devices with two drive units. But those no longer appear to exist 
-- or [do they](https://bitbinders.com/products/commodore-1581dv).
-Therefore, in the remainder of this document, we will no longer use the term "drive device" but simply "drive" or "device".
+In the past maybe there were drive devices with two drive units. But those no longer appear to exist - or [do they](https://bitbinders.com/products/commodore-1581dv).
+In the remainder of this document, we will no longer use the term "drive device" but simply "drive" or "device".
 
 Since a program might have more then one file open on a drive (remember that the disk operating system is in the drive),
 the drive needs to differentiate between them. This is done with so-called _secondary addresses_. 
 One aspects of a secondary address is that it has a 256 byte buffer on the drive; other aspects 
-associtaed with a secomdary address are pointers to the current track, sector and (byte) offset.
+associated with a secondary address are pointers to the current track, sector and (byte) offset.
 
 To [open](https://www.c64-wiki.com/wiki/OPEN) a file the following command is given.
 
@@ -39,7 +38,7 @@ This allocates a file handle on the C64 (e.g. a buffer) identified by `<logical_
 The handle is associated with a file on device `<device_number>`, but since there could be more,
 specifically using handle `<secondary_address>` on the drive. 
 
-For example, this opens two sequential files on device 8. The have handles 2 and 3 on the C64 and 5 and 6 on the drive.
+For example, this opens two sequential files on device 8. They have handles 2 and 3 on the C64 and 5 and 6 on the drive.
 
 ```
 OPEN 2, 8, 5, "FILENAME,SEQ,READ" 
@@ -58,7 +57,7 @@ which formats a disk. It assigns name `DISKNAME` (disk names have a maximum leng
 identifier `ID` (disk identifiers are exactly 2 characters) to the disk.
 
 ```
-OPEN 1, 8, 15, "N0:DISKNAME,ID" 
+OPEN 1, 8, 15, "N0:DISKNAME,ID" : CLOSE 1
 ```
 
 For other examples see [c64-wiki](https://www.c64-wiki.com/wiki/Commodore_1541), or [manual](https://www.mocagh.org/cbm/c1541II-manual.pdf).
@@ -69,6 +68,7 @@ An example of a complex administrative command is the following: it seems to cha
 ```
 OPEN 2,8,15:PRINT#2,"M-W";CHR$(119);CHR$(0);CHR$(2);CHR$(devnum+32);CHR$(devnum+64):CLOSE 2
 ```
+
 
 ## Example basic programs
 
@@ -136,6 +136,16 @@ Note that it uses the command address (secondary address 15) to send the block-r
 and a plain secondary address 5 to get the block bytes.
 
 ![sectordump](sectordump.png)
+
+Line 160 is tricky; as the manual explains on [page 66](https://www.mocagh.org/cbm/c1541II-manual.pdf#page=38) the
+`U1` command has four parameters
+
+```
+  "U1" ; <secondary_address> ; <unit> ; <track> ; <sector>
+```
+
+This line therefore couples the command block-read given via the command channel 15, to the other file descriptor 5.
+
 
 (end)
 
