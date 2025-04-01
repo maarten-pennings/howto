@@ -1,6 +1,11 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+## Commodore 64 string storage
+
+How does the C64 store strings. Section [C64strings](C64strings) explains this.
+
+
 ## Commodore 64 drives
 
 The 1541 disk drive for the commodore 64 is "smart".
