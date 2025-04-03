@@ -72,6 +72,66 @@ OPEN 2,8,15:PRINT#2,"M-W";CHR$(119);CHR$(0);CHR$(2);CHR$(devnum+32);CHR$(devnum+
 
 ## Example basic programs
 
+
+### filetest
+
+This program tests how (sequential) files are written and read.
+It has a simple menu: 1 writes some data to sequential file `BYTES`, 
+2 reads all data from `BYTES`, and 3 scratches (deletes) file `BYTES`.
+Option 9 ends the program.
+
+![filetest](filetest.png)
+
+This program begins (line 100) by opening the command channel of the drive
+(hardwired device 8). The channel is needed because all operations from 
+the menu report drive status.
+
+Lines 110-140 print a menu, get user input, execute chosen subroutines, and all that
+until the user presses 0. Then the program closes the command channel and ends.
+
+Lines 200-235 form the writing subroutine. Lines 300-360 form the reading subroutine,
+and lines 400-410 are the scratch subroutine. On 500-510 we find the drive status
+reporting.
+
+Some observations
+
+- It seems that `ST` is used for querying the system state after data input 
+  (INPUT/GET) and output (PRINT) [see](https://www.c64-wiki.com/wiki/STATUS). 
+  I'm note sure of `ST` is also updated after OPEN or CLOSE.
+  
+- The C64 file state (`ST`, not to be confused with the drive status read via channel 15)
+  turns 64 when the last byte has been read. As [Bumbershoot](https://bumbershootsoft.wordpress.com/2017/09/23/c64-basic-disk-io/) 
+  states "Unlike `feof()` in C, though, ST is set on the _last legal_ read, not the _first illegal_ one."
+  This makes me wonder how that works for an empty file.
+  Unfortunately, I'm not able to generate an empty file. If I OPEN:CLOSE,
+  or OPEN:PRINT3,"";:CLOSE or even OPEN:PRINT3,"A";:CLOSE, I get a file of four bytes
+  x 0 2 x where x is 13 in the first 2 and 65 (A) for the third try...
+  
+- A sequential file is like a modern text file, but there is more than just newline 
+  conversions when using INPUT.
+  That's why this program read character by character (`GET#3,B$`). One "glitch" in
+  C64 BASIC, when the file has a NUL char, `B$` is an empty string.
+  The second part of line 320 converts the read character (`B$`) to an ASCII value (`B`)
+  taking care of the glitch.
+
+![running filetest](filetest-run.png)
+
+I ran the program (with `BYTES` present from a previous run).
+
+- The first delete (scratch) was successful the last `1` in `1 FILES SCRATCHED 1 0` 
+  means 1 file was scratched.
+  
+- A second delete was sort of successful, no error, but also no file scratched.
+
+- A first write was successful, but the second gave a `FILES EXISTS`.
+
+- Finally the reading.
+  This was a bit of a surprise to me.
+  We see that CRs (character 13) are inserted if we use `PRINT#` without `;`.
+  We see that our patch to read the NUL character works.
+  For fun: change the `;` in  a `,` in `PRINT#`. This inserts a series of spaces into the file.
+
+
 ### filedump
 
 This basic program prints a hex dump of a file.
