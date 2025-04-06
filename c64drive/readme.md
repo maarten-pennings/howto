@@ -208,5 +208,163 @@ Line 160 is tricky; as the manual explains on [page 66](https://www.mocagh.org/c
 This line therefore couples the command block-read given via the command channel 15, to the other file descriptor 5.
 
 
+### Save elsewhere
+
+When LOADing a program BASIC loads to its default address of 0x0801.
+For assembler programs this is unwanted behavior.
+The LOAD command does allow loading to another location, by appending the 1 flag: `LOAD "BYTES",8,1`.
+This works for PRG files, since the have a very simple header, namely two bytes the specify the load address.
+
+BASIC also has the counterpart for saving: `SAVE "BYTES",8,1`.
+What is inconvenient is that the start and end-address are not part of the command.
+Instead, the SAVE,1 command uses the addresses at 0043/0044 and 0045/0046.
+The first is the start address where to save from. This location is known as TXTTAB, or start-of-basic.
+The second address is the end address. This location is known as VARTAB, or start-of-variables; 
+which is also the end-of-basic (program code).
+
+In this test we make a "fake" program of 4 bytes at 49152 (page 192, or 0xC000); 
+We poke decimal values 11, 22, 33, 44; arbitrary values, just to recognize them.
+
+Next we set the TXTTAB to 49152 (00/192) and VARTAB to 49152
+(it might be wise to first record the original values of TXTTAB and VARTAB, 
+see warning at the end of this section).
+Those pointer values setup a block of 0 bytes.
+The first SAVE saves that block of 0 bytes.
+
+![SAVE](nbytes.png)
+
+The next step is to set VARTAB one higher and SAVE a block of 1 bytes.
+The next step is to set VARTAB again one higher, to 2, and SAVE a block of 2 bytes.
+
+If we run this in VICE we can take a copy of the whole [raw disk](nbytes.d64).
+With [d64viewer](https://github.com/maarten-pennings/d64viewer) we can inspect the details of the disk.
+
+First we check the directory
+
+```
+(env) C:\Repos\d64viewer\viewer>run nbytes.d64
+d64viewer: file 'nbytes.d64' has 683 blocks of 256 bytes
+showing dir starts at 358 as dir [tech0 cont(17)]
+
+|block 358 zone 1/19 track 18 sector 1 type DIR------|
+| blocks | filename           | filetype | block1    |
+|--------|--------------------|----------|-----------|
+|   1    | '0BYTES'           |   PRG    | 11/00=336 |
+|   1    | '1BYTES'           |   PRG    | 11/01=337 |
+|   1    | '2BYTES'           |   PRG    | 11/02=338 |
+no next block (request was 17)
+Done
+```
+
+Next we check the two-byte file.
+
+```
+(env) C:\Repos\d64viewer\viewer>run nbytes.d64 --tfile 2BYTES
+d64viewer: file 'nbytes.d64' has 683 blocks of 256 bytes
+showing file 2BYTES at 338 as hex [tech0 cont(682)]
+
+|block 338 zone 0/21 track 17 sector 2 type FIL-----------------------------|
+|offset| 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F | 0123456789ABCDEF |
+|------|-------------------------------------------------|------------------|
+|  00  | 00 05 00 C0 0B 16*00*00*00*00*00*00*00*00*00*00*| °·°···°°°°°°°°°° |
+|  10  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  20  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  30  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  40  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  50  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  60  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  70  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  80  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  90  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  A0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  B0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  C0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  D0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  E0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  F0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|------|-------------------------------------------------|------------------|
+no next block (request was 682)
+Done
+```
+
+Looks good. First two bytes (00 05) is the _link_ to the next disk block.
+But in this case the first byte, normally track, is 00 which signals that this is the last block of the file.
+The next byte 05 is then not the sector, but the index of the last byte in this sector.
+So 6 bytes (from 00 up to and including 05) of this sector are used.
+We see that d64viewer "stars" all bytes from 06 onward so it came to the same conclusion.
+Why does this make sense?
+After the two bytes for _link_ a PRG file has two bytes for the load address.
+We indeed see 00 C0 for 49152.
+After that, two bytes contents: 0B and 16, or, in decimal, 11 and 22, that's what we poked.
+
+A quick check on the one-byte file shows indeed a _link_ of 00 04
+
+```
+(env) C:\Repos\d64viewer\viewer>run nbytes.d64 --tfile 1BYTES
+d64viewer: file 'nbytes.d64' has 683 blocks of 256 bytes
+showing file 1BYTES at 337 as hex [tech0 cont(682)]
+
+|block 337 zone 0/21 track 17 sector 1 type FIL-----------------------------|
+|offset| 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F | 0123456789ABCDEF |
+|------|-------------------------------------------------|------------------|
+|  00  | 00 04 00 C0 0B*00*00*00*00*00*00*00*00*00*00*00*| °·°··°°°°°°°°°°° |
+|  10  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  20  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  30  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  40  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  50  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  60  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  70  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  80  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  90  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  A0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  B0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  C0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  D0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  E0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  F0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|------|-------------------------------------------------|------------------|
+no next block (request was 682)
+Done
+```
+
+And finally a quick check on the zero-byte file shows indeed a _link_ of 00 03
+
+
+```
+(env) C:\Repos\d64viewer\viewer>run nbytes.d64 --tfile 0BYTES
+d64viewer: file 'nbytes.d64' has 683 blocks of 256 bytes
+showing file 0BYTES at 336 as hex [tech0 cont(682)]
+
+|block 336 zone 0/21 track 17 sector 0 type FIL-----------------------------|
+|offset| 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F | 0123456789ABCDEF |
+|------|-------------------------------------------------|------------------|
+|  00  | 00 03 00 C0*00*00*00*00*00*00*00*00*00*00*00*00*| °·°·°°°°°°°°°°°° |
+|  10  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  20  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  30  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  40  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  50  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  60  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  70  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  80  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  90  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  A0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  B0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  C0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  D0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  E0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  F0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|------|-------------------------------------------------|------------------|
+no next block (request was 682)
+Done
+```
+
+Warning: BASIC will behave strangely after you reset these pointers.
+Sometime is helps to do RUN/STOP/RESTORE.
+The NEW command resets the pointers.
+But NEW might now work, then `POKE43,1:POKE44,8` and `POKE45,3:POKE 46,8`.
+
+
 (end)
 
