@@ -102,15 +102,15 @@ Some observations
 - The C64 file state (`ST`, not to be confused with the drive status read via channel 15)
   turns 64 when the last byte has been read. As [Bumbershoot](https://bumbershootsoft.wordpress.com/2017/09/23/c64-basic-disk-io/) 
   states "Unlike `feof()` in C, though, ST is set on the _last legal_ read, not the _first illegal_ one."
-  In my test code a print a `/` before the last byte.
-  This mechanism makes me wonder how that works for an empty file.
+  The code prints a `/` before the last byte.
+  This mechanism of "last legal read" makes me wonder how that works for an empty file.
   Unfortunately, I'm not able to generate an empty file. If I `OPEN:CLOSE`,
   or `OPEN:PRINT3,"";:CLOSE` or even `OPEN:PRINT3,"A";:CLOSE`, I get a file of four bytes
   x 0 2 x where x is 13 in the first two cases and 65 (A) for the third try...
   
 - A sequential file is like a modern text file, but there is more than just newline 
   conversions when using INPUT.
-  That's why this program read character by character (`GET#3,B$`). One "glitch" in
+  That's why this program reads character by character (`GET#3,B$`). One "glitch" in
   C64 BASIC is that when the file has a NUL char, `B$` is an empty string.
   The second part of line 320 converts the read character (`B$`) to an ASCII value (`B`)
   taking care of the glitch.
