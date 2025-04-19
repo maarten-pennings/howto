@@ -366,7 +366,7 @@ The NEW command resets the pointers.
 But NEW might now work, then `POKE43,1:POKE44,8` and `POKE45,3:POKE 46,8`.
 
 
-## Save program as text file
+### Save program as text file
 
 A `SAVE` command saves a BASIC program as PRG file, a series of tokens.
 It is also possible to save the program as text, as SEQ file with plain ASCII to be more precise.
@@ -429,6 +429,64 @@ But I added them as documentation.
 Two observations around the generated text file.
 - The text file still starts with a newline (it is printed after the `*`).
 - The text file ends with `READY.`, since that is printed  after `LIST`.
+
+
+## Drive versions
+
+Commodore seems to have made 5 different drives.
+See [here](https://www.youtube.com/watch?v=ByHdBD16DRg) or [here](https://portcommodore.com/rcarlsen/cbm/1541/).
+
+
+### 1541 (v1)
+
+![1541_v1](1541_v1.png)
+
+- distinguishing feature: pull-down tab, brown casing
+- year: 1982
+- drive: Alps
+- problems: overheating, misalignment, head knocking (no track zero sensor)
+
+
+### 1541 (v2)
+
+![1541_v2](1541_v2.png)
+
+- distinguishing feature: flip lever, brown casing
+- year: 1984
+- drive: Mitsumi's Newtronics 
+- problems: badly sealed heads (sudden failure after 20 years)
+
+ 
+### 1541C
+
+![1541C_v1](1541C_v1.png)
+
+- distinguishing feature: flip lever, white casing, quiet
+- year: 1986
+- drive: Mitsumi's Newtronics 
+- problems: badly sealed heads (sudden failure after 20 years)
+
+
+### 1541-II (v1)
+
+![1541-II_v1](1541-II_v1.png)
+
+- distinguishing feature: lever flush with housing, square, smaller (from 100×200×375 mm³ to 80×185×250 mm³ )
+- year: 1988
+- drive: Mitsumi's Newtronics 
+- problems: badly sealed heads (sudden failure after 20 years)
+
+
+### 1541-II (v2)
+
+![1541-II_v2](1541-II_v2.png)
+
+- distinguishing feature: flip lever recessed
+- year: 1990
+- drive: Chinon
+- problems: none :-) sealed heads, spindle no longer belt driven, firmware bugs fixed.
+
+
 
 (end)
 
