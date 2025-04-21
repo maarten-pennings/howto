@@ -1,6 +1,13 @@
 # How to
 Assortment of "How to xxx" I want to remember.
 
+
+## Gemini
+
+Most of the questions I asked Gemini and the likes (ChatGPT) did not lead to a satisfactory answer.
+Marc gave me a puzzle, and this time Gemini did not let me [down](Gemini8princesses).
+
+
 ## Commodore 64 string storage
 
 How does the C64 store strings. Section [C64strings](C64strings) explains this.
