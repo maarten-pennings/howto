@@ -406,7 +406,7 @@ Changes Made:
 
 Compile and run this code as before. It will now output the maximum count and a visual representation of one arrangement that achieves that count.
 
-_And yes, also this compiles flawlessly and gives a credible solution - nicely regular._And
+_And yes, also this compiles flawlessly and gives a credible solution - nicely regular._
 
 
 ```
