@@ -21,7 +21,7 @@ This [how to](c64drive) explains what that means.
 ## Remapping keys in VICE
 
 I was playing with VICE the C64 (Commodore 64) emulator.
-In Turbo Macro Pro, the `←` key is used extensively, so I wanted to rempa that to an easy key.
+In Turbo Macro Pro, the `←` key is used extensively, so I wanted to remap that to an easy key.
 See [how to](ViceKeyboardRemap/readme.md) do that yourself.
 
 ## Get a map file in Arduino for ESP

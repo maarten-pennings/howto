@@ -11,10 +11,8 @@ Marc sent me this problem he authored.
 
 This is a derivative of the [8 queens problem](https://en.wikipedia.org/wiki/Eight_queens_puzzle).
 I knew that that problem places 8 queens in non-attacking positions on a regular chess board.
-
-Since princesses have a reach of 2 squares, instead of 8 of a queen), I knew 
-I had to find a solution with at least 8. I was happy I found a solution that 
-placed 11 princesses.
+Since princesses have a reach of 2 squares, instead of 8 of a queen, I knew 
+I had to find a solution with at least 8 princesses. I was happy I found a solution that placed 11 princesses.
 
 ![solution 11](solution11.jpg).
 
@@ -22,7 +20,7 @@ Marc said I could do better. And yes I could.
 
 ![solution 13](solution13.jpg).
 
-Marc said he could not do better.
+Marc said he could _not_ do better.
 But I felt that there were quite some empty places in the third row.
 
 But writing a whole algorithm ... pff... what a work.
@@ -84,7 +82,7 @@ _From the sentence "a princess at (r, c) attacks all squares within a 5x5 square
 We need to better explain the moves_
 
 
-### Second prompt _ correcting the miss-understanding
+### Second prompt - correcting the miss-understanding
 
 > You misunderstood how the princess moves. It is not a 5x5 square because a princess moves like a queen but only 1 or two squares. So from 0,0 it can reach 1,1 and 2,2, but not 2,1.
 
@@ -139,7 +137,7 @@ Okay, I can provide you with a C program that uses a backtracking approach to fi
 
 Keep in mind that for an 8x8 board, a full backtracking search can still take a significant amount of time to explore all possibilities.
 
-```
+```c
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h> // For max function if needed, or use a ternary operator
@@ -267,7 +265,7 @@ Pity we do not get to see the solution._
 
 Okay, here is the modified C program that will print the chessboard configuration corresponding to the maximum number of non-attacking princesses found.
 
-```
+```c
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h> // For max function if needed
