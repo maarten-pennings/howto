@@ -1,6 +1,6 @@
 # How to implement USR() on the C64
 
-This document explains how to implement a `USR()` function on the C64.
+This document explains how to implement a `USR()` function on the C64. We implement `DEEK()` or double `PEEK()`.
 
 It also shows a trick from Robin "8-Bit Show And Tell" how to easily return to Turbo Macro Pro.
 
@@ -12,8 +12,8 @@ Commodore BASIC has two ways to mix machine language subroutines with BASIC: `SY
 
 ### SYS
 
-The first one is relatively straightforward. The `SYS` command is passed address, and then execution is transferred to
-the machine code at that address, until an `RTS`. That transfers execution back to basic. There is no official
+The first one is relatively straightforward. The `SYS` command is passed an address, and then execution is transferred to
+the machine code at that address. When execution hits an `RTS`, execution transfers back to BASIC. There is no official
 way to pass an argument, nor is there an official way to get a return value. 
 
 The following example calls the routine at 49152 (a free region of memory). 
@@ -28,9 +28,9 @@ At minimum `POKE 49152,96` to get a one-instruction routine `RTS`.
 ### USR
 
 The second method allows passing an argument to the routine, and getting a result back.
-We can pass _one_ argument, and we get one result back; both must be floating point).
+We can pass _one_ argument, and we get one result back; both must be floating point.
 That is a bit limited, but for the rest, this function behaves like any BASIC function;
-it can appear in any place where say `SIN` can occur.
+it can appear in any place where, say, `SIN` can occur.
 
 The following example is a bit contrived, but it shows the possibilities.
 
@@ -38,17 +38,19 @@ The following example is a bit contrived, but it shows the possibilities.
   PRINT USR(785)+USR(780+5)
 ```
 
-You might wonder which routine gets called. The answer is the vector at location 785 ($311).
+You might wonder which routine gets called, to which address the CALL is. 
+The answer is the vector at location 785 ($311).
 By default this vector points to a routine that prints `?ILLEGAL QUANTITY  ERROR`.
-You would poke the vector with your routines address before calling `USR()`.
+You would poke the vector with your routine's address before calling `USR()`.
 
 
-### Expression
+### Expressions
 
 It is good to realize that Commodore BASIC has three _types_: float, string and integer.
-A variable (function) ending in `$` is (returns) a string, a variable ending in `%` is an integer,
-all other variables and function are float. Floats are stored in 5 bytes, strings use
-variable width blocks on a heap and integers are _signed_ and 16 bit. 
+A variable like `A$` (or function like `MID$`) ending in `$` is (returns) a string.
+A variable like `XX%` ending in `%` is an integer.
+All other variables and function are float. Floats are stored in 5 bytes, strings use
+variable width blocks on the heap and integers are _signed_ and 2 byte (16 bits). 
 
 You might be thinking that it would generally be better to use integers, but the answer is a firm _no_.
 First of all you do not save memory: every variable uses 7 bytes: 2 for the name and 5 for the value
@@ -57,7 +59,7 @@ save cycles. On the contrary: integers are first converted to float, then the co
 in the float domain, and the result is converted back to integer. This has been done to keep
 the BASIC interpreter simple; there is only one "ALU", a float one.
 
-Why are there integers? They help in one place: when you make an array of them. Then to occupy only 2 bytes.
+Why are there integers? They help in one place: when you make an array of them. Then they occupy only 2 bytes.
 
 
 ### ALU
@@ -69,6 +71,8 @@ or [codebase64.org](https://codebase64.org/doku.php?id=base:kernal_floating_poin
 
 Example are "FAC:=ARG+FAC" or "FAC:=const*FAC".
 
+The FAC is at location $61-$66 and the ARG at $69-$6E.
+
 
 
 ## Turbo Macro Pro
@@ -77,12 +81,12 @@ To write the `USR` function, we will use TMP or [Turbo Macro Pro](https://turbo.
 This is an assembler that runs on the C64 itself, but also on [VICE](https://vice-emu.sourceforge.io/), the emulator.
 
 TMP consists of an editor with some commands.
-One command is assemble, another command is to run it, or go to basic (and there start it).
+One command is assemble, another command is to run it, or go to BASIC (and there start it).
 Typically in the development cycle, you test and want to go back to TMP.
 
 Robin from [8-Bit Show And Tell](https://www.youtube.com/c/8BitShowAndTell) has a clever trick for that.
 I first saw it in a [video](https://www.youtube.com/watch?v=05vlobA3JeU) but when I needed it, I couldn't find it back.
-Fortunately, somebody else documented it in wa way that was easier to [find](https://old-crank.neocities.org/examples/easy.return.to.tmp).
+Fortunately, somebody else documented it in a way that was easier to [find](https://old-crank.neocities.org/examples/easy.return.to.tmp).
 
 The trick is to add this to your assembler program.
 
@@ -96,7 +100,7 @@ tmpentry  = $8000
           cli
 ```
 
-What it does is vector the interrupt (caused by pressing the RESTORE key) to the start of TMP.
+What it does, is to vector the interrupt (caused by pressing the RESTORE key) to the start of TMP.
 **One key press, and your back.**
 
 
@@ -109,9 +113,9 @@ function `USR`. The first part sets up the vector to the second part.
 
 ### Program header
 
-The program header explains shortly what to program does.
+The program header explains shortly what the program does.
 More importantly is specifies the location for the program.
-We selected the cassette buffer ar (decimal) 828.
+We selected the cassette buffer at (decimal) 828.
 
 ```basic 
          ; implements usr(addr)
@@ -163,22 +167,24 @@ We are making DEEK or double PEEK.
 ```
 
 When calling `USR(expr)`, BASIC first evaluates `expr` and puts the
-resulting value in the floating point accumulator (`FAC`).
+resulting value in the floating point accumulator (`FAC`). Then our program 
+runs. When our program ends (with `RTS`), what is left in the FAC is returned
+to BASIC.
 
 We use the function `getadr` which converts the FAC to an integer.
 This routine assumes the integer is an address and even gives an
-error when out of range. If the number is ok, the routine returns
-with address in location known as `poker` (address $14).
+error when out of range (outside 0..65535). If the number is ok, the routine returns
+with the address in the location known as `poker` (address $14).
 
-When we would enter `USR(2039)` to inspect location $0801, after 
+When we would enter `USR(2049)` to inspect location $0801, after 
 this call, `poker` would store the low byte $01 and `poker+1` would 
 store the high byte $08.
 
-We now want to peek at location $0801 and $0802, this is where the two
-`lda (addr),y` comes to the rescue. After that, `x` has the high byte
+We now want to peek at locations $0801 and $0802, this is where the two
+`lda (addr),y` come to the rescue. After that, `x` has the high byte
 mem[$0802] and `y` has the low byte mem[$0801].
 
-Finally we call the routine givayf which converts the integer
+Finally we call the routine `givayf` which converts the integer
 in `y` and `a` to a float in FAC.
 
 
@@ -205,7 +211,7 @@ But we are not.
 The problem is integer overflow.
 If the value in y/a exceeds 32767, the FAC becomes negative.
 
-If the is new to you, try `FRE()` is suffers from this.
+If this is new to you, try `FRE()`, it suffers from the same issue.
 
 ```basic 
 
@@ -224,14 +230,11 @@ READY.
 READY.
 ```
 
-The final piece of the puzzle comes now.
-When the FAC is negative, we add 65536.
-We use `addmem` which adds a float constant
-pointed to bt a/y to FAC.
+The final piece of the puzzle comes now. When the FAC is negative, we add 65536.
+We use `addmem` which adds a float constant pointed to by a/y to FAC.
 
-The constant is located a `n65536` at the
-end of the program. This is in floating
-point representation.
+The constant is located a `n65536` at the end of the program. 
+This is in floating point representation.
 
 
 ```basic 
@@ -259,12 +262,26 @@ n65536   .byte 145,0,0,0,0,0
 ## Running
 
 Let's try it.
-First some illegal addresses.
-Next the vector of USR iteself.
-And finally BRK vector at 65534, which maps to 65352.
+First a real case, then some illegal addresseses.
+And finally the BRK vector at 65534, which maps to 65352.
+
 
 ```basic
+LOAD "USR13@828.PRG",8,1
+
+SEARCHING FOR USR13@828.PRG
+LOADING
+READY.
+
 SYS 828
+
+READY.
+?USR(785)
+ 839
+
+READY.
+?(USR(785)+USR(780+5))/2
+ 839
 
 READY.
 ?USR(-2)
@@ -276,9 +293,6 @@ READY.
 
 ?ILLEGAL QUANTITY  ERROR
 READY.
-
-?USR(785)
- 839
 
 READY.
 ?USR(65534)
