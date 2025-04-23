@@ -2,6 +2,12 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## Commodore 64 USR() function
+
+How to make the `USR()` function work. Plus, as bonus, a return-to-TMP easily.
+See [c64usr](c64usr).
+
+
 ## Gemini
 
 Most of the questions I asked Gemini and the likes (ChatGPT) did not lead to a satisfactory answer.
@@ -18,11 +24,13 @@ How does the C64 store strings. Section [C64strings](C64strings) explains this.
 The 1541 disk drive for the commodore 64 is "smart".
 This [how to](c64drive) explains what that means.
 
+
 ## Remapping keys in VICE
 
 I was playing with VICE the C64 (Commodore 64) emulator.
 In Turbo Macro Pro, the `←` key is used extensively, so I wanted to remap that to an easy key.
 See [how to](ViceKeyboardRemap/readme.md) do that yourself.
+
 
 ## Get a map file in Arduino for ESP
 
