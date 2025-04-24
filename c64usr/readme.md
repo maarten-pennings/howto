@@ -20,7 +20,7 @@ The following example calls the routine at 49152 (a free region of memory).
 Make sure to first place a routine there (e.g. by `POKE`ing or via `LOAD "XXX",8,1`).
 At minimum `POKE 49152,96` to get a one-instruction routine `RTS`.
 
-```basic
+```
   SYS 49152
 ```
 
@@ -34,7 +34,7 @@ it can appear in any place where, say, `SIN` can occur.
 
 The following example is a bit contrived, but it shows the possibilities.
 
-```basic 
+```
   PRINT USR(785)+USR(780+5)
 ```
 
@@ -90,7 +90,7 @@ Fortunately, somebody else documented it in a way that was easier to [find](http
 
 The trick is to add this to your assembler program.
 
-```asm
+```
 tmpentry  = $8000
           sei ; make vector swap atomic
           lda #<tmpentry
@@ -117,7 +117,7 @@ The program header explains shortly what the program does.
 More importantly is specifies the location for the program.
 We selected the cassette buffer at (decimal) 828.
 
-```basic 
+```
          ; implements usr(addr)
          ; returns vector at <addr>
          ; also known as deek(addr)
@@ -135,7 +135,7 @@ This is just two stores and a return.
 Observe that `<` and `>` are TMP functions that take the
 low byte and high byte respectively of a word (an address).
 
-```basic 
+```
          ; set usr() vector
 usradd   = 785; $0311
          lda #<main
@@ -150,7 +150,7 @@ usradd   = 785; $0311
 The second parts needs some constants.
 It uses three subroutines and two buffers (`poker` and `fac`).
 
-```basic
+```
 getadr   = $b7f7; int(fac) to mem[poker]
 givayf   = $b391; a/y to fac
 addmem   = $b867; fac+=mem[a/y]
@@ -162,7 +162,7 @@ fac      = $61  ; floating point accu
 
 We are making DEEK or double PEEK.
 
-```basic
+```
   DEEK(A) := PEEK(A)+256*PEEK(A+1)
 ```
 
@@ -188,7 +188,7 @@ Finally we call the routine `givayf` which converts the integer
 in `y` and `a` to a float in FAC.
 
 
-```basic 
+```
 main     ; fac parsed as int in poker
          jsr getadr
          
@@ -213,8 +213,7 @@ If the value in y/a exceeds 32767, the FAC becomes negative.
 
 If this is new to you, try `FRE()`, it suffers from the same issue.
 
-```basic 
-
+```
     **** COMMODORE 64 BASIC V2 ****
 
  64K RAM SYSTEM  38911 BASIC BYTES FREE
@@ -237,7 +236,7 @@ The constant is located a `n65536` at the end of the program.
 This is in floating point representation.
 
 
-```basic 
+```
          ; problem: if y/a>32767 the
          ; fac is now negative
          ; same problem not fixed for
@@ -266,7 +265,7 @@ First a real case, then some illegal addresseses.
 And finally the BRK vector at 65534, which maps to 65352.
 
 
-```basic
+```
 LOAD "USR13@828.PRG",8,1
 
 SEARCHING FOR USR13@828.PRG
@@ -311,12 +310,169 @@ Unpacked with [d64viewer](https://github.com/maarten-pennings/d64viewer) to get 
 - [`usr13@828.txt`](usr13@828.txt) the turbo macro pro source (text).
 - [`usr13@828.prg`](usr13@828.prg) the generated executable which will be loaded at address 828.
 
+Note the constant `n65536` has one 0 too much.
+Read the next section for details.
+
+
+## Floating point format
+
+At first, I was too lazy to study the floating point format.
+But I needed the bytes for the `n65536` constant.
+
+
+### Floating point format of the FAC
+Easy peasy, I temporarily modified the program as follows:
+it receives a number in the FAC, copies the FAC to address 5000, and 
+returns the same number, which is still in the FAC.
+
+```
+         ; set usr() pointer
+usradd = 785 ; $0311
+         lda #<main
+         sta usradd+0
+         lda #>main
+         sta usradd+1
+
+fac      = $61
+copy     = 5000
+
+main     lda fac+0
+         sta copy+0
+         lda fac+1
+         sta copy+1
+         lda fac+2
+         sta copy+2
+         lda fac+3
+         sta copy+3
+         lda fac+4
+         sta copy+4
+         lda fac+5
+         sta copy+5
+         rts
+```
+
+Then from BASIC we run
+
+```
+?USR(65536)
+ 65536
+
+READY.
+?PEEK(5000);PEEK(5001);PEEK(5002);PEEK(5003);PEEK(5004);PEEK(5005)
+ 145  128  0  0  0  0
+```
+
+And presto, we have the FAC image of 65536: 145  128  0  0  0  0.
+
+I tried other numbers as well, and it looks genuine.
+
+```
+ready.
+sys 4096
+
+ready.
+?usr(511);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+ 511  137  255  128  0  0  0
+
+ready.
+?usr(257);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+ 257  137  128  128  0  0  0
+
+ready.
+?usr(65536);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+ 65536  145  128  0  0  0  0
+
+ready.
+?usr(-511);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+-511  137  255  128  0  0  255
+
+ready.
+?usr(0.025);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+ .025  123  204  204  204  204  0
+```
+
+Good? No that did not work! (_that_ being _the `USR()` function with adding 65536_ ).
+
+Why not? 
+
+Because, as it turned out, the encoding of a floating point in the FAC 
+is different from the encoding of a floating point as a constant in the code.
+What should have triggered me, is that a BASIC variable is 7 bytes: 
+2 for the name and 5 for the floating point value, whereas the FAC is 6 bytes.
+What is going on?
+
+I find that out via the next approach.
+
+
+### Floating point format of constants
+
+The `addmem` BASIC routine and many others, require a a/y pointer to a floating point.
+It makes sense that those pointers would point to a BASIC variable.
+So let's examine one of those.
+
+Zero page location 45/46 is known as `VARTAB`; it is a pointer indicating where the BASIC variables start.
+The first variable used in a BASIC program gets created there, next ones are appended.
+Each variable starts with 2 bytes for the name and the the floating point value.
+
+So I made a program that dumps the memory of `A`.
+
+```
+10 A=511
+20 STOP
+30 FOR I=PEEK(45)+256*PEEK(46) TO I+6
+40 PRINT PEEK(I);
+50 NEXT I:GOTO 20
+```
+
+And ran it for the same inputs as before.
+
+```
+RUN
+BREAK IN 20
+READY.
+CONT
+ 65  0  137  127  128  0  0
+BREAK IN 20
+READY.
+A=257:CONT
+ 65  0  137  0  128  0  0
+BREAK IN 20
+READY.
+A=65536:CONT
+ 65  0  145  0  0  0  0
+BREAK IN 20
+READY.
+A=-511:CONT
+ 65  0  137  255  128  0  0
+BREAK IN 20
+READY.
+A=0.025:CONT
+ 65  0  123  76  204  204  205
+BREAK IN 20
+READY.
+```
+
+Ignoring the first two bytes (variable names), the memory contents are _different_.
+
+
+### Comparison
+
+On hindsight the difference is not big.
+
+Each number is normalized. This means it is written in m × 2^e, where m must start with a single 1 before the binary point.
+So, 9 decimal is 1001 in binary and this is normalized to 1.001×2³.
+Since the mantissa m now always starts with a 1, that 1 is not stored.
+The leading bit of the mantissa is used to store the sign of the number.
+The exponent gets 129 added (so in our example 129+3=132 would be stored) to cater for negative exponents.
+
+But the FAC does store the leading 1. So there is not room for the sign, so that goes into the 6th byte.
+
+![Floating point formats](floats.png)
+
+Also note in the last example a rounding difference.
+The FAC does seem to have a provision for rounding: there is register FACOV (at zero page $70) that is the 
+"Low Order Mantissa Byte of Floating Point Accumulator #1 (For Rounding)"
+as [pagetable](https://www.pagetable.com/c64ref/c64mem/#:~:text=Low%20Order%20Mantissa%20Byte%20of%20Floating%20Point%20Accumulator%20%231%20(For%20Rounding)) explains.
 
 (end)
-
-
-
-
-
-
 
