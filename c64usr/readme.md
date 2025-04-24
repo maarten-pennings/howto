@@ -25,7 +25,7 @@ At minimum `POKE 49152,96` to get a one-instruction routine `RTS`.
 ```
 
 
-### USR
+### USR()
 
 The second method allows passing an argument to the routine, and getting a result back.
 We can pass _one_ argument, and we get one result back; both must be floating point.
@@ -77,7 +77,7 @@ The FAC is at location $61-$66 and the ARG at $69-$6E.
 
 ## Turbo Macro Pro
 
-To write the `USR` function, we will use TMP or [Turbo Macro Pro](https://turbo.style64.org/).
+To write the `USR()` function, we will use TMP or [Turbo Macro Pro](https://turbo.style64.org/).
 This is an assembler that runs on the C64 itself, but also on [VICE](https://vice-emu.sourceforge.io/), the emulator.
 
 TMP consists of an editor with some commands.
@@ -108,7 +108,7 @@ What it does, is to vector the interrupt (caused by pressing the RESTORE key) to
 
 We write an assembly program that we locate in the cassette buffer.
 The program consists of two parts. The second part implements the
-function `USR`. The first part sets up the vector to the second part.
+function `USR()`. The first part sets up the vector to the second part.
 
 
 ### Program header
@@ -127,7 +127,7 @@ We selected the cassette buffer at (decimal) 828.
 
 ### Setup vector
 
-The first part of the program sets the vector of the `USR`
+The first part of the program sets the vector of the `USR()`
 function to point to the second part of our program.
 The vector is located at (decimal) 785 (vectors take two bytes).
 
@@ -261,7 +261,7 @@ n65536   .byte 145,0,0,0,0,0
 ## Running
 
 Let's try it.
-First a real case, then some illegal addresseses.
+First a real case, then some illegal addressees.
 And finally the BRK vector at 65534, which maps to 65352.
 
 
@@ -367,27 +367,27 @@ And presto, we have the FAC image of 65536: 145  128  0  0  0  0.
 I tried other numbers as well, and it looks genuine.
 
 ```
-ready.
-sys 4096
+READY.
+SYS 4096
 
-ready.
-?usr(511);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+READY.
+?USR(511);PEEK(5000);PEEK(5001);PEEK(5002);PEEK(5003);PEEK(5004);PEEK(5005)
  511  137  255  128  0  0  0
 
-ready.
-?usr(257);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+READY.
+?USR(257);PEEK(5000);PEEK(5001);PEEK(5002);PEEK(5003);PEEK(5004);PEEK(5005)
  257  137  128  128  0  0  0
 
-ready.
-?usr(65536);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+READY.
+?USR(65536);PEEK(5000);PEEK(5001);PEEK(5002);PEEK(5003);PEEK(5004);PEEK(5005)
  65536  145  128  0  0  0  0
 
-ready.
-?usr(-511);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+READY.
+?USR(-511);PEEK(5000);PEEK(5001);PEEK(5002);PEEK(5003);PEEK(5004);PEEK(5005)
 -511  137  255  128  0  0  255
 
-ready.
-?usr(0.025);peek(5000);peek(5001);peek(5002);peek(5003);peek(5004);peek(5005)
+READY.
+?USR(0.025);PEEK(5000);PEEK(5001);PEEK(5002);PEEK(5003);PEEK(5004);PEEK(5005)
  .025  123  204  204  204  204  0
 ```
 
@@ -465,7 +465,9 @@ Since the mantissa m now always starts with a 1, that 1 is not stored.
 The leading bit of the mantissa is used to store the sign of the number.
 The exponent gets 129 added (so in our example 129+3=132 would be stored) to cater for negative exponents.
 
-But the FAC does store the leading 1. So there is not room for the sign, so that goes into the 6th byte.
+But the FAC does store the leading 1. So there is no room for the sign, so that goes into the 6th byte.
+
+The table below shows the 5 numbers we tried in both formats.
 
 ![Floating point formats](floats.png)
 
