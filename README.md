@@ -2,6 +2,12 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## ESP web flash
+
+How to [flash](ESPwebflash) an ESP32 without installing the Arduino IDE or 
+Espressif's IDF (IoT Development Framework).
+
+
 ## Commodore 64 USR() function
 
 How to make the `USR()` function work. Plus, as bonus, a return-to-TMP easily.
