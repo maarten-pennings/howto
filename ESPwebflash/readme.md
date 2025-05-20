@@ -102,47 +102,87 @@ In that build we find (a subdir per target with) the binaries
 We need the `ExampleShort/build/esp32.esp32.esp32s3/ExampleShort.ino.merged.bin`.
 
 
-## Webflashing the image
+## Web flashing 
 
-- By far the hardest part is will be the first.
-  If you don't have Arduino installed, you probably need to install the driver 
-  for USB to UART bridge. The ESP32-S3-DevKitC-1 has an USB to UART Bridge 
-  of type CP2102N. Download and install the driver from 
-  [Silabs](https://www.silabs.com/interface/usb-bridges/usbxpress/device.cp2102n-gqfn28).
+First we need to establish a connection between the ESP board and 
+the browser. Then the page in the browser can flash a firmware image.
 
-- Visit the web flasher at [Espressif esptool-js](https://espressif.github.io/esptool-js/).
 
-  ![Web flash home](webflash-1home.png)
+### Connect
+
+The hardest part is to connect the ESP board to the browser page.
+There are two options: USB-serial or USB-debug.
+
+- **USB-debug**  
+  The idea here is to use the USB-debug block built into the ESP32S3.
+  The S3 has such a block, not all ESP32s do.
   
-  With the "Console" pane you can view the prints over Serial.
-  We ignore that here, we focus on the "Program" pane.
-  
-- The default baudrate (921600) is ok; click on the "Connect" button 
-  in the "Program" pane.
-  A security feature of the browser pops-up: the user has to grant the browser
-  access to the USB port. 
+  - Connect the ESP32S3 with the USB connector marked "USB" (not "UART")
 
-  ![Web flash access](webflash-2access.png)
+  - Hopefully there is no need to install a driver on the PC.
   
-  Select the COM port of your ESP and press Connect.
+  - Visit the web flasher at [Espressif esptool-js](https://espressif.github.io/esptool-js/).
+
+    ![Web flash home](webflash-1home.png)
+    
+    With the "Console" pane you can view the prints over Serial.
+    We ignore that here, we focus on the "Program" pane.
+    
+  - The default baudrate (921600) is ok; click on the "Connect" button 
+    in the "Program" pane.
+    A security feature of the browser pops-up: the user has to grant the browser
+    access to the USB port. 
+
+    ![Web flash access alternative](webflash-2access-alt.png)
+
+- **USB-serial**  
+  The idea here is to use the USB-to-serial chip on the dev kit board.
+  Most all ESP32s have such a chip.
+  
+  - Connect the ESP32S3 with the USB connector marked "UART" (not "USB")
+
+  - If you don't have Arduino installed, you probably need to install the driver 
+    for the USB to UART bridge. The ESP32-S3-DevKitC-1 has an USB to UART Bridge 
+    of type CP2102N. Download and install the driver from 
+    [Silabs](https://www.silabs.com/interface/usb-bridges/usbxpress/device.cp2102n-gqfn28).
+
+  - Visit the web flasher at [Espressif esptool-js](https://espressif.github.io/esptool-js/).
+    See "USB_debug" for details.
+  
+  - This time select the COM port
+
+    ![Web flash access](webflash-2access.png)
+
+### Flashing
+
+- Once the connection means is selected (see previous section)  press Connect
+  in the browser connection control window. The browser page starts 
+  communicating with the ESP. For example we see it detects the ESP32-S3 (line 4).
 
   ![Web flash connected](webflash-3connected.png)
 
 - With the "Choose File" (1) select the firmware image, e.g. 
-  [`ExampleShort.ino.merged.bin`](ExampleShort/build/esp32.esp32.esp32s3/ExampleShort.ino.merged.bin)
+  [`ExampleShort.ino.merged.bin`](ExampleShort/build/esp32.esp32.esp32s3/ExampleShort.ino.merged.bin).
   
-  Do not forget to put the "Flash Address" to 0 (2) and press "Program" (3).
+  Do not forget to put the "Flash Address" to 0 (2), then press "Program" (3).
   
   ![Web flash connected](webflash-4flash.png)
   
-  If you forgot it, the firmware is flashed to the wrong location and 
-  won't work. Just repeat the process with a 0.
+  If you forgot the 0 in step (2), the firmware is flashed to the wrong 
+  location and won't work. No harm done, just repeat the process with a 0.
 
-- Wait. Flashing takes some time.  
+- After pressing "Program", wait. Flashing takes time.
+
   You will see the remark about the address 0x0 (hexadecimal for the 0 we enterd at "Flash Address").
   Wait till you see the "Leaving..." message (5).
   
-- For me the "Hard resetting" doesn't work; I need to press the reset button 
+- For me the "Hard resetting" doesn't work; I need to press the RESET button 
   on the ESP32 board (or unplug and replug the USB cable).
+
+
+## My own server
+
+I did try to get my own server, a clone of Espressif's tool.
+See the [log](ownserver.md) of my experiment.
   
 (end)
