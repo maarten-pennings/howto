@@ -112,10 +112,11 @@ the browser. Then the page in the browser can flash a firmware image.
 
 The hardest part is to connect the ESP board to the browser page.
 There are two options: USB-serial or USB-debug.
+We assume the USB-debug route is easier, no need to install a driver.
 
 - **USB-debug**  
   The idea here is to use the USB-debug block built into the ESP32S3.
-  The S3 has such a block, not all ESP32s do.
+  The S3 has such a block, but not all ESP32s do.
   
   - Connect the ESP32S3 with the USB connector marked "USB" (not "UART")
 
@@ -136,10 +137,10 @@ There are two options: USB-serial or USB-debug.
     ![Web flash access alternative](webflash-2access-alt.png)
 
 - **USB-serial**  
-  The idea here is to use the USB-to-serial chip on the dev kit board.
-  Most all ESP32s have such a chip.
+  The idea here is to use the USB-to-serial chip on the board.
+  Most ESP32s have such a bridge chip.
   
-  - Connect the ESP32S3 with the USB connector marked "UART" (not "USB")
+  - Connect the ESP32S3 with the USB connector marked "UART" (not "USB").
 
   - If you don't have Arduino installed, you probably need to install the driver 
     for the USB to UART bridge. The ESP32-S3-DevKitC-1 has an USB to UART Bridge 
@@ -149,15 +150,15 @@ There are two options: USB-serial or USB-debug.
   - Visit the web flasher at [Espressif esptool-js](https://espressif.github.io/esptool-js/).
     See "USB_debug" for details.
   
-  - This time select the COM port
+  - This time select the COM port.
 
     ![Web flash access](webflash-2access.png)
 
 ### Flashing
 
-- Once the connection means is selected (see previous section)  press Connect
-  in the browser connection control window. The browser page starts 
-  communicating with the ESP. For example we see it detects the ESP32-S3 (line 4).
+- Once the connection means is selected (see previous section) press Connect
+  in the browser "wants to connect to a serial port" window. The browser page starts 
+  communicating with the ESP. For example, we see it detects the ESP32-S3 (line 4).
 
   ![Web flash connected](webflash-3connected.png)
 
@@ -168,8 +169,8 @@ There are two options: USB-serial or USB-debug.
   
   ![Web flash connected](webflash-4flash.png)
   
-  If you forgot the 0 in step (2), the firmware is flashed to the wrong 
-  location and won't work. No harm done, just repeat the process with a 0.
+  If you forgot to change to 0 in step (2), the firmware is flashed to the wrong 
+  location (address) and won't work. No harm done, just repeat the process with a 0.
 
 - After pressing "Program", wait. Flashing takes time.
 

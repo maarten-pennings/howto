@@ -1,10 +1,11 @@
 # Cloning esptool
 
 This is a log of my experiment cloning Espressif's esptool.
+Clone here means getting their sources run on my webserver.
 
-## Ingredients
 
-Ingredients
+## Overview
+
 - Download and install nodejs with npm - _this implements the typescript compiler_
 - Download and unzip esptool-js - _the actual typescript sources of the webflasher_
 - Compile esptool typescript to javascript - _compile and test_
@@ -74,9 +75,9 @@ Ingredients
 
   Then tried `http://localhost:1234` in chrome.
   
-  **It seems to work**
+  **It seemed to work**
   
-  Next, press control-C in cmd to stop the webserver.
+  Pressed control-C in cmd to stop the webserver.
 
 - Then, again in same cmd and dir, ran `npm run build`
 
