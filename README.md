@@ -2,6 +2,11 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## Solving tht Quadro puzzle
+
+How to solve the [Quadro](Quadro) puzzle - by analysis.
+
+
 ## ESP web flash
 
 How to [flash](ESPwebflash) an ESP32 without installing the Arduino IDE or 
