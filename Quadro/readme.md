@@ -1,18 +1,18 @@
 # How to solve the Quadro puzzle.
 
-I stumbled upon the Quadro puzzle on [YouTube](https://www.youtube.com/shorts/B8nTNSduKsM).
+I, and Marc, stumbled upon the Quadro puzzle on [YouTube](https://www.youtube.com/shorts/B8nTNSduKsM).
 I'm not sure what the origin is, this [seller](https://cruxpuzzles.co.uk/products/quadro) lists 
-Yavuz Demirhan as the creator. You also find sites referring to it as the Quadra puzzle.
+Yavuz Demirhan as the creator. You also find sites referring to it as the Quadra puzzle (with an A).
 
-This how to explains how you can reason towards the only solution.
+This how-to explains how you can reason towards the solution.
 
 
 ## Introduction
 
 Quadro is a _packing puzzle_: you must fit all pieces into a given box. 
 
-The pieces are straightforward: there are six, and they are all the same, they consist of 2×1 cubes.
-The packing is also straightforward: a box of 4×3 cells.
+The pieces are straightforward; there are six, and they are all the same, they consist of 2×1 cubes.
+The box is also straightforward, it has 4×3 cells.
 So twelve cubes in a box of twelve cells, what is the catch?
 
 The catch is an opening into the puzzle box that restricts entering pieces.
@@ -89,7 +89,7 @@ with one exception: piece 10-11  can move in the y-direction.
 
 With 10-11 in the center, none of the pieces can move, in the xy-plane or in the z-direction,
 with one exception: again piece 10-11  can move in the y-direction but now also in the z-direction.
-The y-direction brings us back to the previous Situation, so we discard that.
+The y-direction brings us back to the previous situation, so we discard that.
 
 We take out 10-11.
 
@@ -116,10 +116,15 @@ So we only consider C. In other words, from situation 4 we get to the following 
 
 ![Situation 5b](quadro-step5b.drawio.png)
 
+Note that C (and with symmetry F) is the only variation where we unlock 1-2 (or 3-4).
+
 
 ### Situation 6
 
-Same complication as before. Now we don't have 6 but even 7 variations.
+In this situation we can move 5-9 (and/or 8-12), but that only circles around in the
+variations of situation 5.
+
+So we start moving 1-2; leading to 7 variations.
 
 First column (A) shows where 1-2 stays at the top.
 Middle column (B, C, D) shows where 1-2 has moved 1 down,
@@ -129,7 +134,7 @@ and the last column (E, F, G, H) where 1-2 moved 2 down.
 
 Again, we will ignore A, B, C, and E.
 In those variations no move is possible except moving 1-2 or 3-4, leading to one of A-H.
-So we are left we three variations in step 6: D, G and H.
+So we are left with three variations in step 6: D, G and H.
 
 > To be fair there are more variations, because as soon as 3-4 is moved, we can move 8-12 or even 5-9. But this is more or less what we do next.
 
@@ -144,11 +149,11 @@ We have three variations (D, G, H), but in all three we move 5-9 by half a cell.
 
 ### Situation 8
 
-Now we can move 5-9 in the z-direction; it is taken out.
+Now we can move 5-9 in the z-direction to take it out.
 
 ![Situation 8](quadro-step8.drawio.png)
 
-The rest of the solution is left to the reader.
+The rest of the emptying of the box is left to the reader.
 
 
 ## Solution
