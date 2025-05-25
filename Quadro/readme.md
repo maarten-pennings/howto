@@ -44,12 +44,12 @@ You can solve this puzzle via _reasoning_.
 
 We start by assuming the puzzle is solved.
 With that we mean that all pieces are in the box.
-And we will take the pieces out one by one.
+We will take the pieces out one by one.
 
 
 ### End situation
 
-When the puzzle is solved we do not know is how the cubes connect to pieces.
+When the puzzle is solved, we do not know how the cubes connect to form pieces.
 So we begin with drawing just the  cubes, not yet the pieces.
 
 ![Geometry](quadro-end.drawio.png)
@@ -59,7 +59,7 @@ So we begin with drawing just the  cubes, not yet the pieces.
 
 In the end situation, the box is full.
 Therefore, no piece can move in the xy-plane.
-The only legal move would be if cube 6 and 7 form one piece and move in z-direction (are taken out).
+The only legal move would be if cubes 6 and 7 form one piece, and move in z-direction (are taken out).
 
 ![Situation 1](quadro-step1.drawio.png)
 
@@ -73,14 +73,14 @@ Below diagram sketches both possible chains.
 
 ![Situation 2](quadro-step2.drawio.png)
 
-Observe that they are the same under 180° rotation.
+Observe that the chains are the same under 180° rotation around the z-axis.
 We will continue with the left one only.
 
 
 ### Situation 3
 
-Given the chain, none of the pieces can move, in the xy-plane or in the z-direction,
-with one exception: piece 10-11  can move in the y-direction.
+Given the (left) chain, none of the pieces can move, in the xy-plane or in the z-direction,
+with one exception: piece 10-11  can move in the y-direction. Again, we have no choice; a move is forced.
 
 ![Situation 3](quadro-step3.drawio.png)
 
@@ -91,7 +91,7 @@ With 10-11 in the center, none of the pieces can move, in the xy-plane or in the
 with one exception: again piece 10-11  can move in the y-direction but now also in the z-direction.
 The y-direction brings us back to the previous situation, so we discard that.
 
-We take out 10-11.
+A forced move; we take out 10-11.
 
 ![Situation 4](quadro-step4.drawio.png)
 
@@ -99,12 +99,11 @@ We take out 10-11.
 ### Situation 5
 
 Now it gets a bit more complicated. Pieces 1-2 and 3-4 are locked, 
-but pieces 5-9 and 8-12 can both move in the x-direction.
-But in the end, only 6 variations exists.
+but pieces 5-9 and 8-12 can both move in the x-direction, leading to six variations.
 
-In the diagram below, the top row (variations A, B, C) shows the variations where 8-12 stays right,
-the middle row (variations D and E) where 8-12 is moved one cell, and
-the bottom row (variation F) shows where 8-12 has moved 2 cells.
+In the diagram below, the top row (A, B, C) shows the variations where 8-12 stays right,
+the middle row (D and E) where 8-12 is moved one cell, and
+the bottom row (F) shows where 8-12 has moved 2 cells.
 
 ![Situation 5](quadro-step5.drawio.png)
 
@@ -112,11 +111,12 @@ For symmetry reasons, we ignore variations D and F.
 
 However, we can also ignore variations A, B and E.
 In those situation no move is possible except moving 5-9 or 8-12, leading to one of A-F.
-So we only consider C. In other words, from situation 4 we get to the following situation.
+So we only consider C. In other words, from situation 4 we transfer to the following situation.
+Again, symmetry aside, a forced move.
 
 ![Situation 5b](quadro-step5b.drawio.png)
 
-Note that C (and with symmetry F) is the only variation where we unlock 1-2 (or 3-4).
+Note that C (and with symmetry F) is the only variation where we unlock piece 1-2 (or 3-4).
 
 
 ### Situation 6
@@ -132,7 +132,7 @@ and the last column (E, F, G, H) where 1-2 moved 2 down.
 
 ![Situation 6](quadro-step6.drawio.png)
 
-Again, we will ignore A, B, C, and E.
+Again, we will ignore A, B, C, E, and F.
 In those variations no move is possible except moving 1-2 or 3-4, leading to one of A-H.
 So we are left with three variations in step 6: D, G and H.
 
