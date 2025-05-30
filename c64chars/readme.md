@@ -19,11 +19,11 @@ and how the mapping from poke codes to ASCII works out.
 ## Process
 
 I started with a font ROM [dump](c64fontrom1.pbm).
-Actually there is a [double](c64fontrom2.pbm) double one if you want both sets.
+Actually there is a [double](c64fontrom2.pbm) table if you want both sets.
 
-I wrote a [python script](app.py) to convert separate the pixels ("dots") of the characters
+I wrote a [python script](app.py) to convert this to a image, separating the pixels ("dots") of the characters
 so that I could clearly see which ones connect.
-When you run it (open cmd shell, execute `setup.bat`, execute `run.bat`) it generates the tables
+When you run the script (open `cmd` shell, execute `setup.bat`, execute `run.bat`) it generates the tables
 
 ![table](c64fontrom1.png)
 
