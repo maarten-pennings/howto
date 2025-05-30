@@ -2,6 +2,11 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## Commodore 64 characters
+
+How are [C64 chars](c64chars) organized?
+
+
 ## Solving tht Quadro puzzle
 
 How to solve the [Quadro](Quadro) puzzle - by analysis.
