@@ -312,9 +312,9 @@ def main(charset,basename) :
   draw= ImageDraw.Draw(horfill)  
   draw.text( (dst_marginx+dst_charsepx,dst_offsety), "Commodore 64 pokecodes - horizontal fill", dst_colfg, font=dst_labels)
   draw.text( (dst_marginx+dst_charsepx,dst_marginy0+dst_charsepy+num_cy*dst_chary+dst_offsety), "Bars to make horizontal gauge (with the C64 double pixels causing some jumps, see dotted pixels).", dst_colfg, font=dst_ascii)
-  for ix,block in enumerate([0x20,0x65,0x74,0x75,0x61,0xF6,0xEA,0x67,0xA0]) :
+  for ix,block in enumerate([0x20,0x65,0x74,0x75,0x61,0xF6,0xEA,0xE7,0xA0]) :
     circle(draw,block,"red",f"#{ix}")
-  patchdots(draw,0x67,dst_col1, [(6,y) for y in range(num_pix)] );
+  patchdots(draw,0xE7,dst_col0, [(6,y) for y in range(num_pix)] );
   patchdots(draw,0x65,dst_col1, [(1,y) for y in range(num_pix)] );
   horfill.save(basename+'-6horfill.png')
 
