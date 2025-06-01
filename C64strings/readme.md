@@ -7,7 +7,7 @@ How are strings stored in a C64 (Commodore 64) BASIC program?
 
 We wrote a small test program which uses three string variables `AA$`, `BB$` and `C$`.
 We ran the program, so that the variables are actually created/allocated.
-And the we made two memory dumps (`FOR..?PEEK..NEXT`).
+And then we made two memory dumps (`FOR..?PEEK..NEXT`).
 
 ![test program](screen.png)
 
@@ -22,11 +22,11 @@ three strings in red (`AA$`), green (`BB$`), and yellow (`C$`).
 The corresponding bytes in the memory dump are outlined with the same colors.
 
 Note that the variable name of `AA$` is encoded as 65 65 36, so plain ASCII.
-Note also that the variable content of `AA$` is encoded as 70 73 78 68 77 69, so also plain ASCII.
-There is no terminating zero byte. You simply can not type a string literal in C64 basic with a quote `"`.
+Note also that the variable _content_ of `AA$` is encoded as 70 73 78 68 77 69, so also plain ASCII.
+There is no terminating zero byte. 
 
-We have annotated the hex dump below. The program ends at 0x0826 with 00 00; no more next line.
-What is interesting is that _after that the basic variables start - if the program has run.
+We have copied and annotated the hex dump below. The program ends at 0x0826 with 00 00; no more next line.
+What is interesting is that _after_ that the basic variables start - if the program has run.
 
 ```
 0800 0                       <start>
