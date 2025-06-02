@@ -63,7 +63,7 @@ The rumor goes that when Commodore moved from the 22-column VIC-20 to
 the 40-column C64, there was color distortion at pixel boundaries.
 To mitigate this Commodore made the characters fat: in horizontal
 direction there are always at least two similar colored pixels.
-This doubling is very clear in the above comparison. 
+This "double pixel policy" is very clear when comparing the C64 and VIC-20 tables above. 
 
 It also meant that the vertical line character with pokecode 0x42,
 a single line in the VIC-20 had to doubled. But so had 0x5D, and 
@@ -77,21 +77,24 @@ double the horizontal line glyphs, which resulted in 0x40 and 0x43 to become dup
 
 If you are still not convinced, have a look at the keyboard.
 The G and H can be used with the Commodore shift key to give a thin (1 pixel) or thicker (2 pixel)
-vertical bar. In practice, the G gives glyph 0x65 and H gives character 0x74.
-On VIC-20 these are 1 and 2 pixels wide but on the C64 both are 2 pixels wide.
+vertical bar as shown on the key caps. In practice, the G gives glyph 0x65 and H gives glyph 0x74.
+On VIC-20 these are indeed 1 and 2 pixels wide but on the C64 both are 2 pixels wide.
 
 ![cbm-G and cbm-H](cbm-G-H.jpg)
 
 Similarly, the N and M can be used with the Commodore shift key to give a thick (2 pixel) or thin (1 pixel)
-vertical bar. In practice, the N gives glyph 0x6A and M gives character 0x67.
+vertical bar. Also this is depicted on the key caps. 
+In practice, the N gives glyph 0x6A and M gives glyph 0x67.
 On VIC-20 these are 2 and 1 pixels wide but on the C64 both are 2 pixels wide.
 
 ![cbm-N and cbm-M](cbm-N-M.jpg)
 
-It is harder to see, but similar for shift-star and shift-C
+It is harder to see on the key caps, but similar situation for shift-star and shift-C
 respectively shift-minus and shift-B
 
 ![shift star, C, minus, and B](shift_star_C_min_B.jpg)
+
+Conclusion: the C64 duplicate glyphs are a result of the "double pixel policy".
 
 
 ## Reverse video error
