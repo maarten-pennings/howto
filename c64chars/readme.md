@@ -99,10 +99,10 @@ respectively shift-minus and shift-B
 Conclusion: the C64 duplicate glyphs are a result of the "double pixel policy".
 
 
-## Reverse video error
+## Reverse video errors
 
 My Python script also checks if each glyph is a flip of its reverse video counter part.
-To my big surprise, there was one mismatch: for character 0x00 (@).
+To my big surprise, there was one mismatch: for character 0x00 (@), see the pixel in the 6th row of the 6th column (dotted in 0x80 in the table below).
 
 ![Wrong RVS](c64fontromhi-3wrongrvs.png)
 
