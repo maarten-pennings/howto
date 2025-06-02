@@ -36,6 +36,7 @@ The first table that is generated just shows all glyphs in a matrix organized ac
 ![Standard table](c64fontromhi-1plain.png)
 
 The ASCII code that produces a glyph is printed in small (black) font to the right of it.
+For example the glyph with pokecode 0x5E (π) is associated to 3 ASCII codes.
 
 ![ASCII](ascii.png)
 
