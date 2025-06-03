@@ -78,21 +78,27 @@ Since now all glyphs with vertical lines are double-width, Commodore decided to 
 double the horizontal line glyphs, which resulted in 0x40 and 0x43 to become duplicates.
 
 If you are still not convinced, have a look at the keyboard.
-The G and H can be used with the Commodore shift key to give a thin (1 pixel) or thicker (2 pixel)
+The G and H can be used with the Commodore key to give a thin (1 pixel) or thicker (2 pixel)
 vertical bar as shown on the key caps. In practice, the G gives glyph 0x65 and H gives glyph 0x74.
 On VIC-20 these are indeed 1 and 2 pixels wide but on the C64 both are 2 pixels wide.
 
 ![cbm-G and cbm-H](cbm-G-H.jpg)
 
-Similarly, the N and M can be used with the Commodore shift key to give a thick (2 pixel) or thin (1 pixel)
+Similarly, the N and M can be used with the Commodore key to give a thick (2 pixel) or thin (1 pixel)
 vertical bar. Also this is depicted on the key caps. 
 In practice, the N gives glyph 0x6A and M gives glyph 0x67.
 On VIC-20 these are 2 and 1 pixels wide but on the C64 both are 2 pixels wide.
 
 ![cbm-N and cbm-M](cbm-N-M.jpg)
 
-It is harder to see on the key caps, but similar situation for shift-star and shift-C
-respectively shift-minus and shift-B
+It is harder to see on the key caps, because they are farther apart and have centered lines.
+But a similar situation appears for shift-C and shift-star respectively shift-B and shift-minus.
+
+![shift-C and shift-star](shift-c-star.jpg)
+
+![shift-b and shift-minus](shift-b-min.jpg)
+
+Coding confirms the suspicion.
 
 ![shift star, C, minus, and B](shift_star_C_min_B.jpg)
 
