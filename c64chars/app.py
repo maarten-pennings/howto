@@ -176,7 +176,7 @@ def circle(draw,pokecode,color,label) :
   dst_py = dst_marginy0 + dst_charsepy + cy*dst_chary
   shape = [(dst_px-width,dst_py-width),(dst_px+dst_charbx+width-1,dst_py+dst_charby+width-1)]
   draw.rectangle(shape,outline=color,width=width)
-  draw.text( (dst_px + dst_charbx + 3,dst_py + dst_charby - dst_font_ascii*3 + 3), label, color, font=dst_ascii)
+  draw.text( (dst_px + dst_charbx + 3,dst_py + dst_charby - dst_font_ascii*1 + 3), label, color, font=dst_ascii)
 
 
 def table(charset) :
@@ -214,15 +214,15 @@ def table(charset) :
       dst_cy = 0 + dst_marginy0 + dst_charsepy + cy*dst_chary + dst_chary/2 - dst_font_labels/2
       dst_draw.text( (dst_cx,dst_cy), f"–{cy%0x100:X}", dst_colfg, font=dst_labels)
     for ascii in range(256) :
-      shift=1
-      if     0 <= ascii <= 31: pokecode= ascii+128
+      shift=3
+      if     0 <= ascii <= 31: continue
       elif  32 <= ascii <= 63: pokecode= ascii
       elif  64 <= ascii <= 95: pokecode= ascii-64
       elif  96 <= ascii <=127: pokecode= ascii-32
-      elif 128 <= ascii <=159: continue # pokecode= ascii; shift=2
+      elif 128 <= ascii <=159: pokecode= ascii; shift=3
       elif 160 <= ascii <=191: pokecode= ascii-64
       elif 192 <= ascii <=254: pokecode= ascii-128; shift=2
-      elif 255 <= ascii <=255: pokecode= ascii-161; shift=3
+      elif 255 <= ascii <=255: pokecode= ascii-161; shift=1
       cx = pokecode // num_cx
       cy = pokecode % num_cx
       dst_px = dst_marginx + dst_charsepx + cx*dst_charx + dst_charbx + 3
@@ -297,7 +297,7 @@ def main(charset,basename) :
   draw.text( (dst_marginx+dst_charsepx,dst_offsety), "Commodore 64 pokecodes - block graphics", dst_colfg, font=dst_labels)
   draw.text( (dst_marginx+dst_charsepx,dst_marginy0+dst_charsepy+num_cy*dst_chary+dst_offsety), "A set of characters for low resolution (80×50) monochrome graphics.", dst_colfg, font=dst_ascii)
   for ix,block in enumerate([32,126,124,226,123,97,255,236,108,127,225,251,98,252,254,160]) :
-    circle(draw,block,"red",f"#{ix}")
+    circle(draw,block,"red",f"#{ix:X}")
   blocks.save(basename+'-4blocks.png')
   
   verfill=img.copy()
