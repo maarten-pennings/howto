@@ -2,6 +2,13 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## Commodore 64 memory partitioning
+
+Can we partition the C64 memory, storing two programs simultaneously?A multi-app setup?
+No multitasking, we activate one, run it, activate another and run it.
+The howto [c64mempart](c64mempart) explains it.
+
+
 ## Commodore 64 characters
 
 How are [C64 chars](c64chars) organized?
