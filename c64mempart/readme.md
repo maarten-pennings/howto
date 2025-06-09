@@ -69,7 +69,7 @@ If a program uses _array_ variables, they are stored from location `ARYTAB` to l
 Every new array (explicit or implicit `DIM`) pushes up `STREND`. 
 This name is a bit confusing. As mentioned before, string 
 characters are stored in the heap. The heap grows _down_ from `MEMSIZ` to `FRETOP`, until the 
-later hits `STREND`. Hence the name.
+latter hits `STREND`. Hence the name.
 
 This explains all six pointers relevant for managing a BASIC program.
 The table below shows their zero page addresses.
@@ -94,10 +94,10 @@ My first trial is to replicate Herman's article, but then on the C64.
 
 - I create one partition manager (app "A0").
 - I create two apps ("A1" and "A2", instead of three as Herman does).
-- Each app gets a block of 2k RAM (yes that is small).
+- Each app gets a block of 2k RAM (yes, that is small) starting at $0800.
 
 The figure below shows how I've partitioned the 40k BASIC RAM (leaving 32k unused).
-The numbers on the right are the partition boundaries as mentioned above.
+The numbers on the right are the partition boundaries as selected above.
 They are shown in hex (`$0801`) followed by an equals sign, and then the 
 high byte and low byte in decimal (`8/1`).
 
@@ -105,7 +105,8 @@ high byte and low byte in decimal (`8/1`).
 
 The partition manager A0 can be loaded from e.g. a disk (but you can also type it in).
 It will be loaded at the standard `TXTTAB` ($0801), and the 
-loader will set `VARTAB` once the whole program is loaded and the end is known.
+loader will set `VARTAB` once the whole program is loaded and the end is known (or the editor maintains it when editing).
+
 When ran, one of the first things the partition manager does, is to lower 
 its own `MEMSIZ`. With that the three "user" pointers for its partition are set.
 The partition manager then calls `CLR`, which updates `ARYTAB`, `STREND` and `FRETOP`;
