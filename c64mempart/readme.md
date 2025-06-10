@@ -26,23 +26,25 @@ The book explains
 
 Then came a reference to [COMPUTE!'s First Book of PET/CBM, pages 66 and 163](https://archive.org/details/COMPUTEs_First_Book_of_PET-CBM_1981_Small_Systems_Services).
 That book predates the C64. It describes the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET), 
-but that also had Microsoft BASIC, so maybe usable. Unfortunately, the administration of the BASIC and Kernal was a bit 
-different, so it took me some time to get "Keeping two programs simultaneously" running on my 
-[C64](https://en.wikipedia.org/wiki/Commodore_64).
+but since the PET also had Microsoft BASIC, it was a usable start. 
+The administration of BASIC interpreter on the PET differs from the C64, so it did take me some time to 
+get going on my [C64](https://en.wikipedia.org/wiki/Commodore_64).
 
 
 ## BASIC memory map
 
-The above mentioned COMPUTES!'s book contains the article "Memory Partition of BASIC Workspace" by Harvey B. Herman on pages 64-67.
-It explains a system with 4 programs, all four in the memory of the PET. 
+The above mentioned _COMPUTES!'s First Book_ contains the article 
+"Memory Partition of BASIC Workspace" by Harvey B. Herman on pages 64-67.
+It explains a system with four programs, all four in the memory of the PET. 
 Program 1, 2 and 3 are the actual programs between which we want to switch.
-A 4th program is the manager; it lets the user pick the one to switch to.
-Once program 1, 2, or 3 is done, it switches back to the manager.
+The 4th program is the manager; it lets the user pick the one to switch to.
+Once program 1, 2, or 3 is done, it switches back to the manager, where we
+can dispatch again one of 1, 2, or 3.
 
 The four programs implement the switching by manipulating pointers.
-The article describes and uses pointers on the PET.
+Herman's article describes and uses pointers on the PET.
 In the meantime I found the corresponding pointers for the C64.
-The table below comes from the book, with the right-most column added by me.
+The table below comes from the book, with the right-most column ("C64 ROM") added by me.
 
 ![Pointer table](pointers.jpg)
 
@@ -55,7 +57,7 @@ we look at the colored parts.
 By default, a BASIC program starts at $0800. With a zero byte, which _must_ be there (or even `NEW` won't work).
 Then comes the BASIC program "text" (the entered lines). Program text starts at a location known
 as `TXTTAB` ($0801) and grows pushing up `VARTAB`. 
-The image below shows a simple example (a one-line program `10 REM A`) in more detail.
+The image below shows a simple example (of a one-line program `10 REM A`) in more detail.
 
 ![10 REM A](10REM_A.drawio.png)
 
@@ -75,17 +77,20 @@ This explains all six pointers relevant for managing a BASIC program.
 The table below shows their zero page addresses.
 Although `FRESPC` is interspersed, it seems not relevant for our discussion.
 
-  | addr (dec)| addr (hex)|   name   |set by|
-  |:---------:|:---------:|:--------:|:----:|
-  | **43/44** |**$2B/$2C**|**TXTTAB**| user |
-  | **45/46** |**$2D/$2E**|**VARTAB**| user |
-  | **47/48** |**$2F/$30**|**ARYTAB**| CLR  |
-  | **49/50** |**$31/$32**|**STREND**| CLR  |
-  | **51/52** |**$33/$34**|**FRETOP**| CLR  |
-  |   53/54   |  $35/$36  |  FRESPC  |      |
-  | **55/56** |**$37/$38**|**MEMSIZ**| user |
+  | addr (dec)| addr (hex)|   name   |life cycle|
+  |:---------:|:---------:|:--------:|:--------:|
+  | **43/44** |**$2B/$2C**|**TXTTAB**| progtime |
+  | **45/46** |**$2D/$2E**|**VARTAB**| progtime |
+  | **47/48** |**$2F/$30**|**ARYTAB**| runtime  |
+  | **49/50** |**$31/$32**|**STREND**| runtime  |
+  | **51/52** |**$33/$34**|**FRETOP**| runtime  |
+  |   53/54   |  $35/$36  |  FRESPC  |          |
+  | **55/56** |**$37/$38**|**MEMSIZ**| progtime |
 
-> We will set the pointers tagged "user", then by calling "CLR", the other three pointers will be updated.
+The pointers tagged _progtime_ in the life cycle column need to be fixed 
+before the program is run (programming phase). 
+The pointers tagged _runtime_ are updated during the program execution.
+By calling "CLR", the "runtime" pointers are initialized.
   
 
 ## Partition manager
@@ -99,20 +104,21 @@ My first trial is to replicate Herman's article, but then on the C64.
 The figure below shows how I've partitioned the 40k BASIC RAM (leaving 32k unused).
 The numbers on the right are the partition boundaries as selected above.
 They are shown in hex (`$0801`) followed by an equals sign, and then the 
-high byte and low byte in decimal (`8/1`).
+high byte and low byte in decimal (`8/1`), because that is what we need
+for pokes in BASIC.
 
 ![Partitioning the BASIC RAM](A0A1A2.drawio.png)
 
 The partition manager A0 can be loaded from e.g. a disk (but you can also type it in).
 It will be loaded at the standard `TXTTAB` ($0801), and the 
-loader will set `VARTAB` once the whole program is loaded and the end is known (or the editor maintains it when editing).
+loader will set `VARTAB` once the whole program is loaded and the end is known (or the editor maintains it while editing).
 
 When ran, one of the first things the partition manager does, is to lower 
-its own `MEMSIZ`. With that the three "user" pointers for its partition are set.
+its own `MEMSIZ`. With that the three progtime pointers for its partition are set.
 The partition manager then calls `CLR`, which updates `ARYTAB`, `STREND` and `FRETOP`;
 all six pointers are set correctly for A0.
 For debugging (and as we will see later, for configuring A1 and A2),
-A0 does print the three "user" pointers (`TXTTAB`, `VARTAB`, and `MEMSIZ`) to the screen.
+A0 does print the three progtime pointers (`TXTTAB`, `VARTAB`, and `MEMSIZ`) to the screen.
 
 The partition manager A0, does need to know the addresses of the partitions
 that will contain applications A1 and A2, because activating an application 
@@ -122,12 +128,12 @@ However, at this moment, we do not yet know `VARTAB` of A1 and A2, because we do
 which (how big) those programs will be. Fortunately that doesn't hamper use.
 At first we will uses dummy values for `VARTAB` in A0, then run A0 
 (write down its `TXTTAB`, `VARTAB`, and `MEMSIZ`), let it switch to A1, and there call `NEW`. 
-This initializes `VARTAB` (and the dependent pointers).
+This initializes `VARTAB` of A1 (and the dependent pointers).
 
 Then we type in the program for A1. At the end of the A1 program, we add lines
 that set `TXTTAB`, `VARTAB`, and `MEMSIZ` to the values written down for A0.
-Once A1 is done, we can inspect its length via `VARTAB` (`TXTTAB` and `MEMSIZ` should not have changed).
-In my experimental apps, part of the code of A1 is to actually print the three pointers 
+Once A1 is done, we can inspect its length by peeking `VARTAB` (`TXTTAB` and `MEMSIZ` should not have changed).
+In my experimental apps, part of the code of A1 is to actually print the three progtime pointers 
 `TXTTAB`, `VARTAB`, and `MEMSIZ`.
 
 In other words, from the table below, the pointers with no marking come for free, 
@@ -143,30 +149,29 @@ and the pointers with the double << marking come once we have written those apps
 
 ### Application A0 (partition manager)
 
-The screenshot below shows the complete listing for the simple partition manager A0.
+The screenshot below shows the complete listing for a simple partition manager A0.
 
 Before or after running it (but don't press `1` or `2` yet), the listing can be saved e.g. to disk. 
-BASIC's SAVE will look at `TXTTAB` and `VARTAB` (but not `MEMSIZ`) to determine what to save, 
-and `TXTTAB` is even saved as header of the `PRG` file (see hex dump below).
+BASIC's SAVE will look at `TXTTAB` and `VARTAB` (but not `MEMSIZ`) to determine what to save.
+`TXTTAB` is even saved as header of the `PRG` file (see hex dump below).
 This way BASIC knows where to load a `PRG` back. 
-This will come in handy for A1 and A2.
 
 ![A0 listing](A0listing.jpg)
 
 Note
 - Line 100, identifies this program as partition manager A0.
-- Line 110, sets its own the partition by poking `MEMSIZ`, correcting the other pointers via `CLR`.
+- Line 110, sets own the partition size by poking `MEMSIZ`, updating the runtime pointers via `CLR`.
 - Lines 120 and 130 set the leading 0 for the other two partitions.
-- Lines 140-160 print the "user" pointers (to write down).
-- Lines 170-210 let the user enter `1` or `2` or something else, and activate 1 or 2, or just end A0 (to be rerun, edited, saved).
+- Lines 140-160 print the progtime pointers (to write down, needed when editing A1 or A2).
+- Lines 170-210 let the user enter `1` or `2` or something else, and activate A1 or A2, or just end A0 (to be rerun, edited, saved).
 - Lines 300-340 active A0.
 - Lines 400-440 active A1.
 - The activation sets `TXTTAB`, `VARTAB`, and `MEMSIZ` (then `CLR` for the other 3). 
-  In the first version `VARTAB` at lines 310 and 410 are dummies.
-- On purpose we have extra spaces for a poke value, so that there is room for 3 digits (0..255) without
-  changing the size of the program (and thus without changing A0's `VARTAB`).
+  In the first version `VARTAB` at lines 310 and 410 are set to dummy values.
+- On purpose we have extra spaces for the poke values, so that there is room for 3 digits (0..255)
+  without changing the size of the program (and thus without changing A0's `VARTAB`).
 - If you enter the programs yourself make sure to _copy them exactly_.
-  If there is any size chnage you need to update the pointers.
+  If there is any size change you need to correct the pointer values.
 
 The screen below is what we see after running.
 We need to write down the values of the three pointers.
@@ -187,7 +192,7 @@ We can now load or enter a program. We start with the latter.
 
 Note
 - Lines 100-110 identify this program as user program A1.
-- Lines 112-116 print the "user" pointers (to write down - we need to update A0 for that).
+- Lines 112-116 print the progtime pointers (to write down - we need to update A0 for that).
 - Lines 120-140 let the user enter `0` or something else, and return to A0, or just end A1 (to be rerun, edited, saved).
 - Lines 150-180 active A0. These are the numbers we wrote down while running A0.
 
@@ -197,7 +202,7 @@ Again, we need to write down the values of the three pointers of A1 to patch A0.
 ![A1 output](A1output.jpg)
 
 Press e.g. space to exit. Save this user program. For fun, do a `PRINT FRE(0)`. Rerun it and press `0`. 
-After pressing `0` in A1, it activates the partition for A0 again.
+After pressing `0` in A1, it activates (the partition for) A0 again.
 
 Update the A1's `VARTAB` in A0 and save A0.
 
