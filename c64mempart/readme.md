@@ -75,7 +75,7 @@ characters are stored in the heap. The heap grows _down_ from `MEMSIZ` to `FRETO
 latter hits `STREND`. Hence the name.
 
 This explains all six pointers relevant for managing a BASIC program.
-All call these six BASIC/Kernal maintained zero-page locations the **layout pointers**.
+I call this set of six BASIC/Kernal maintained zero-page locations the **layout pointers**.
 The table below lists them. Although pointer `FRESPC` is interspersed, it does not 
 contribute to describing the layout of a BASIC program.
 
@@ -92,7 +92,8 @@ contribute to describing the layout of a BASIC program.
 The layout pointers tagged _progtime_ in the life cycle column are fixed 
 during the programming phase. 
 The layout pointers tagged _runtime_ are updated during the program execution.
-By calling `CLR`, the runtime pointers are initialized.
+By calling `CLR`, the runtime pointers are initialized by making the
+variables block, the array block, and the heap block empty.
   
 
 ## Partition manager
@@ -101,9 +102,10 @@ My first trial is to replicate Herman's article, but then on the C64.
 
 - I create one partition manager (app "A0").
 - I create two apps ("A1" and "A2", instead of three as Herman does).
-- Each app gets a block of 2k RAM (yes, that is small) starting at $0800.
+- Each app gets a block of 2k RAM (yes, that is small), the first one starting at $0800.
+- All three apps are BASIC programs.
 
-The figure below shows how I've partitioned the 40k BASIC RAM (leaving 32k unused).
+The figure below shows how I've partitioned the 38k BASIC RAM (leaving 32k unused).
 The numbers on the right are the partition boundaries as selected above.
 They are shown in hex (`$0801`) followed by an equals sign, and then the 
 high byte and low byte in decimal (`8/1`), because that is what we need
