@@ -8,11 +8,12 @@ No multitasking, we activate one, run it, activate another and run it.
 
 ## Introduction
 
-I was reading "Mapping the Commodore 64" from Sheldon Leemon.
-A [classic](https://archive.org/details/Compute_s_Mapping_the_64_and_64C), describing the memory 
-map of the C64 ([webversion](https://www.pagetable.com/c64ref/c64mem/)).
+I was browsing "Mapping the Commodore 64" from Sheldon Leemon. I still have an original, falling apart.
+It is a [classic](https://archive.org/details/Compute_s_Mapping_the_64_and_64C) for programmers, 
+describing the memory map of the C64 ([webversion](https://www.pagetable.com/c64ref/c64mem/)).
 
-I stumbled on the entry **TXTTAB**, the "Pointer to the Start of BASIC Program Text" at $002B-$002C (43-44 decimal).
+The entry **TXTTAB** caught my attention.
+It is the "Pointer to the Start of BASIC Program Text" at $002B-$002C (43-44 decimal).
 The book explains
 
 > This two-byte pointer lets BASIC know where program text is stored. 
@@ -74,8 +75,9 @@ characters are stored in the heap. The heap grows _down_ from `MEMSIZ` to `FRETO
 latter hits `STREND`. Hence the name.
 
 This explains all six pointers relevant for managing a BASIC program.
-The table below shows their zero page addresses.
-Although `FRESPC` is interspersed, it seems not relevant for our discussion.
+All call these six BASIC/Kernal maintained zero-page locations the **layout pointers**.
+The table below lists them. Although pointer `FRESPC` is interspersed, it does not 
+contribute to describing the layout of a BASIC program.
 
   | addr (dec)| addr (hex)|   name   |life cycle|
   |:---------:|:---------:|:--------:|:--------:|
@@ -87,10 +89,10 @@ Although `FRESPC` is interspersed, it seems not relevant for our discussion.
   |   53/54   |  $35/$36  |  FRESPC  |          |
   | **55/56** |**$37/$38**|**MEMSIZ**| progtime |
 
-The pointers tagged _progtime_ in the life cycle column need to be fixed 
-before the program is run (programming phase). 
-The pointers tagged _runtime_ are updated during the program execution.
-By calling "CLR", the "runtime" pointers are initialized.
+The layout pointers tagged _progtime_ in the life cycle column are fixed 
+during the programming phase. 
+The layout pointers tagged _runtime_ are updated during the program execution.
+By calling `CLR`, the runtime pointers are initialized.
   
 
 ## Partition manager
@@ -114,31 +116,31 @@ It will be loaded at the standard `TXTTAB` ($0801), and the
 loader will set `VARTAB` once the whole program is loaded and the end is known (or the editor maintains it while editing).
 
 When ran, one of the first things the partition manager does, is to lower 
-its own `MEMSIZ`. With that the three progtime pointers for its partition are set.
+its own `MEMSIZ`. With that the three progtime layout pointers for its partition are set.
 The partition manager then calls `CLR`, which updates `ARYTAB`, `STREND` and `FRETOP`;
-all six pointers are set correctly for A0.
+all six layout pointers are then set correctly for A0.
 For debugging (and as we will see later, for configuring A1 and A2),
-A0 does print the three progtime pointers (`TXTTAB`, `VARTAB`, and `MEMSIZ`) to the screen.
+A0 does print the three progtime layout pointers (`TXTTAB`, `VARTAB`, and `MEMSIZ`) to the screen.
 
 The partition manager A0, does need to know the addresses of the partitions
 that will contain applications A1 and A2, because activating an application 
-means changing the six pointers. 
+means changing the six layout pointers. 
 
 However, at this moment, we do not yet know `VARTAB` of A1 and A2, because we don't know
 which (how big) those programs will be. Fortunately that doesn't hamper use.
 At first we will uses dummy values for `VARTAB` in A0, then run A0 
 (write down its `TXTTAB`, `VARTAB`, and `MEMSIZ`), let it switch to A1, and there call `NEW`. 
-This initializes `VARTAB` of A1 (and the dependent pointers).
+This initializes `VARTAB` of A1 (and the dependent layout pointers).
 
 Then we type in the program for A1. At the end of the A1 program, we add lines
 that set `TXTTAB`, `VARTAB`, and `MEMSIZ` to the values written down for A0.
 Once A1 is done, we can inspect its length by peeking `VARTAB` (`TXTTAB` and `MEMSIZ` should not have changed).
-In my experimental apps, part of the code of A1 is to actually print the three progtime pointers 
+In my experimental apps, part of the code of A1 is to actually print the three progtime layout pointers 
 `TXTTAB`, `VARTAB`, and `MEMSIZ`.
 
-In other words, from the table below, the pointers with no marking come for free, 
-the pointers with the single < marking come by design (it is the partitions we want),
-and the pointers with the double << marking come once we have written those apps.
+In other words, from the table below, the layout pointers with no marking come for free, 
+the layout pointers with the single < marking come by design (it is the partitions we want),
+and the layout pointers with the double << marking come once we have written those apps.
 
   |  App |TXTTAB (43/44)| |VARTAB (45/46)|  |MEMSIZ (55/56)| |
   |:----:|:------------:|-|:------------:|--|:------------:|-|
@@ -153,16 +155,16 @@ The screenshot below shows the complete listing for a simple partition manager A
 
 Before or after running it (but don't press `1` or `2` yet), the listing can be saved e.g. to disk. 
 BASIC's SAVE will look at `TXTTAB` and `VARTAB` (but not `MEMSIZ`) to determine what to save.
-`TXTTAB` is even saved as header of the `PRG` file (see hex dump below).
+`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#file_content)).
 This way BASIC knows where to load a `PRG` back. 
 
 ![A0 listing](A0listing.jpg)
 
 Note
 - Line 100, identifies this program as partition manager A0.
-- Line 110, sets own the partition size by poking `MEMSIZ`, updating the runtime pointers via `CLR`.
+- Line 110, sets own the partition size by poking `MEMSIZ`, updating the runtime layout pointers via `CLR`.
 - Lines 120 and 130 set the leading 0 for the other two partitions.
-- Lines 140-160 print the progtime pointers (to write down, needed when editing A1 or A2).
+- Lines 140-160 print the progtime layout pointers (to write down, needed when editing A1 or A2).
 - Lines 170-210 let the user enter `1` or `2` or something else, and activate A1 or A2, or just end A0 (to be rerun, edited, saved).
 - Lines 300-340 active A0.
 - Lines 400-440 active A1.
@@ -171,10 +173,10 @@ Note
 - On purpose we have extra spaces for the poke values, so that there is room for 3 digits (0..255)
   without changing the size of the program (and thus without changing A0's `VARTAB`).
 - If you enter the programs yourself make sure to _copy them exactly_.
-  If there is any size change you need to correct the pointer values.
+  If there is any size change you need to correct the layout pointer values.
 
 The screen below is what we see after running.
-We need to write down the values of the three pointers.
+We need to write down the values of the three layout pointers.
 
 ![A0 output](A0output.jpg)
 
@@ -192,12 +194,12 @@ We can now load or enter a program. We start with the latter.
 
 Note
 - Lines 100-110 identify this program as user program A1.
-- Lines 112-116 print the progtime pointers (to write down - we need to update A0 for that).
+- Lines 112-116 print the progtime layout pointers (to write down - we need to update A0 for that).
 - Lines 120-140 let the user enter `0` or something else, and return to A0, or just end A1 (to be rerun, edited, saved).
 - Lines 150-180 active A0. These are the numbers we wrote down while running A0.
 
 The screen below is what we see after running A1.
-Again, we need to write down the values of the three pointers of A1 to patch A0.
+Again, we need to write down the values of the three layout pointers of A1 to patch A0.
 
 ![A1 output](A1output.jpg)
 
@@ -222,8 +224,23 @@ automagically fix the linked list of BASIC line numbers (of A1 which was saved f
 
 > I have the KCS power cartridge. I features a `DLOAD`. That seems to do a "FAST-LOAD,8,1" so do not use it.
 
+After A1 is loaded, fix e.g. line 1 to identify it as user program 2.
+Run it. Write down the layout pointers. Hit 
+`0` to go to A0. Update A0, to have the correct pointers for A2.
+
+
+## File content
 
 The image below shows the hex dump of A1 (version V3).
+What is special about this file is that it is saved with BASICs `SAVE`,
+but the `TXTTAB` address was not $0800 but $1000.
+BASIC can handle that.
+
+What is even more astonishing is that when `LOAD`ing this program 
+in a partition not starting at $1000, BASIC patches the line-link addresses
+of the program.
+
+Here is a quick analysis.
 - First two bytes form $1001, the load address (`TXTTAB`).
 - The next two bytes form $1009, the link to the next line.
 - Bytes 5 and 6 form $0064, or line number 100.
@@ -237,29 +254,28 @@ The image below shows the hex dump of A1 (version V3).
   
 ![A1 hexdumo](A1hexdump.jpg)
 
-After A1 is loaded, fix e.g. line 1 to identify it as user program 2.
-Run it. Write down the pointers. Hit `0` to go to A0. Update A0, to have the correct pointers for A2.
-
 
 ## After thoughts
 
 I have two thoughts.
 
-Firstly, while A0 (or A1) is starting to poke the 3 vectors (43/44, 45/46, 55/56) it is changing
-its own world. Would it still be able to use variables, probably not, because `VARTAB` is broken.
+Firstly, while a program like A0 (or A1) is changing the layout pointers --
+by poking in 43/44, 45/46, 55/56 -- it is changing its own "world". 
+Would it still be able to use its variables, probably not, because `VARTAB` is broken.
 Would it be able to use `GOTO`? I believe that a `NN GOTO MM` starts looking from the current line (`NN`) 
 downwards when `MM>NN`. But it starts looking from the start (from `TXTTAB`) when `MM<NN`. So 
 that will probably not work either. But apparently just going to the next line is fine.
 
-Maintaining the `VARTAB` in A0 is not fun. But you have to otherwise A1 breaks when you switch back to it.
-And A0 is the manager, that will not change. But A1 is under development so having that broken is no fun.
+Note that A0 needs to know that layout pointers of A1 and A2, otherwise it can not activate them.
+Note also that A1 and A2 need to know the layout pointers of A0, otherwise they can switch back.
+If you are editing A1, this dependemcy is very painful.
 We need to write an app manager that 
-- has a store of all pointers of all apps;
-- knows that app `C` is current app;
-- that offers an `USR(N)` which
-  - saves the current zero page pointers of `C` in the store
-  - switches to app `N`, i.e. sets `C` to `N`
-  - copies the pointers of `N` from the store to the zero page pointers
-- then the administration would be automated.
+- has a table of all layout pointers of all apps;
+- knows that app `C` is the (index of the) current app;
+- offers a function `USR(N)` which
+  - saves the current layout pointers to slot `C` in the table
+  - switches to app `N`, i.e. sets `C` to `N`, and
+  - copies the pointers of slot `N` from the table to the layout pointers
+- then the switching administration would be automated.
 
 (end)
