@@ -67,12 +67,12 @@ The image below shows a simple example (of a one-line program `10 REM A`) in mor
 If a program uses _plain_ variables (scalars, i.e. not arrays), they are stored from location `VARTAB` 
 to location `ARYTAB`. Every new variable pushes up `ARYTAB`. Every variable takes a fixed 
 amount of 7 bytes, two for the name and 5 for the data. For strings, the data part is actually 
-the size and a _pointer_ to the characters, the characters themselves are on the heap 
-(see later), or part of the program text.
+the size and a _pointer_ to the characters, the characters themselves are on the heap at top of the BASIC memory
+(when constructed dynamically), or part of the program text (string literals).
 
 If a program uses _array_ variables, they are stored from location `ARYTAB` to location `STREND`.
 Every new array (explicit or implicit `DIM`) pushes up `STREND`. 
-This name is a bit confusing. As mentioned before, string 
+This name is a bit confusing (I expected `ARYEND`). As mentioned before, string 
 characters are stored in the heap. The heap grows _down_ from `MEMSIZ` to `FRETOP`, until the 
 latter hits `STREND`. Hence the name.
 
@@ -94,8 +94,8 @@ contribute to describing the layout of a BASIC program.
 The layout pointers tagged _progtime_ in the life cycle column are fixed 
 during the programming phase. 
 The layout pointers tagged _runtime_ are updated during the program execution.
-By calling `CLR`, the runtime pointers are initialized by making the
-variables block, the array block, and the heap block empty.
+By calling `CLR`, the runtime pointers are initialized by emptying the
+variables block, the array block, and the heap block.
   
 
 ## Partition manager
@@ -108,7 +108,7 @@ My first trial is to replicate Herman's article, but then on the C64.
 - All three apps are BASIC programs.
 
 The figure below shows how I've partitioned the 38k BASIC RAM (leaving 32k unused).
-The numbers on the right are the partition boundaries as selected above.
+The numbers on the right are the partition boundaries as selected in the bullets above.
 They are shown in hex (`$0801`) followed by an equals sign, and then the 
 high byte and low byte in decimal (`8/1`), because that is what we need
 for pokes in BASIC.
@@ -116,8 +116,9 @@ for pokes in BASIC.
 ![Partitioning the BASIC RAM](A0A1A2.drawio.png)
 
 The partition manager A0 can be loaded from e.g. a disk (but you can also type it in).
-It will be loaded at the standard `TXTTAB` ($0801), and the 
-loader will set `VARTAB` once the whole program is loaded and the end is known (or the editor maintains it while editing).
+It will be located at the standard `TXTTAB` ($0801), and the 
+loader will set `VARTAB` once the whole program is loaded and the end is known 
+(or the editor maintains `VARTAB` while editing).
 
 When ran, one of the first things the partition manager does, is to lower 
 its own `MEMSIZ`. With that the three progtime layout pointers for its partition are set.
@@ -138,8 +139,9 @@ This initializes `VARTAB` of A1 (and the dependent layout pointers).
 
 Then we type in the program for A1. At the end of the A1 program, we add lines
 that set `TXTTAB`, `VARTAB`, and `MEMSIZ` to the values written down for A0.
-Once A1 is done, we can inspect its length by peeking `VARTAB` (`TXTTAB` and `MEMSIZ` should not have changed).
-In my experimental apps, part of the code of A1 is to actually print the three progtime layout pointers 
+Once A1 is done, we can inspect its length by peeking `VARTAB` 
+(`TXTTAB` and `MEMSIZ` should not have changed). In my experimental apps, part 
+of the code of A1 is to actually print the three progtime layout pointers 
 `TXTTAB`, `VARTAB`, and `MEMSIZ`.
 
 In other words, from the table below, the layout pointers with no marking come for free, 
@@ -159,7 +161,7 @@ The screenshot below shows the complete listing for a simple partition manager A
 
 Before or after running it (but don't press `1` or `2` yet), the listing can be saved e.g. to disk. 
 BASIC's SAVE will look at `TXTTAB` and `VARTAB` (but not `MEMSIZ`) to determine what to save.
-`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#file_content)).
+`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#file-content)).
 This way BASIC knows where to load a `PRG` back. 
 
 ![A0 listing](A0listing.jpg)
@@ -197,7 +199,7 @@ We can now load or enter a program. We start with the latter.
 ![A1 listing](A1listing.jpg)
 
 Note
-- Lines 100-110 identify this program as user program A1.
+- Lines 100-110 identify this program as user program A1. One could argue these are the only two real lines of app A1, the rest is to support switching.
 - Lines 112-116 print the progtime layout pointers (to write down - we need to update A0 for that).
 - Lines 120-140 let the user enter `0` or something else, and return to A0, or just end A1 (to be rerun, edited, saved).
 - Lines 150-180 active A0. These are the numbers we wrote down while running A0.
@@ -237,16 +239,16 @@ Run it. Write down the layout pointers. Hit
 
 The image below shows the hex dump of A1 (version V3).
 What is special about this file is that it is saved with BASICs `SAVE`,
-but the `TXTTAB` address was not $0800 but $1000.
+but the `TXTTAB` address for A1 was not $0800 but $1000.
 BASIC can handle that.
 
 What is even more astonishing is that when `LOAD`ing this program 
 in a partition not starting at $1000, BASIC patches the line-link addresses
-of the program.
+of the program during (or after) `LOAD`.
 
 Here is a quick analysis.
-- First two bytes form $1001, the load address (`TXTTAB`).
-- The next two bytes form $1009, the link to the next line.
+- First two bytes form $1001, the load destination address (`TXTTAB` of A1).
+- The next two bytes (which will be placed at $1001) form $1009, the link to the next line.
 - Bytes 5 and 6 form $0064, or line number 100.
 - Bytes 7-9, E4 B2 31 represent `N=1`.
 - Byte 10 is the terminating 0 for the first line.
