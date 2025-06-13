@@ -3,7 +3,7 @@
 Can we partition the C64 memory, storing two programs simultaneously?
 A multi-app setup?
 
-No multitasking, we activate one, run it, activate another and run it.
+No multitasking, we activate one, run it, stop it, activate another and run it.
 
 
 ## Introduction
@@ -25,10 +25,12 @@ The book explains
 > By changing this pointer, you can keep more than one BASIC program in memory at one time, 
 > and switch back and forth between them. 
 
-Then came a reference to [COMPUTE!'s First Book of PET/CBM, pages 66 and 163](https://archive.org/details/COMPUTEs_First_Book_of_PET-CBM_1981_Small_Systems_Services).
-That book predates the C64. It describes the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET), 
+Then came a reference to [COMPUTE!'s First Book of PET/CBM, pages 66 and 163](https://archive.org/details/COMPUTEs_First_Book_of_PET-CBM_1981_Small_Systems_Services)
+an article showcasing a multi-app implementation. The book predates the C64. 
+It describes the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET), 
 but since the PET also had Microsoft BASIC, it was a usable start. 
-The administration of BASIC interpreter on the PET differs from the C64, so it did take me some time to 
+The administration of BASIC interpreter (pointer names, pointer locations) on the PET 
+differs from the C64, so it did take me some time to 
 get going on my [C64](https://en.wikipedia.org/wiki/Commodore_64).
 
 
