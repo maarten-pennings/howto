@@ -285,29 +285,30 @@ BASIC's `SAVE` uses `TXTTAB` as start of program and `VARTAB` as end.
 
 Here is a quick analysis of the file.
 
-- The first 12 bytes of the file look like this (header row is offset in file).
+- These are the first 12 bytes of the file; the header row is offset in _file_ (all in hex).
 
   |0000|0001|0002|0003|0004|0005|0006|0007|0008|0009|000A|000B|
   |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
   | 01 | 10 | 09 | 10 | 64 | 00 | 4E | B2 | 31 | 00 | 25 | 10 |
 
-- First two bytes (low byte, high byte) form $1001, the original start of the program (`TXTTAB`).
-  The rest of the file is the content of the program, loaded at $1001
-  (header row shows address in memory).
+- The first two bytes (low byte, high byte order) form $1001, the original 
+  _load address_ of the program (`TXTTAB`). The rest of the file is the 
+  _content_ of the program. The header row shows address in _memory_
+  when loading at the load address.
 
   |1001|1002|1003|1004|1005|1006|1007|1008|1009|100A|
   |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
   | 09 | 10 | 64 | 00 | 4E | B2 | 31 | 00 | 25 | 10 |
 
-- The next two bytes (again, low byte, high byte) form $1009, the link to the next line.
+- The next two bytes (again: low byte, high byte) form $1009, the link to the next line.
 
-- Bytes at file offset 4 and 5 form $0064, for the line number, 100.
+- Bytes at file offset 4 and 5 form $0064, form the line number, 100.
 
-- Bytes at offset 6-8 are E4 B2 31, which represents `N=1`.
+- Bytes at offset 6-8 are E4 B2 31, which represents the BASIC fragment `N=1`.
 
-- Byte at offset 9 is the terminating 0 for the first line.
+- Byte at offset 9 is the terminating 0 for line 100.
 
-- We see that the next line indeed starts at address 1009, just as the first link indicated.
+- We see that the next line indeed starts at address $1009, just as the first link indicated.
 
 ### LOAD behavior
 
@@ -317,25 +318,28 @@ addresses. One could say, the loader relocates the program.
 
 That is a neat feature, illustrated by these experiments:
 
-- Try `LOAD "A1",8` in partition 1. As expected it loads and runs fine. 
+- Try `LOAD "A1",8` in partition 1. As expected (A1 was written for/in partition 1) it loads, lists, and runs fine. 
   "Reduce" A1 by deleting all of its lines except the code to switch to A0. 
   Switch to A0 and from there to partition 2.
 
-- Try `LOAD "A1",8` in partition 2. Also here, it loads and runs fine. 
+- Try `LOAD "A1",8` in partition 2. Also here, it loads, lists, and runs fine. 
   This shows that (1) BASIC's `LOAD` loads at `TXTTAB`, ignoring the load 
   address in the file, and (2) BASIC's `LOAD` patches the line links.
 
-- Switch to 0 and from there to 1 to check A1 app is the "reduced" one.
+- Switch to 0 and from there to 1 to check A1 app is still the "reduced" one.
   Switch back to 0 and from there to 2. "Reduce" A2 by deleting all of its 
   lines except the code to switch to A0. 
   
   Try `LOAD "A1",8,1` in partition 2. Note the `,1` to force LOAD to use
-  the load address in the file. Recall that this is $1001, the start of 
-  partition 1. After the `LOAD` partition 2 still has the "reduced" A2 code,
-  so nothing appears loaded. 
+  the load address in the file. Recall that the load address in the file is 
+  $1001, the start of partition 1. After the `LOAD` partition 2 still has the 
+  "reduced" A2 code, so nothing is loaded (in partition 2). 
   
   Switch to 0 and then to 1 and check that the "reduced" A1
   is now replaced by the loaded A1.
+  
+  This shows that (1) `LOAD "XXX",8` loads in the activate partition, and 
+  (2) `LOAD "XXX",8,1` loads absolute, that could be in another partition.
 
 
 
