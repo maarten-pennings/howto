@@ -35,7 +35,7 @@ get going on my [C64](https://en.wikipedia.org/wiki/Commodore_64).
 
 I did miss one reason for changing `TXTTAB`/`MEMSIZ`, namely to set aside a 
 part of the memory for an assembly routine. We will utilize this later in the
-[advanced partition manager](#advanced_partition_manager) for a central 
+[advanced partition manager](#advanced-partition-manager) for a central 
 switching routine.
 
 
@@ -165,7 +165,7 @@ The screenshot below shows the complete listing for a simple partition manager A
 
 Before or after running it (but don't press `1` or `2` yet), the listing can be saved e.g. to disk. 
 BASIC's SAVE will look at `TXTTAB` and `VARTAB` (but not `MEMSIZ`) to determine what to save.
-`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#intermezzo_on_file_content)).
+`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#intermezzo-on-file-content)).
 This way BASIC knows where to load a `PRG` back. 
 
 ![A0 listing](A0listing.png)
@@ -231,9 +231,10 @@ Run A0 and now press `2`. We are now in partition A2, which was unused until now
 We can write a program for A2. In that case we should start with `NEW`.
 
 However, we can also `LOAD "A1",8`.
-**Do not do `LOAD "A1",8,1`**.
+**Do not `LOAD "A1",8,1`**.
 When loading without the `,1` BASIC will load at `TXTTAB` (which is $1801 for A2) and 
 automagically fix the linked list of BASIC line numbers (of A1 which was saved for $1001).
+See [LOAD behavior](#load-behavior)
 
 > I have the KCS power cartridge. I features a `DLOAD`. That seems to do a "FAST-LOAD,8,1" so do not use it.
 
@@ -247,24 +248,26 @@ Hit `0` to switch to A0. Update A0, to have the correct pointers for A2.
 
 ### After thoughts
 
-I have two thoughts.
+While a program like A0 (or A1) is changing the layout pointers - by 
+poking in 43/44, 45/46, 55/56 - it is changing its own "world". 
+Would it still be able to use its variables? 
+Probably not, because `VARTAB` is broken.
+Would it be able to use `GOTO`? 
+I believe that a `NN GOTO MM` starts looking from the current line (`NN`) 
+downwards when `MM>NN`. But it starts looking from the start (from `TXTTAB`) 
+when `MM<NN`. So that will probably not work either. 
+But apparently just going to the next line is fine.
 
-Firstly, while a program like A0 (or A1) is changing the layout pointers --
-by poking in 43/44, 45/46, 55/56 -- it is changing its own "world". 
-Would it still be able to use its variables, probably not, because `VARTAB` is broken.
-Would it be able to use `GOTO`? I believe that a `NN GOTO MM` starts looking from the current line (`NN`) 
-downwards when `MM>NN`. But it starts looking from the start (from `TXTTAB`) when `MM<NN`. So 
-that will probably not work either. But apparently just going to the next line is fine.
-
-Note that A0 needs to know the layout pointers of apps A1 and A2, otherwise it can not activate those apps.
-Note also that A1 and A2 need to know the layout pointers of A0, otherwise they cannot switch back.
+Note that A0 needs to know the layout pointers of apps A1 and A2, 
+otherwise it can not activate those apps. Note also that A1 and A2 
+need to know the layout pointers of A0, otherwise they cannot switch back.
 If you are editing A1, this dependency is painful.
 
 
 ## Intermezzo on file content
 
 We dump the content of file `A1`, to check its load address and line links.
-Next we check the behavior of BASIC's `LOAD`.
+With that info, we check the behavior of BASIC's `LOAD`.
 
 
 ### Hex dump
@@ -338,7 +341,7 @@ That is a neat feature, illustrated by these experiments:
 
 ## Advanced partition manager 
 
-In the second part of this document we try to make an advanced partition 
+In the second part of this document we try to make an **advanced** partition 
 manager, which mitigates the shortcomings of the simple partition manager.
 Let's first have a look at those shortcomings.
 
@@ -358,16 +361,16 @@ from switching back to A1 at a later stage. This is a maintenance burden and
 it is easy to forget.
 
 A related drawback is that when changing A0 (to update the layout pointers 
-of one of the apps A1, A2, ...) there is a risk that the layout (typically 
-pointer VARTAB) of A0 itself changes. That would require an update of the 
+of one of the apps A1, A2, ...) there is a risk that the layout of A0 itself 
+changes (typically pointer VARTAB). That would require an update of the 
 switching code of all apps (A1, A2, ...) otherwise they could no longer 
 switch to A0.
 
 A small nuisance is also that the switching code only restores the progtime 
 pointers (begin of partition, end of BASIC program text, and end of partition), 
-not the runtime pointers (variables, arrays, strings). Adding those would 
-aggravate the maintenance burden (more pointers to record and update, and 
-more often).
+not the runtime pointers (variables, arrays, strings) - it clears them. 
+Adding the runtime pointers in the switching code would aggravate the 
+maintenance burden (more pointers to record and update, and more often).
 
 A final drawback is that the apps (A1, A2, ...) only have switching code to go 
 back to partition manager A0, and not to another app. Of course we could 
@@ -381,53 +384,54 @@ There is a solution to all this; it is presented in the next section.
 
 Why would the programmer of app A1 need to write down the values of A1's 
 layout pointers when switching to A0? We have a computer, we could store 
-those pointers in variables. No. Not really. The problem is that while we 
+those pointers in variables, can't we? No. Not really. The problem is that while we 
 are changing the layout pointers of an app we lose access to our variables 
-(VARTAB indicates where they are). So that doesn't work. 
+(`VARTAB` indicates where they are). So that doesn't work. 
 
 Unless we do not use _BASIC_ variables to record the layout pointers, but 
 some fixed memory locations. And then we do not use BASIC but some assembly 
 routine to update those locations.
 
-The idea is that the partition manager A0 sets aside a piece of memory 
-that records the layout pointers of all its apps, the _layout table_. If 
+The idea is that the partition manager A0 sets aside a piece of memory, the 
+_layout table_, that records the layout pointers of all its apps. If 
 there are 8 apps (partitions), that would be 8 sets of 7 pointers of 2 bytes, 
 nearly 128 bytes for the layout table. The partition manager also records 
 which partition is active. Finally, there would be one assembly routine, 
-the _switcher_, with one parameter: the partition to make active. 
+the _switcher_, with one input parameter: the partition to make active. 
 
-When this switcher gets called, it first copies the actual layout pointers 
-(43..56) to the layout table (_backup_). The switcher knows which slot in the 
-table to use, because it knows which partition is currently active. 
-Then it updates the location that records the active partition with the 
-passed parameter. Finally, it copies (_restores_) the layout pointers from 
-the table (using the slot of the new active partition) to the actual layout 
-pointers (43..56).
+When the switcher gets called, it first copies the actual layout pointers 
+(43..56) to the layout table (a "backup"). The switcher knows which slot in the 
+layout table to use, because it knows which partition is currently active. 
+Then the switcher updates the location that records the active partition with 
+the passed parameter. Finally, it copies (it "restores") the layout pointers 
+from the layout table (using the slot of the new active partition) to the 
+actual layout pointers (43..56).
 
 The advanced partition manager thus consists of three parts
 - the _layout table_ with layout pointers of all partitions,
 - the _switcher_, an assembly routine that implements the switching using 
   the layout table,
-- a BASIC program with some easy way to define partition boundaries. It also
+- a BASIC program that packages all this; it
+   - has some easy way to define partition boundaries,
    - creates the partitions (pokes the leading zeros),
-   - initializes the layout table with pointers for all partitions, and 
-   - pokes the switcher assembly routine into memory.
-   - It will map `USR()` to this routine. This makes it easy pass a parameter 
-     (new partition to become active) to the routine. It also makes The
-     routine easily accessible in all partitions.
+   - initializes the layout table with pointers for all partitions,  
+   - pokes the switcher assembly routine into memory, and
+   - maps `USR()` to the switcher. This makes it easy pass a parameter 
+     (new partition to become active) to the switcher. 
+     It also makes the switcher easily accessible in all partitions.
 
 
-### todo
+### Todo
 
 ...
 
 
 ## Files
 
-This document comes with a [d64](partmngr.d64) disk image, With
-- `A0` the simple partition manager.
-- `A1` the simple app that prints its name, progtime addresses and returns to A0.
-- `HEXDUMP` a basic program that prints a hex dump of file `A1`.
+This document comes with a [d64](partmngr.d64) disk image, with these files
+- `A0`, the simple partition manager.
+- `A1`, a simple app that prints its name, progtime addresses and returns to A0.
+- `HEXDUMP` a basic program that prints a hex dump (e.g. of file `A1`).
 
 
 (end)
