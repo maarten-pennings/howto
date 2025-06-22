@@ -12,7 +12,7 @@ I was browsing "Mapping the Commodore 64" from Sheldon Leemon. I still have an o
 It is a [classic](https://archive.org/details/Compute_s_Mapping_the_64_and_64C) for programmers, 
 describing the memory map of the C64 ([webversion](https://www.pagetable.com/c64ref/c64mem/)).
 
-The entry **TXTTAB** caught my attention.
+The entry `TXTTAB` caught my attention.
 It is the "Pointer to the Start of BASIC Program Text" at $002B-$002C (43-44 decimal).
 The book explains
 
@@ -32,6 +32,11 @@ but since the PET also had Microsoft BASIC, it was a usable start.
 The administration of BASIC interpreter (pointer names, pointer locations) on the PET 
 differs from the C64, so it did take me some time to 
 get going on my [C64](https://en.wikipedia.org/wiki/Commodore_64).
+
+I did miss one reason for changing `TXTTAB`/`MEMSIZ`, namely to set aside a 
+part of the memory for an assembly routine. We will utilize this later in the
+[advanced partition manager](#advanced_partition_manager) for a central 
+switching routine.
 
 
 ## BASIC memory map
@@ -91,14 +96,13 @@ contribute to describing the layout of a BASIC program.
   |   53/54   |  $35/$36  |  FRESPC  |          |
   | **55/56** |**$37/$38**|**MEMSIZ**| progtime |
 
-The layout pointers tagged _progtime_ in the life cycle column are fixed 
-during the programming phase. 
-The layout pointers tagged _runtime_ are updated during the program execution.
+The layout pointers tagged _progtime_ in the life cycle column are established during the programming phase. 
+The layout pointers tagged _runtime_ are updated during the program execution. 
 By calling `CLR`, the runtime pointers are initialized by emptying the
 variables block, the array block, and the heap block.
   
 
-## Partition manager
+## Simple partition manager
 
 My first trial is to replicate Herman's article, but then on the C64.
 
@@ -116,7 +120,7 @@ for pokes in BASIC.
 ![Partitioning the BASIC RAM](A0A1A2.drawio.png)
 
 The partition manager A0 can be loaded from e.g. a disk (but you can also type it in).
-It will be located at the standard `TXTTAB` ($0801), and the 
+It will be loaded at the standard `TXTTAB` ($0801), and the 
 loader will set `VARTAB` once the whole program is loaded and the end is known 
 (or the editor maintains `VARTAB` while editing).
 
@@ -161,30 +165,32 @@ The screenshot below shows the complete listing for a simple partition manager A
 
 Before or after running it (but don't press `1` or `2` yet), the listing can be saved e.g. to disk. 
 BASIC's SAVE will look at `TXTTAB` and `VARTAB` (but not `MEMSIZ`) to determine what to save.
-`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#file-content)).
+`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#intermezzo_on_file_content)).
 This way BASIC knows where to load a `PRG` back. 
 
-![A0 listing](A0listing.jpg)
+![A0 listing](A0listing.png)
 
 Note
-- Line 100, identifies this program as partition manager A0.
-- Line 110, sets own the partition size by poking `MEMSIZ`, updating the runtime layout pointers via `CLR`.
-- Lines 120 and 130 set the leading 0 for the other two partitions.
-- Lines 140-160 print the progtime layout pointers (to write down, needed when editing A1 or A2).
-- Lines 170-210 let the user enter `1` or `2` or something else, and activate A1 or A2, or just end A0 (to be rerun, edited, saved).
-- Lines 300-340 active A0.
-- Lines 400-440 active A1.
+- Line 100, identifies this program as the simple partition manager A0.
+- Line 110, sets own the partition size by poking `MEMSIZ`
+- Line 120 updates the runtime layout pointers via the BASIC `CLR` command.
+- Lines 130 and 140 set the leading 0 for the other two partitions.
+- Lines 150-170 print the progtime layout pointers (to write down, needed when editing A1 or A2).
+- Lines 180-220 let the user enter `1` or `2` or something else, and activate A1 or A2, or just end A0 (to be rerun, edited, saved).
+- Lines 300-330 active A0.
+- Lines 400-430 active A1.
 - The activation sets `TXTTAB`, `VARTAB`, and `MEMSIZ` (then `CLR` for the other 3). 
-  In the first version `VARTAB` at lines 310 and 410 are set to dummy values.
+  At first `VARTAB` at lines 310 and 410 are set to dummy values. 
+  They need to be updated with the actual values once A1 and A2 are known (programmed/edited, loaded).
 - On purpose we have extra spaces for the poke values, so that there is room for 3 digits (0..255)
   without changing the size of the program (and thus without changing A0's `VARTAB`).
-- If you enter the programs yourself make sure to _copy them exactly_.
-  If there is any size change you need to correct the layout pointer values.
+- If you enter the programs yourself make sure to _copy the lines exactly_.
+  If there is any size change you need to correct the layout pointer values in A1 and A2.
 
 The screen below is what we see after running.
 We need to write down the values of the three layout pointers.
 
-![A0 output](A0output.jpg)
+![A0 output](A0output.png)
 
 Go ahead and press `1` now.
 
@@ -192,22 +198,23 @@ Go ahead and press `1` now.
 ### Application A1 (user program)
 
 After pressing `1` in the partition manager A0, it activated the partition for A1.
-Remember, the first time we need to call `NEW` to set `VARTAB`.
+
+> Remember, the first time we activate a partition, we need to call `NEW` to set `VARTAB`.
 
 We can now load or enter a program. We start with the latter.
 
-![A1 listing](A1listing.jpg)
+![A1 listing](A1listing.png)
 
 Note
 - Lines 100-110 identify this program as user program A1. One could argue these are the only two real lines of app A1, the rest is to support switching.
-- Lines 112-116 print the progtime layout pointers (to write down - we need to update A0 for that).
-- Lines 120-140 let the user enter `0` or something else, and return to A0, or just end A1 (to be rerun, edited, saved).
-- Lines 150-180 active A0. These are the numbers we wrote down while running A0.
+- Lines 120-140 print the progtime layout pointers (to write down - we need to update A0 for that).
+- Lines 200-220 let the user enter `0` or something else, and return to A0, or just end A1 (to be rerun, edited, saved).
+- Lines 230-260 active A0. These are the numbers we wrote down while running A0.
 
 The screen below is what we see after running A1.
 Again, we need to write down the values of the three layout pointers of A1 to patch A0.
 
-![A1 output](A1output.jpg)
+![A1 output](A1output.png)
 
 Press e.g. space to exit. Save this user program. For fun, do a `PRINT FRE(0)`. Rerun it and press `0`. 
 After pressing `0` in A1, it activates (the partition for) A0 again.
@@ -221,7 +228,7 @@ When we now run A0, we can press `1` and got to A1. List it. Run it and press `0
 
 Run A0 and now press `2`. We are now in partition A2, which was unused until now.
 
-We can do `NEW` and write a program.
+We can write a program for A2. In that case we should start with `NEW`.
 
 However, we can also `LOAD "A1",8`.
 **Do not do `LOAD "A1",8,1`**.
@@ -231,37 +238,14 @@ automagically fix the linked list of BASIC line numbers (of A1 which was saved f
 > I have the KCS power cartridge. I features a `DLOAD`. That seems to do a "FAST-LOAD,8,1" so do not use it.
 
 After A1 is loaded, fix e.g. line 1 to identify it as user program 2.
-Run it. Write down the layout pointers. Hit 
-`0` to go to A0. Update A0, to have the correct pointers for A2.
+Run it. Write down the layout pointers. 
+
+![A2 listing and output](A2listingoutput.png)
+
+Hit `0` to switch to A0. Update A0, to have the correct pointers for A2.
 
 
-## File content
-
-The image below shows the hex dump of A1 (version V3).
-What is special about this file is that it is saved with BASICs `SAVE`,
-but the `TXTTAB` address for A1 was not $0800 but $1000.
-BASIC can handle that.
-
-What is even more astonishing is that when `LOAD`ing this program 
-in a partition not starting at $1000, BASIC patches the line-link addresses
-of the program during (or after) `LOAD`.
-
-Here is a quick analysis.
-- First two bytes form $1001, the load destination address (`TXTTAB` of A1).
-- The next two bytes (which will be placed at $1001) form $1009, the link to the next line.
-- Bytes 5 and 6 form $0064, or line number 100.
-- Bytes 7-9, E4 B2 31 represent `N=1`.
-- Byte 10 is the terminating 0 for the first line.
-- We see that the next line indeed starts at address 1009, just as the first link indicated.
-
-  |1001|1002|1003|1004|1005|1006|1007|1008|1009|100A|
-  |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-  | 09 | 10 | 64 | 00 | 4E | B2 | 31 | 00 | 25 | 10 |
-  
-![A1 hexdumo](A1hexdump.jpg)
-
-
-## After thoughts
+### After thoughts
 
 I have two thoughts.
 
@@ -272,16 +256,178 @@ Would it be able to use `GOTO`? I believe that a `NN GOTO MM` starts looking fro
 downwards when `MM>NN`. But it starts looking from the start (from `TXTTAB`) when `MM<NN`. So 
 that will probably not work either. But apparently just going to the next line is fine.
 
-Note that A0 needs to know that layout pointers of A1 and A2, otherwise it can not activate them.
-Note also that A1 and A2 need to know the layout pointers of A0, otherwise they can switch back.
-If you are editing A1, this dependemcy is very painful.
-We need to write an app manager that 
-- has a table of all layout pointers of all apps;
-- knows that app `C` is the (index of the) current app;
-- offers a function `USR(N)` which
-  - saves the current layout pointers to slot `C` in the table
-  - switches to app `N`, i.e. sets `C` to `N`, and
-  - copies the pointers of slot `N` from the table to the layout pointers
-- then the switching administration would be automated.
+Note that A0 needs to know the layout pointers of apps A1 and A2, otherwise it can not activate those apps.
+Note also that A1 and A2 need to know the layout pointers of A0, otherwise they cannot switch back.
+If you are editing A1, this dependency is painful.
+
+
+## Intermezzo on file content
+
+We dump the content of file `A1`, to check its load address and line links.
+Next we check the behavior of BASIC's `LOAD`.
+
+
+### Hex dump
+
+The image below shows the hex dump of app A1.
+
+> A hex dump utility is included in the [disk image](#files). 
+> You could load it in the second partition, and run it, to see how A1 was saved to disk.
+
+What is special about this file is that it is saved with BASIC's `SAVE`,
+but the `TXTTAB` address was not $0800 but $1000.
+BASIC's `SAVE` uses `TXTTAB` as start of program and `VARTAB` as end.
+
+![A1 hexdump](A1hexdump.png)
+
+Here is a quick analysis of the file.
+
+- The first 12 bytes of the file look like this (header row is offset in file).
+
+  |0000|0001|0002|0003|0004|0005|0006|0007|0008|0009|000A|000B|
+  |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+  | 01 | 10 | 09 | 10 | 64 | 00 | 4E | B2 | 31 | 00 | 25 | 10 |
+
+- First two bytes (low byte, high byte) form $1001, the original start of the program (`TXTTAB`).
+  The rest of the file is the content of the program, loaded at $1001
+  (header row shows address in memory).
+
+  |1001|1002|1003|1004|1005|1006|1007|1008|1009|100A|
+  |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+  | 09 | 10 | 64 | 00 | 4E | B2 | 31 | 00 | 25 | 10 |
+
+- The next two bytes (again, low byte, high byte) form $1009, the link to the next line.
+
+- Bytes at file offset 4 and 5 form $0064, for the line number, 100.
+
+- Bytes at offset 6-8 are E4 B2 31, which represents `N=1`.
+
+- Byte at offset 9 is the terminating 0 for the first line.
+
+- We see that the next line indeed starts at address 1009, just as the first link indicated.
+
+### LOAD behavior
+
+What is more surprising is that when `LOAD`ing a program with load address 
+$1001 in a partition that does not start at $1001, BASIC patches the line link 
+addresses. One could say, the loader relocates the program. 
+
+That is a neat feature, illustrated by these experiments:
+
+- Try `LOAD "A1",8` in partition 1. As expected it loads and runs fine. 
+  "Reduce" A1 by deleting all of its lines except the code to switch to A0. 
+  Switch to A0 and from there to partition 2.
+
+- Try `LOAD "A1",8` in partition 2. Also here, it loads and runs fine. 
+  This shows that (1) BASIC's `LOAD` loads at `TXTTAB`, ignoring the load 
+  address in the file, and (2) BASIC's `LOAD` patches the line links.
+
+- Switch to 0 and from there to 1 to check A1 app is the "reduced" one.
+  Switch back to 0 and from there to 2. "Reduce" A2 by deleting all of its 
+  lines except the code to switch to A0. 
+  
+  Try `LOAD "A1",8,1` in partition 2. Note the `,1` to force LOAD to use
+  the load address in the file. Recall that this is $1001, the start of 
+  partition 1. After the `LOAD` partition 2 still has the "reduced" A2 code,
+  so nothing appears loaded. 
+  
+  Switch to 0 and then to 1 and check that the "reduced" A1
+  is now replaced by the loaded A1.
+
+
+
+## Advanced partition manager 
+
+In the second part of this document we try to make an advanced partition 
+manager, which mitigates the shortcomings of the simple partition manager.
+Let's first have a look at those shortcomings.
+
+### Analysis of the simple partition manager
+
+The first drawback of the simple partition manager is that the actual apps 
+(A1, A2,...) need to include switching code (eg lines 150-180 of A1). Of course 
+the developer of the partition manager A0 needs to understand partitions and 
+layout pointers, but the user apps (A1, A2, ...) should be plain BASIC, free of 
+partition knowledge. 
+
+The second drawback is that while developing a user app (say A1), its layout 
+pointers (most notably `VARTAB`) change. Therefore, each time a switch is made 
+from app A1 to the partition manager A0, the layout pointers of A1 need to be 
+recorded, so that they can be updated in A0. Failing to do so, would block us 
+from switching back to A1 at a later stage. This is a maintenance burden and 
+it is easy to forget.
+
+A related drawback is that when changing A0 (to update the layout pointers 
+of one of the apps A1, A2, ...) there is a risk that the layout (typically 
+pointer VARTAB) of A0 itself changes. That would require an update of the 
+switching code of all apps (A1, A2, ...) otherwise they could no longer 
+switch to A0.
+
+A small nuisance is also that the switching code only restores the progtime 
+pointers (begin of partition, end of BASIC program text, and end of partition), 
+not the runtime pointers (variables, arrays, strings). Adding those would 
+aggravate the maintenance burden (more pointers to record and update, and 
+more often).
+
+A final drawback is that the apps (A1, A2, ...) only have switching code to go 
+back to partition manager A0, and not to another app. Of course we could 
+expand the switching code in each app to allow switching to all other apps, 
+but this would make the previous drawbacks only more painful. 
+
+There is a solution to all this; it is presented in the next section.
+
+
+### Sketch of the advanced partition manager
+
+Why would the programmer of app A1 need to write down the values of A1's 
+layout pointers when switching to A0? We have a computer, we could store 
+those pointers in variables. No. Not really. The problem is that while we 
+are changing the layout pointers of an app we lose access to our variables 
+(VARTAB indicates where they are). So that doesn't work. 
+
+Unless we do not use _BASIC_ variables to record the layout pointers, but 
+some fixed memory locations. And then we do not use BASIC but some assembly 
+routine to update those locations.
+
+The idea is that the partition manager A0 sets aside a piece of memory 
+that records the layout pointers of all its apps, the _layout table_. If 
+there are 8 apps (partitions), that would be 8 sets of 7 pointers of 2 bytes, 
+nearly 128 bytes for the layout table. The partition manager also records 
+which partition is active. Finally, there would be one assembly routine, 
+the _switcher_, with one parameter: the partition to make active. 
+
+When this switcher gets called, it first copies the actual layout pointers 
+(43..56) to the layout table (_backup_). The switcher knows which slot in the 
+table to use, because it knows which partition is currently active. 
+Then it updates the location that records the active partition with the 
+passed parameter. Finally, it copies (_restores_) the layout pointers from 
+the table (using the slot of the new active partition) to the actual layout 
+pointers (43..56).
+
+The advanced partition manager thus consists of three parts
+- the _layout table_ with layout pointers of all partitions,
+- the _switcher_, an assembly routine that implements the switching using 
+  the layout table,
+- a BASIC program with some easy way to define partition boundaries. It also
+   - creates the partitions (pokes the leading zeros),
+   - initializes the layout table with pointers for all partitions, and 
+   - pokes the switcher assembly routine into memory.
+   - It will map `USR()` to this routine. This makes it easy pass a parameter 
+     (new partition to become active) to the routine. It also makes The
+     routine easily accessible in all partitions.
+
+
+### todo
+
+...
+
+
+## Files
+
+This document comes with a [d64](partmngr.d64) disk image, With
+- `A0` the simple partition manager.
+- `A1` the simple app that prints its name, progtime addresses and returns to A0.
+- `HEXDUMP` a basic program that prints a hex dump of file `A1`.
+
 
 (end)
