@@ -65,7 +65,7 @@ we look at the colored parts.
 By default, a BASIC program starts at $0800. With a zero byte, which _must_ be there (or even `NEW` won't work).
 Then comes the BASIC program "text" (the entered lines). Program text starts at a location known
 as `TXTTAB` ($0801) and grows pushing up `VARTAB`. 
-The image below shows a simple example (of a one-line program `10 REM A`) in more detail.
+The image below shows a simple example (of a two-line program `10 A$="ABC"`/`20 B=0`) in more detail.
 
 ![10 REM A](10REM_A.drawio.png)
 
@@ -165,7 +165,7 @@ The screenshot below shows the complete listing for a simple partition manager A
 
 Before or after running it (but don't press `1` or `2` yet), the listing can be saved e.g. to disk. 
 BASIC's SAVE will look at `TXTTAB` and `VARTAB` (but not `MEMSIZ`) to determine what to save.
-`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#intermezzo-on-file-content)).
+`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#intermezzo-on-file-loading)).
 This way BASIC knows where to load a `PRG` back. 
 
 ![A0 listing](A0listing.png)
@@ -264,7 +264,7 @@ need to know the layout pointers of A0, otherwise they cannot switch back.
 If you are editing A1, this dependency is painful.
 
 
-## Intermezzo on file content
+## Intermezzo on file loading
 
 We dump the content of file `A1`, to check its load address and line links.
 With that info, we check the behavior of BASIC's `LOAD`.
@@ -284,23 +284,28 @@ BASIC's `SAVE` uses `TXTTAB` as start of program and `VARTAB` as end.
 ![A1 hexdump](A1hexdump.png)
 
 Here is a quick analysis of the file.
+Thee first 12 bytes of the file are in the second row of this table.
+The first row (header) is offset in the file.
+All numbers are in hex.
 
-- These are the first 12 bytes of the file; the header row is offset in _file_ (all in hex).
 
-  |0000|0001|0002|0003|0004|0005|0006|0007|0008|0009|000A|000B|
-  |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-  | 01 | 10 | 09 | 10 | 64 | 00 | 4E | B2 | 31 | 00 | 25 | 10 |
+  |offset in file `A1`   | 0000 | 0001 | 0002 | 0003 | 0004 | 0005 | 0006 | 0007 | 0008 | 0009 | 000A | 000B |
+  |:--------------------:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
+  |byte at file offset   |  01  |  10  |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
+  |`LOAD` in partition 1 |      |      |[1001]| 1002 | 1003 | 1004 | 1005 | 1006 | 1007 | 1008 |[1009]| 100A |
+  |byte at memory address|      |      |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
+
 
 - The first two bytes (low byte, high byte order) form $1001, the original 
   _load address_ of the program (`TXTTAB`). The rest of the file is the 
-  _content_ of the program. The header row shows address in _memory_
-  when loading at the load address.
+  _content_ of the program. That is typically stored in memory at the load 
+  address.
 
-  |1001|1002|1003|1004|1005|1006|1007|1008|1009|100A|
-  |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-  | 09 | 10 | 64 | 00 | 4E | B2 | 31 | 00 | 25 | 10 |
+- If the program is indeed loaded at $1001, we get the memory content as
+  shown in rows 2 and 3 of the table.
 
-- The next two bytes (again: low byte, high byte) form $1009, the link to the next line.
+- Bytes at file offset 2 and 3 (again: low byte, high byte) form $1009, 
+  the link to the next line (marked with square brackets)
 
 - Bytes at file offset 4 and 5 form $0064, form the line number, 100.
 
@@ -308,7 +313,8 @@ Here is a quick analysis of the file.
 
 - Byte at offset 9 is the terminating 0 for line 100.
 
-- We see that the next line indeed starts at address $1009, just as the first link indicated.
+- We see that the next line indeed starts at address $1009, 
+  just as the first link indicated.
 
 ### LOAD behavior
 
@@ -326,6 +332,18 @@ That is a neat feature, illustrated by these experiments:
   This shows that (1) BASIC's `LOAD` loads at `TXTTAB`, ignoring the load 
   address in the file, and (2) BASIC's `LOAD` patches the line links.
 
+  The table below shows the file (`A1`) being loaded in partition 2, which 
+  starts at $1809. Note that the line links (bold) are patched by the loader.
+
+    |offset in file `A1`   | 0000 | 0001 | 0002 | 0003 | 0004 | 0005 | 0006 | 0007 | 0008 | 0009 | 000A | 000B |
+    |:--------------------:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
+    |byte at file offset   |  01  |  10  |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
+    |`LOAD` in partition 2 |      |      |[1801]| 1802 | 1803 | 1804 | 1805 | 1806 | 1807 | 1808 |[1809]| 180A |
+    |byte at memory address|      |      |  09  |**18**|  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |**18**|
+
+  This table is generated with `FORI=$1801TOI+10:?HEX$(PEEK(I))" ";:NEXT` 
+  (using the KCS power cartridge).
+  
 - Switch to 0 and from there to 1 to check A1 app is still the "reduced" one.
   Switch back to 0 and from there to 2. "Reduce" A2 by deleting all of its 
   lines except the code to switch to A0. 
@@ -340,7 +358,6 @@ That is a neat feature, illustrated by these experiments:
   
   This shows that (1) `LOAD "XXX",8` loads in the activate partition, and 
   (2) `LOAD "XXX",8,1` loads absolute, that could be in another partition.
-
 
 
 ## Advanced partition manager 
