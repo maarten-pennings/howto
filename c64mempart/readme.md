@@ -12,7 +12,7 @@ I was browsing "Mapping the Commodore 64" from Sheldon Leemon. I still have an o
 It is a [classic](https://archive.org/details/Compute_s_Mapping_the_64_and_64C) for programmers, 
 describing the memory map of the C64 ([webversion](https://www.pagetable.com/c64ref/c64mem/)).
 
-The entry `TXTTAB` caught my attention.
+The entry [TXTTAB](https://www.pagetable.com/c64ref/c64mem/#:~:text=%24002B%2D%24002C-,TXTTAB,-Pointer%20to%20the) caught my attention.
 It is the "Pointer to the Start of BASIC Program Text" at $002B-$002C (43-44 decimal).
 The book explains
 
@@ -28,15 +28,18 @@ The book explains
 Then came a reference to [COMPUTE!'s First Book of PET/CBM, pages 66 and 163](https://archive.org/details/COMPUTEs_First_Book_of_PET-CBM_1981_Small_Systems_Services)
 an article showcasing a multi-app implementation. The book predates the C64. 
 It describes the [Commodore PET](https://en.wikipedia.org/wiki/Commodore_PET), 
-but since the PET also had Microsoft BASIC, it was a usable start. 
+but since the PET also had Microsoft BASIC, it is a usable start. 
 The administration of BASIC interpreter (pointer names, pointer locations) on the PET 
 differs from the C64, so it did take me some time to 
 get going on my [C64](https://en.wikipedia.org/wiki/Commodore_64).
 
-I did miss one reason for changing `TXTTAB`/`MEMSIZ`, namely to set aside a 
+I did miss one reason in "Mapping the Commodore 64" for changing `TXTTAB`/`MEMSIZ`, namely to set aside a 
 part of the memory for an assembly routine. We will utilize this later in the
 [advanced partition manager](#advanced-partition-manager) for a central 
 switching routine.
+
+Let's first try to understand the memory map used by BASIC, then try to 
+replicate on my C64 the multi-app system described in the PET article.
 
 
 ## BASIC memory map
@@ -45,7 +48,7 @@ The above mentioned _COMPUTES!'s First Book_ contains the article
 "Memory Partition of BASIC Workspace" by Harvey B. Herman on pages 64-67.
 It explains a system with four programs, all four in the memory of the PET. 
 Program 1, 2 and 3 are the actual programs between which we want to switch.
-The 4th program is the manager; it lets the user pick the one to switch to.
+The other program is the manager; it lets the user pick the one to switch to.
 Once program 1, 2, or 3 is done, it switches back to the manager, where we
 can dispatch again one of 1, 2, or 3.
 
@@ -58,11 +61,11 @@ The table below comes from the book, with the right-most column ("C64 ROM") adde
 
 What are all these pointers? The diagram below shows the C64 memory map with focus on BASIC.
 The gray parts (zero page, stack, OS data, screen buffer, BASIC, I/O and Kernal) are ignored;
-we look at the colored parts.
+we look at the colored (blue, orange, green) parts.
 
 ![C64 memory map with focus on BASIC](basicmemorymap.drawio.png)
 
-By default, a BASIC program starts at $0800. With a zero byte, which _must_ be there (or even `NEW` won't work).
+By default, a BASIC program starts at $0800, with a zero byte, which _must_ be there (or even `NEW` won't work).
 Then comes the BASIC program "text" (the entered lines). Program text starts at a location known
 as `TXTTAB` ($0801) and grows pushing up `VARTAB`. 
 The image below shows a simple example (of a two-line program `10 A$="ABC"`/`20 B=0`) in more detail.
@@ -104,10 +107,10 @@ variables block, the array block, and the heap block.
 
 ## Simple partition manager
 
-My first trial is to replicate Herman's article, but then on the C64.
+We now try to replicate Herman's article, but then on the C64.
 
-- I create one partition manager (app "A0").
-- I create two apps ("A1" and "A2", instead of three as Herman does).
+- Create one partition manager (app "A0").
+- Create two apps ("A1" and "A2", instead of three as Herman does).
 - Each app gets a block of 2k RAM (yes, that is small), the first one starting at $0800.
 - All three apps are BASIC programs.
 
@@ -154,9 +157,9 @@ and the layout pointers with the double << marking come once we have written tho
 
   |  App |TXTTAB (43/44)| |VARTAB (45/46)|  |MEMSIZ (55/56)| |
   |:----:|:------------:|-|:------------:|--|:------------:|-|
-  |  A0  | $0801 =  8/1 | |$0A13 = 10/19 |  | $1000 = 16/0 |<|
-  |  A1  | $1001 = 16/1 |<|$110D = 17/50 |<<| $1800 = 24/0 |<|
-  |  A2  | $1801 = 24/1 |<|$190D = 25/50 |<<| $2000 = 32/0 |<|
+  |  A0  | $0801 =  8/1 | |$0A13 = 10/49 |  | $1000 = 16/0 |<|
+  |  A1  | $1001 = 16/1 |<|$110D = 17/54 |<<| $1800 = 24/0 |<|
+  |  A2  | $1801 = 24/1 |<|$190D = 25/54 |<<| $2000 = 32/0 |<|
 
 
 ### Application A0 (partition manager)
@@ -224,19 +227,19 @@ Update the A1's `VARTAB` in A0 and save A0.
 
 ### Application A2 (user program)
 
-When we now run A0, we can press `1` and got to A1. List it. Run it and press `0`. We are back in A0.
+When we now run A0, we can press `1` and go to A1. List it. Run it and press `0`. We are back in A0.
 
 Run A0 and now press `2`. We are now in partition A2, which was unused until now.
 
 We can write a program for A2. In that case we should start with `NEW`.
 
-However, we can also `LOAD "A1",8`.
+However, we can also `LOAD "A1",8`, which includes an implicit `NEW`.
 **Do not `LOAD "A1",8,1`**.
 When loading without the `,1` BASIC will load at `TXTTAB` (which is $1801 for A2) and 
 automagically fix the linked list of BASIC line numbers (of A1 which was saved for $1001).
 See [LOAD behavior](#load-behavior)
 
-> I have the KCS power cartridge. I features a `DLOAD`. That seems to do a "FAST-LOAD,8,1" so do not use it.
+> I have the KCS power cartridge. It features a `DLOAD "A1"`. That seems to do a `FASTLOAD "A1",8,1` so do not use it.
 
 After A1 is loaded, fix e.g. line 1 to identify it as user program 2.
 Run it. Write down the layout pointers. 
@@ -268,6 +271,12 @@ If you are editing A1, this dependency is painful.
 
 We dump the content of file `A1`, to check its load address and line links.
 With that info, we check the behavior of BASIC's `LOAD`.
+
+We come to two useful conclusions
+- BASIC's `SAVE` saves what the program between `TXTTAB` and `VARTAB` so it works for any partition.
+- BASIC's `LOAD` (without `,1`) ignores the program's original location (partition) and relocates it to the current `TXTTAB`.
+
+In other words, **`LOAD` and `SAVE` are fully partition compliant**.
 
 
 ### Hex dump
