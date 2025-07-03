@@ -1,9 +1,18 @@
 # C64 Memory partitioning
 
-Can we partition the C64 memory, storing two programs simultaneously?
+Can we partition the C64 memory, storing two BASIC programs simultaneously?
 A multi-app setup?
 
-No multitasking, we activate one, run it, stop it, activate another and run it.
+This is not multitasking with millisecond time slicing; rather we activate 
+one partition, run the BASIC app, stop it, switch to another partition, 
+and run that BASIC app, switch back, etc.
+
+Think of a use-case where we have an app writing files an app reading those files.
+We could have one partition where we develop the app that writes files to disk.
+A second partition has some standard app that performs hex-dumps of disk files; 
+we use that to debug what the first app has written. Partition three has the 
+second app we develop; it reads and processes disk files. A fourth partition 
+could be used for `LOAD "$",8` without overwriting the apps we develop.
 
 
 ## Introduction
@@ -168,7 +177,7 @@ The screenshot below shows the complete listing for a simple partition manager A
 
 Before or after running it (but don't press `1` or `2` yet), the listing can be saved e.g. to disk. 
 BASIC's SAVE will look at `TXTTAB` and `VARTAB` (but not `MEMSIZ`) to determine what to save.
-`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#intermezzo-on-file-loading)).
+`TXTTAB` is even saved as header of the `PRG` file (see hex dump [below](#appendix-on-file-handling)).
 This way BASIC knows where to load a `PRG` back. 
 
 ![A0 listing](A0listing.png)
@@ -237,7 +246,6 @@ However, we can also `LOAD "A1",8`, which includes an implicit `NEW`.
 **Do not `LOAD "A1",8,1`**.
 When loading without the `,1` BASIC will load at `TXTTAB` (which is $1801 for A2) and 
 automagically fix the linked list of BASIC line numbers (of A1 which was saved for $1001).
-See [LOAD behavior](#load-behavior)
 
 > I have the KCS power cartridge. It features a `DLOAD "A1"`. That seems to do a `FASTLOAD "A1",8,1` so do not use it.
 
@@ -266,110 +274,10 @@ otherwise it can not activate those apps. Note also that A1 and A2
 need to know the layout pointers of A0, otherwise they cannot switch back.
 If you are editing A1, this dependency is painful.
 
-
-## Intermezzo on file loading
-
-We dump the content of file `A1`, to check its load address and line links.
-With that info, we check the behavior of BASIC's `LOAD`.
-
-We come to two useful conclusions
-- BASIC's `SAVE` saves what the program between `TXTTAB` and `VARTAB` so it works for any partition.
-- BASIC's `LOAD` (without `,1`) ignores the program's original location (partition) and relocates it to the current `TXTTAB`.
-
-In other words, **`LOAD` and `SAVE` are fully partition compliant**.
-
-
-### Hex dump
-
-The image below shows the hex dump of app A1.
-
-> A hex dump utility is included in the [disk image](#files). 
-> You could load it in the second partition, and run it, to see how A1 was saved to disk.
-
-What is special about this file is that it is saved with BASIC's `SAVE`,
-but the `TXTTAB` address was not $0800 but $1000.
-BASIC's `SAVE` uses `TXTTAB` as start of program and `VARTAB` as end.
-
-![A1 hexdump](A1hexdump.png)
-
-To analyze the dumped file, we tabulate the first 12 bytes, see table below.
-The first row (header) is offset in the file, the second row the contents.
-All numbers are in hex.
-
-
-|offset in file `A1`   | 0000 | 0001 | 0002 | 0003 | 0004 | 0005 | 0006 | 0007 | 0008 | 0009 | 000A | 000B |
-|:--------------------:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
-|byte at file offset   |  01  |  10  |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
-|`LOAD` in partition 1 |      |      |[1001]| 1002 | 1003 | 1004 | 1005 | 1006 | 1007 | 1008 |[1009]| 100A |
-|byte at memory address|      |      |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
-
-
-- The first two bytes (low byte, high byte order) of the file form $1001, 
-  the original _load address_ of the program (`TXTTAB`). The rest of the 
-  file is the _content_ of the program. That is stored in memory at the 
-  load address.
-
-- If the program is indeed loaded at $1001, we get the memory content as
-  shown in rows 2 and 3 of the table.
-
-- Bytes at file offset 2 and 3 (again: low byte, high byte) form $1009, 
-  the link to the next line (start-of-lines are marked with square brackets)
-
-- Bytes at file offset 4 and 5 form $0064, which is the line number, 100.
-
-- Bytes at offset 6-8 are E4 B2 31, which represents the BASIC fragment `N=1`.
-
-- Byte at offset 9 is the terminating 0 for line 100.
-
-- We see that the next line indeed starts at address $1009, 
-  just as the first link indicated. The next line is at $1025.
-
-
-### LOAD behavior
-
-What is more surprising than the support for a non-standard load address,
-Is that the loader relocates!
-When `LOAD`ing a program with load address $1001 in a partition 
-that does not start at $1001, BASIC patches the line links. 
-
-That is a neat feature, illustrated by these experiments:
-
-- Try `LOAD "A1",8` in partition 1. As expected (A1 was written for/in partition 1) it loads, lists, and runs fine. 
-  "Reduce" A1 by deleting all of its lines except the code to switch to A0. 
-  Switch to A0 and from there to partition 2.
-
-- Try `LOAD "A1",8` in partition 2. Also here, it loads, lists, and runs fine. 
-  This shows that (1) BASIC's `LOAD` loads at `TXTTAB`, ignoring the load 
-  address in the file, and (2) BASIC's `LOAD` patches the line links.
-
-  The table below shows the file (`A1`) being loaded in partition 2, which 
-  starts at $1809. Note that the line links (bold) are patched by the loader.
-
-  |offset in file `A1`   | 0000 | 0001 | 0002 | 0003 | 0004 | 0005 | 0006 | 0007 | 0008 | 0009 | 000A | 000B |
-  |:--------------------:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
-  |byte at file offset   |  01  |  10  |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
-  |`LOAD` in partition 2 |      |      |[1801]| 1802 | 1803 | 1804 | 1805 | 1806 | 1807 | 1808 |[1809]| 180A |
-  |byte at memory address|      |      |  09  |**18**|  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |**18**|
-
-  This table is generated with `FORI=$1801TOI+10:?HEX$(PEEK(I))" ";:NEXT` 
-  (using the KCS power cartridge).
-  
-- Switch to 0 and from there to 1 to check A1 app is still the "reduced" one.
-  Switch back to 0 and from there to 2. "Reduce" A2 by deleting all of its 
-  lines except the code to switch to A0. Partition 1 and 2 now both have a 
-  "reduced" version of program `A1`.
-  
-  Try `LOAD "A1",8,1` in partition 2. Note the `,1` to force LOAD to use
-  the load address in the file. Recall that the load address in the file is 
-  $1001, the start of partition 1. Check with `LIST` that after the `LOAD` 
-  partition 2 still has the "reduced" A2 code, so nothing is loaded 
-  (in partition 2). 
-  
-  Switch to 0 and then to 1 and check with `LIST` that the "reduced" A1
-  is now replaced by the loaded A1.
-  
-  This shows that (1) `LOAD "XXX",8` loads in the activate partition, and 
-  (2) `LOAD "XXX",8,1` loads absolute, that could be in another partition.
+Finally, I was surprised to find out that the standard BASIC commands
+`LOAD` and `SAVE` are fully partition compliant: `SAVE` saves the program  
+stored between `TXTTAB` and `VARTAB`, and `LOAD` relocates a file to the 
+current `TXTTAB`.
 
 
 ## Advanced partition manager 
@@ -465,6 +373,118 @@ This document comes with a [d64](partmngr.d64) disk image, with these files
 - `A0`, the simple partition manager.
 - `A1`, a simple app that prints its name, progtime addresses and returns to A0.
 - `HEXDUMP` a basic program that prints a hex dump (e.g. of file `A1`).
+
+
+
+
+
+
+
+## Appendix on file handling
+
+We hex-dump the content of file `A1`, to check its load address and line links.
+With that info, we check the behavior of BASIC's `LOAD`.
+
+We come to two conclusions:
+
+- BASIC's `SAVE` saves the program stored between `TXTTAB` and `VARTAB`, so it works for any partition.
+
+- BASIC's `LOAD` (without `,1`) ignores the program's original location (partition) and _relocates_ it to the current `TXTTAB`.
+
+In other words, **`LOAD` and `SAVE` are fully partition compliant**.
+
+
+### Hex dump
+
+The image below shows the hex dump of app A1.
+
+> A hex dump utility is included in the [disk image](#files). 
+> You could load it in the second partition, and run it, to see how A1 was saved to disk.
+
+What is special about file `A1` is that it was saved with BASIC's `SAVE`,
+but the `TXTTAB` address was not $0800 but $1000. BASIC's `SAVE` uses `TXTTAB` 
+as start of program (and not e.g. a hardwired $0800), and `VARTAB` as end.
+So `SAVE` works from any partition.
+
+![A1 hexdump](A1hexdump.png)
+
+To analyze the dumped file, we tabulate the first 12 bytes, see table below.
+The first row (header) is offset in the file, the second row the contents.
+All numbers are in hex.
+
+
+|offset in file `A1`   | 0000 | 0001 | 0002 | 0003 | 0004 | 0005 | 0006 | 0007 | 0008 | 0009 | 000A | 000B |
+|:--------------------:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
+|byte at file offset   |  01  |  10  |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
+|`LOAD` in partition 1 |      |      |[1001]| 1002 | 1003 | 1004 | 1005 | 1006 | 1007 | 1008 |[1009]| 100A |
+|byte at memory address|      |      |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
+
+
+- The first two bytes (low byte, high byte order) of the file form $1001, 
+  the original _load address_ of the program (`TXTTAB`). The rest of the 
+  file is the _content_ of the program. That is stored in memory at the 
+  load address.
+
+- If the program is indeed loaded at $1001, we get the memory content as
+  shown in rows 2 and 3 of the table.
+
+- Bytes at file offset 2 and 3 (again: low byte, high byte) form $1009, 
+  the link to the next line (start-of-lines are marked with square brackets)
+
+- Bytes at file offset 4 and 5 form $0064, which is the line number, 100.
+
+- Bytes at offset 6-8 are E4 B2 31, which represents the BASIC fragment `N=1`.
+
+- Byte at offset 9 is the terminating 0 for line 100.
+
+- We see that the next line indeed starts at address $1009, 
+  just as the first link indicated. The next line is at $1025.
+
+
+### LOAD behavior
+
+The BASIC loader relocates.
+When `LOAD`ing a program with load address $1001 in a partition 
+that does not start at $1001, BASIC patches the line links stored in the file.
+
+That is a neat feature, illustrated by these experiments:
+
+- Try `LOAD "A1",8` in partition 1. As expected (A1 was written for/in partition 1) it loads, lists, and runs fine. 
+  "Reduce" A1 by deleting all of its lines except the code to switch to A0. 
+  Switch to A0 and from there to partition 2.
+
+- Try `LOAD "A1",8` in partition 2. Also here, it loads, lists, and runs fine. 
+  This shows that (1) BASIC's `LOAD` loads at `TXTTAB`, ignoring the load 
+  address in the file, and (2) BASIC's `LOAD` patches the line links.
+
+  The table below shows the file (`A1`) being loaded in partition 2, which 
+  starts at $1801. Note that the line links (bold) are patched by the loader.
+
+  |offset in file `A1`   | 0000 | 0001 | 0002 | 0003 | 0004 | 0005 | 0006 | 0007 | 0008 | 0009 | 000A | 000B |
+  |:--------------------:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
+  |byte at file offset   |  01  |  10  |  09  |  10  |  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |  10  |
+  |`LOAD` in partition 2 |      |      |[1801]| 1802 | 1803 | 1804 | 1805 | 1806 | 1807 | 1808 |[1809]| 180A |
+  |byte at memory address|      |      |  09  |**18**|  64  |  00  |  4E  |  B2  |  31  |  00  |  25  |**18**|
+
+  This table is generated with `FORI=$1801TOI+10:?HEX$(PEEK(I))" ";:NEXT` 
+  (using the KCS power cartridge).
+  
+- Switch to 0 and from there to 1 to check A1 app is still the "reduced" one.
+  Switch back to 0 and from there to 2. "Reduce" A2 by deleting all of its 
+  lines except the code to switch to A0. Partition 1 and 2 now both have a 
+  "reduced" version of program `A1`.
+  
+  Try `LOAD "A1",8,1` in partition 2. Note the `,1` to force LOAD to use
+  the load address in the file. Recall that the load address in the file is 
+  $1001, the start of partition 1. Check with `LIST` that after the `LOAD` 
+  partition 2 still has the "reduced" A2 code, so nothing is loaded 
+  (in partition 2). 
+  
+  Switch to 0 and then to 1 and check with `LIST` that the "reduced" A1
+  is now replaced by the loaded A1.
+  
+  This shows that (1) `LOAD "XXX",8` loads in the activate partition, and 
+  (2) `LOAD "XXX",8,1` loads absolute, that could be in another partition.
 
 
 (end)
