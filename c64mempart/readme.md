@@ -7,7 +7,7 @@ This is not multitasking with millisecond time slicing; rather we activate
 one partition, run the BASIC app, stop it, switch to another partition, 
 and run that BASIC app, switch back, etc.
 
-Think of a use-case where we have an app writing files an app reading those files.
+Think of a use-case where we have one app writing files anothrt app reading those files.
 We could have one partition where we develop the app that writes files to disk.
 A second partition has some standard app that performs hex-dumps of disk files; 
 we use that to debug what the first app has written. Partition three has the 
@@ -404,7 +404,7 @@ for e.g. assembler (or graphics data).
 
 ### BASIC program (`APM`)
 
-The BASIC program of the Advanced Partition Manager (APM) is only 9 lines.
+The main part of the BASIC program of the Advanced Partition Manager (APM) is only 9 lines.
 
 ```BAS
 100 PRINT"APM V17,2025JUL05 MCPENNINGS"
@@ -679,7 +679,7 @@ SETPTR   ; PTR := @TBL[PIX]
          RTS
 ```
 
-Since (due to the padding) a slot in the layout table is 16 bytes, 
+Since (due to the padding) a slot in the layout table is 16 bytes, 
 the computation is relatively simple: `PTR := TBL + 16*PIX`. 
 What also helps is that `PIX<8`, and since `TBL` 
 is $0F80, we add maximum $80, so there is no carry.
