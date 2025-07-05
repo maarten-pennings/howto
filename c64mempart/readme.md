@@ -7,17 +7,17 @@ This is not multitasking with millisecond time slicing; rather we activate
 one partition, run the BASIC app, stop it, switch to another partition, 
 and run that BASIC app, switch back, etc.
 
-Think of a use-case where we have one app writing files anothrt app reading those files.
+Think of a use-case where we have one app writing files and another app is reading those files.
 We could have one partition where we develop the app that writes files to disk.
 A second partition has some standard app that performs hex-dumps of disk files; 
 we use that to debug what the first app has written. Partition three has the 
 second app we develop; it reads and processes disk files. A fourth partition 
 could be used for `LOAD "$",8` without overwriting the apps we develop.
 
-After studying where the idea came from, we look at the BASIC memory map.
+After reconstructing where the partitioning idea came from, we look at the BASIC memory map.
 Next, we create a _Simple Partition manager_, and we close with some after thoughts.
 
-In a second part we develop an _Advanced Partition Manager_, including some 
+In the second part we develop an _Advanced Partition Manager_, including some 
 assembly code to switch between partitions.
 
 This document comes with two appendices: one containing example files, and 
@@ -420,11 +420,11 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
 
 - APM starts with a banner (line 100)
 
-- APM assumes to start at $0800. Variable `MS` is set to the required top: 
-  $1000 (line 110), the MEMSIZ to be. However, we cut of 256 bytes for the
+- APM assumes to start at $0800. At line 110, variable `MS` is set to the required top: 
+  $1000, the MEMSIZ to be. However, we cut of 256 bytes for the
   switcher routine and the layout table.
   
-- At line 120 MEMSIZ is set. We use sub routine at line 600 for that; it
+- At line 120 MEMSIZ is set. We use the sub routine at line 600 for that; it
   implements a "DOKE" (double poke).
   
   ```BAS
@@ -434,8 +434,8 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
   ```  
   
 - In the next section we will develop the assembly routine for the switcher.
-  That 92 byte code is in-lined in BASIC, and poked one line 130 via 
-  routine 700 to address `MS`. The poker even has a simple checksum.
+  That 92 byte code is in-lined in BASIC, and poked to addres `MS` on line 130 via 
+  the sub routine at 700. The poker even has a simple checksum.
   
   ```BAS
   700 REM USR() CODE
@@ -449,7 +449,7 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
   780 DATA 8824:RETURN
   ```  
 
-- Once the switcher is placed in RAM, we set the `USR()` vector (785),
+- Once the switcher is placed in RAM, we poke the `USR()` vector (address 785),
   see line 140.
   
 - Line 150 prints the (address/size) details for partition 0 to the screen
@@ -462,9 +462,9 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
   ```
 
 - Line 160, calling routine 200, creates the partition table and prints
-  (address/size) details for the other partitions.
+  (address/size) details for the other partitions. We discuss that next.
 
-- Line 170 gives a one line user manual: is states to use USR(0) .. USR(7).
+- Line 170 gives a one line user manual: it states to use `USR(0)` .. `USR(7)`.
   It also prints a reminder to use `NEW` the first time a partition is entered.
   
 - Line 190 ends the program.
@@ -492,7 +492,7 @@ initially used by APM itself.
 
 - The number of partitions needs to be between 3 and 8.
 - The partitions shall not overlap. 
-- It is allowed, to leave "gaps" between partitions.
+- It is allowed to leave "gaps" between partitions.
 
 This is routine 200.
 
@@ -523,12 +523,12 @@ This is routine 200.
 ```
 
 - Is starts (line 210) by reading how many partitions to create.
-  This is tested 1t line 220 (maybe a lower bound of 2 instead of 
+  This is tested at line 220 (maybe a lower bound of 2 instead of 
   3 would also be ok).
 
-- The layout table is written in the second half of page $0f00.
+- The layout table is written in the second half of page $0F00: at $0F80.
   But the table is prepended by four variables (`NUM`, `PIX`, `ARG`, `RES`).
-  Line 230 initializes the address pointer `A` for that.
+  Line 230 initializes the address pointer `A` for that. See the assembly routine below for the purpose of those variables.
   
 - Line 240 initializes NUM to N and PIX to 0, using the DOKE routine 600.
 
@@ -538,7 +538,7 @@ This is routine 200.
   Slot 0 is for APM itself; it will be initialized the first time the
   user will call USR() and leave partition 0.
   
-- Line 270 initializes `PA` (previous address) for some error checking.
+- Line 270 initializes `PA` ("previous address") to the first free address, for some error checking.
 
 - Line 280-420 initialize the vector table for partitions 1 to N-1 
   (PART-0 was done/skipped at line 260).
@@ -549,14 +549,14 @@ This is routine 200.
 - Line 300 checks against overlap and line 310 against too small partitions.
 
 - Line 320 ensures that every partitions starts with a 0 byte, as BASIC 
-  wants it.
+  requires.
   
 - Lines 330-390 save the layout pointers (for an empty program) to the layout 
   table. Again, routine 600 is used, which steps `A` each time. Line 400
   pads the table to 16 entries. This makes the switch routine easier,
   ×16 is easier in assembler (4× shift) than ×14.
   
-- Line 410 record the new top address.
+- Line 410 records the new first free address.
 
 This completes the BASIC program of the Advanced Partition Manager.
 For full source see [listing](#file-apm17---advanced-partition-manager) below.
@@ -583,7 +583,7 @@ needs to do:
 - The layout pointers that were active for `X` will now be restored from 
   slot `X` to the actual pointers.
 
-This is the assembly program.
+Let's review the assembly program.
 
 It begins with a header with comments.
 
@@ -684,7 +684,7 @@ the computation is relatively simple: `PTR := TBL + 16*PIX`.
 What also helps is that `PIX<8`, and since `TBL` 
 is $0F80, we add maximum $80, so there is no carry.
 For safety, `PIX` is ANDed with 7, this ensures `PTR` always points 
-inside the layout table, so that when `PIX` is correct, we will 
+inside the layout table, so that when somehow`PIX` is incorrect, we will 
 not write 14 bytes over the `USR` routine.
 
 We have now discussed all ingredients.
@@ -735,9 +735,9 @@ RET      LDY RES
   result that later will be returned.
   
 - The next block converts the FAC or floating point accumulator (holding the value
-  of expression `E` When calling `USR(E)` to an integer by calling `GETADR`.
+  of expression `E` When calling `USR(E)`) to an integer by calling `GETADR`.
   Then it check that the high byte (`A`) is 0, otherwise bails out via `RET1`.
-  Then it check is the low byte (`Y`) is less then the number of partitions 
+  Then it check if the low byte (`Y`) is less then the number of partitions 
   (`NUM`), otherwise bails out via `RET1`.
   If all ok, the low byte is stored in `ARG`.
   
@@ -747,7 +747,7 @@ RET      LDY RES
 
 - The following block computes `PTR` from the new `PIX` and performs a restore.
 
-- The last block converts integer in `RES` to a floating point value in 
+- The last block converts the integer in `RES` to a floating point value in 
   BASIC's FAC or floating point accumulator. As high byte (`A`) we use 0 
   if there was no problem, or 1 if there was (USR's argument out of range).
 
@@ -760,7 +760,7 @@ the current partition number.
 PRINT USR(8) AND 7
 ```
 
-For full source see [listing](#file-apmusr6txt---assembly-source-for-usr) below.
+For the full source see the [listing](#file-apmusr6txt---assembly-source-for-usr) below.
 
 ### System
 
