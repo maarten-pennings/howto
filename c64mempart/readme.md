@@ -800,26 +800,26 @@ memory footprint.
 
 ![addresses in detail](advappmngr.drawio.png)
 
-After the leading zero (at $0800) comes the basic program: $0E9b - $0800 or
-1691 byes long. This is followed by $0ED3 - $0E9B or 56 bytes of variables
+After the leading zero (at $0800) comes the basic program: $0800..$0E9B or
+1691 bytes long. This is followed by $0E9B..$0ED3 or 56 bytes of variables
 (that is, 8 variables of 7 bytes).
 
 ![APM variables](vars.png)
 
-Note that the BASIC partition has $0F00 - 0x0ED3 or 45 bytes free, so not much 
+Note that the BASIC partition has 0x0ED3..$0F00 or 45 bytes free, so not much 
 room left to add lines or variables.
 
 The assembly switcher is located at $0F00 and runs to $0F5B, 92 bytes.
-Similarly, the switcher routine has free space for $0F7C - $0F5B or 33 bytes.
+Similarly, the switcher routine has free space for $0F5B..$0F7C or 33 bytes.
 The four variables are located at $0F7C, $0F7D, $0F7E, and $0F7F,
 followed by 128 bytes for the layout table. Slot 5 of the layout table 
 has been magnified to show details.
 
-Recall that the switcher and variables ($0F00-$0FFF) page technically does
-_not_ belong to PART-0 (that ends at $0EFF). It is tagged as PART-0X 
-because functionally it extends the APM in PART-0. However, once the BASIC
-APM has run, and PART-0X is setup, there is no harm in reusing PART-0 for 
-something else.
+Recall that the switcher and variables page ($0F00-$0FFF) technically does
+_not_ belong to PART-0 (that ends one page earlier at $0EFF). 
+In the diagram, the page is tagged as PART-0X because functionally it 
+extends the APM in PART-0. However, once the BASIC APM has run, and PART-0X 
+is setup, there is no harm in reusing PART-0 for something else.
 
 
 ## Appendix example files
