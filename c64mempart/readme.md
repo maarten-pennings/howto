@@ -702,7 +702,7 @@ SETPTR   ; PTR := @TBL[PIX]
          ASL A
          ASL A
          ASL A
-         ; Ã=0
+         ; C=0
          ADC #<TBL
          STA PTR
          LDA #>TBL
@@ -1016,7 +1016,7 @@ SETPTR   ; PTR := @TBL[PIX]
          ASL A
          ASL A
          ASL A
-         ; Ã=0
+         ; C=0
          ADC #<TBL
          STA PTR
          LDA #>TBL
@@ -1118,7 +1118,7 @@ See [explanation](#assembly-program-apmusr).
 0F3A 0A                 ASL A
 0F3B 0A                 ASL A
 0F3C 0A                 ASL A
-                        ; Ã=0
+                        ; C=0
 0F3D 69 80              ADC #<TBL
 0F3F 85 FD              STA PTR
 0F41 A9 0F              LDA #>TBL
