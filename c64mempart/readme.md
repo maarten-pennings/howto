@@ -445,7 +445,6 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
   Note that the code consists of 92 bytes.
   They are poked to address `MS` and up.
   The poker even has a simple checksum (computed in `P`).
-  I noticed the checksum checker misses the `:END` in case of error.
   
   ```BAS
   700 REM USR() CODE
@@ -459,6 +458,9 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
   780 DATA 8824:RETURN
   ```  
 
+  > **future change** 
+  > I noticed the checksum checker misses the `:END` in case of error.
+  
 - Once the switcher is placed in RAM, we poke the `USR()` vector (address 785),
   see line 140.
   
@@ -567,6 +569,10 @@ This is routine 200.
 
   - Line 320 ensures that every partitions starts with a 0 byte, as BASIC 
     requires.
+    
+    > **future change** 
+    > At this moment, I believe `320 POKE A0,0: POKE A0+1,0: POKE A0+2,0`
+    > would be more friendly, the initial `NEW` is no longer needed.
     
   - Lines 330-390 save the seven layout pointers (assuming an empty program) 
     to the layout table. Again, routine 600 is used, which steps `A` each time. 
