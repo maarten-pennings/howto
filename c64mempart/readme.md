@@ -14,13 +14,14 @@ we use that to debug what the first app has written. Partition three has the
 second app we develop; it reads and processes disk files. A fourth partition 
 could be used for `LOAD "$",8` without overwriting the apps we develop.
 
+The outline of the article is as follows
 After reconstructing where the partitioning idea came from, we look at the BASIC memory map.
-Next, we create a _Simple Partition manager_, and we close with some after thoughts.
+Next, we create a _Simple Partition Manager_, and we close with some after thoughts.
 
 In the second part we develop an _Advanced Partition Manager_, including some 
 assembly code to switch between partitions.
 
-This document comes with two appendices: one containing example files, and 
+This document comes with two appendices: one containing source files, and 
 one examining how `SAVE` and `LOAD` match with partitions.
 
 
@@ -382,24 +383,24 @@ It also makes the switcher easily accessible in all partitions.
 
 ### Partitions
 
-I decided that a maximum of 8 partitions (including the partition manager 
+I decided that a maximum of 8 partitions (including one for the partition manager 
 itself) is sufficient. Since each partition has 7 layout pointers (14 bytes, 
-which I padded with 2 bytes) the layout table is 8×16 or 128 bytes, that is
-half a 6502 page. Seems sufficient and fitting well.
+which I padded with 2 bytes to a slot of 16 bytes) the layout table is 8×16 
+or 128 bytes, which is half a 6502 page. Seems sufficient and fitting well.
 
-The Advanced Partition Manager BASIC program has a table (with `DATA`) at 
-the end, specifying the partitions wanted by the user. The diagram below 
+The Advanced Partition Manager BASIC program includes a table (with `DATA`), 
+specifying the partitions wanted by the user. The diagram below 
 is the choice I made: 2 large partitions (8k) and 5 medium ones (4k). 
 There is one small partition (2k), which is initially for the 
 Advanced Partition Manager itself, but once run, it might be replaced by 
-something else; the switching routine is in a gap between partitions.
+something else; the (assembly) switching routine is in a gap between partitions.
 
 ![chosen partitions](apmmap.drawio.png)
 
 Feel free to change the partitions in source code, as long as the partitions 
 do not overlap. It is allowed, and I actually did that, to leave "gaps" 
 between partitions. The partitions are for BASIC, the gaps can be used 
-for e.g. assembler (or graphics data).
+for e.g. assembly programs or graphics data.
 
 
 ### BASIC program (`APM`)
@@ -420,11 +421,11 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
 
 - APM starts with a banner (line 100)
 
-- APM assumes to start at $0800. At line 110, variable `MS` is set to the required top: 
-  $1000, the MEMSIZ to be. However, we cut of 256 bytes for the
-  switcher routine and the layout table.
+- APM assumes to start at $0800. At line 110, variable `MS` is set to 
+  the chosen top: $1000, the MEMSIZ to be. However, we cut of 256 bytes 
+  (one 6502 page) for the switcher routine and the layout table.
   
-- At line 120 MEMSIZ is set. We use the sub routine at line 600 for that; it
+- At line 120 MEMSIZ is actually set. We use the sub routine at line 600 for that; it
   implements a "DOKE" (double poke).
   
   ```BAS
@@ -433,9 +434,14 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
   620 POKE A,INT(D/256):A=A+1:RETURN
   ```  
   
-- In the next section we will develop the assembly routine for the switcher.
-  That 92 byte code is in-lined in BASIC, and poked to addres `MS` on line 130 via 
-  the sub routine at 700. The poker even has a simple checksum.
+- In the next section of this article we develop the assembly routine for 
+  the switcher. Those byte are included in the BASIC source, and poked 
+  to memory by the routine at 700, which is called from line 130. 
+  
+  Note that the code consists of 92 bytes.
+  They are poked to address `MS` and up.
+  The poker even has a simple checksum (computed in `P`).
+  I noticed the checksum checker misses the `:END` in case of error.
   
   ```BAS
   700 REM USR() CODE
@@ -452,8 +458,8 @@ The main part of the BASIC program of the Advanced Partition Manager (APM) is on
 - Once the switcher is placed in RAM, we poke the `USR()` vector (address 785),
   see line 140.
   
-- Line 150 prints the (address/size) details for partition 0 to the screen
-  (routine at 500).
+- Line 150 prints the (address/size) details for partition 0, which differs
+  a bit from the details of the other partitions (routine at 500).
   
   ```BAS
   500 REM PRINT PART-0
@@ -485,14 +491,17 @@ address pairs, defining the partitions.
 880 DATA 32768,40960
 ```
 
-Note that the first element defines the number of partitions, here 8 
+Note that the first `DATA` element defines the number of partitions, here 8 
 (the maximum the switcher supports). Also note that lines 820-880 only 
 define partitions 1 to 7, partition 0 is implicit, that is the partition
 initially used by APM itself.
 
 - The number of partitions needs to be between 3 and 8.
+ (probably a lower bound of 2 instead of 3 would also be OK).
 - The partitions shall not overlap. 
 - It is allowed to leave "gaps" between partitions.
+- We could have added a check that partitions do not to overlap with the 
+  BASIC interpreter at $A000 and up.
 
 This is routine 200.
 
@@ -523,12 +532,14 @@ This is routine 200.
 ```
 
 - Is starts (line 210) by reading how many partitions to create.
-  This is tested at line 220 (maybe a lower bound of 2 instead of 
-  3 would also be ok).
+  This is tested at line 220.
 
 - The layout table is written in the second half of page $0F00: at $0F80.
-  But the table is prepended by four variables (`NUM`, `PIX`, `ARG`, `RES`).
-  Line 230 initializes the address pointer `A` for that. See the assembly routine below for the purpose of those variables.
+  But the table is prepended by four variables (`NUM`, `PIX`, `ARG`, `RES`)
+  used by the switcher assembly routine.
+  See the assembly routine below for the purpose of those variables.
+  Line 230 initializes the address pointer `A` to the start address
+  of the variables.
   
 - Line 240 initializes NUM to N and PIX to 0, using the DOKE routine 600.
 
@@ -536,27 +547,35 @@ This is routine 200.
 
 - Line 260 skips initialization of slot 0 of the layout table.
   Slot 0 is for APM itself; it will be initialized the first time the
-  user will call USR() and leave partition 0.
+  user will call `USR()`.
   
-- Line 270 initializes `PA` ("previous address") to the first free address, for some error checking.
+- Line 270 initializes `PA` ("previous address") to the first free address, 
+  for some error checking while creating the partitions (see line 300).
 
-- Line 280-420 initialize the vector table for partitions 1 to N-1 
+- Line 280 initializes the vector table for partitions 1 to N-1 
   (PART-0 was done/skipped at line 260).
 
-- Line 290 reads the wanted address pair `A0`/`A1`for partition `P`.
-  It prints the data.
+  - Line 290 reads the wanted address pair `A0`/`A1`for partition `P`.
+    It prints the addresses and the partition size (in kibi bytes).
 
-- Line 300 checks against overlap and line 310 against too small partitions.
+  - Line 300 checks against partitions overlapping and line 310 against too 
+    small partitions (we took 64 bytes as limit).
 
-- Line 320 ensures that every partitions starts with a 0 byte, as BASIC 
-  requires.
+  - Line 320 ensures that every partitions starts with a 0 byte, as BASIC 
+    requires.
+    
+  - Lines 330-390 save the seven layout pointers (assuming an empty program) 
+    to the layout table. Again, routine 600 is used, which steps `A` each time. 
+    Note that `FRESPC` is included; it does not belong to the layout pointers,
+    but having 14 continous bytes is easy, and it does not harm.
   
-- Lines 330-390 save the layout pointers (for an empty program) to the layout 
-  table. Again, routine 600 is used, which steps `A` each time. Line 400
-  pads the table to 16 entries. This makes the switch routine easier,
-  ×16 is easier in assembler (4× shift) than ×14.
-  
-- Line 410 records the new first free address.
+  - Line 400 pads each slot in the layout table to 16 entries. 
+    This makes the switch routine easier, ×16 is easier in assembler 
+    (4× shift) than ×14.
+    
+  - Line 410 records the new first free address.
+
+- Line 420 ends the partition loop.
 
 This completes the BASIC program of the Advanced Partition Manager.
 For full source see [listing](#file-apm17---advanced-partition-manager) below.
@@ -572,16 +591,16 @@ needs to do:
 - One partition is active, which one, is recorded in variable `PIX` 
   (partition index).
   
-- The user will give a command `USR(X)`, which is supposed to activate
-  partition `X`.
+- The user will give a command `USR(E)`, which is supposed to activate
+  partition `E`.
   
 - The switcher will make a backup of the active layout pointers 
   into the layout table, at slot `PIX` (current layout).
 
-- The active layout will switch, `PIX` will be set to the passed `X`.
+- The active partition will switch: `PIX` will be set to the passed `E`.
 
-- The layout pointers that were active for `X` will now be restored from 
-  slot `X` to the actual pointers.
+- The layout pointers that were backed-up for `E` will now be restored from 
+  slot `E` to the active layout pointers.
 
 Let's review the assembly program.
 
@@ -596,7 +615,7 @@ It begins with a header with comments.
          ; MAARTEN PENNINGS
 ```
 
-Next come symbols.
+Next come symbol definitions.
 
 ```ASM
 ;---------------------------------------
@@ -614,13 +633,13 @@ TBL      = $0F80;TABLE OF LAYOUT PTRS
 ;---------------------------------------
 ```
 
-- We use $FD/$FE as indirect pointer `PTR`.
-- Symbol `TXTTAB` identifies the layout pointers.
-- `GETADR` is a BASIC routine that converts a floating point number (as it
-  comes in via `USR()`) to an integer in register Y and A.
-- `GIVAYFADR` is a BASIC routine that converts and integer in Y and A to a 
-  floating point number (as returned by `USR()`).
-- `NUM` stores the number of partitions.
+- Location $FD/$FE is used for an indirect pointer `PTR`.
+- Symbol `TXTTAB` identifies the address of the (active) layout pointers.
+- `GETADR` is a BASIC routine that converts a floating point number (`E` as it
+  comes in via `USR(E)`) to an integer in register Y and A.
+- `GIVAYFADR` is a BASIC routine that converts and integer in registers 
+  Y and A to a floating point number (as returned by `USR()`).
+- `NUM` stores the number of partitions, set by the BASIC program.
 - `PIX` stores the index (slot) of the current active partition.
 - `ARG` is the low-byte of the integer passed via `USR()` 
   (after conversion from float).
@@ -632,33 +651,35 @@ Let us first have a look at the backup and restore routines.
 ```ASM
 BACKUP   ; COPY LAYOUT POINTERS TO PTR
          LDY #13; 7 POINTERS = 14 BYTES
-BACKUP¤  LDA TXTTAB,Y
+BACKUP_  LDA TXTTAB,Y
          STA (PTR),Y
          DEY
-         BPL BACKUP¤
+         BPL BACKUP_
          RTS
 ```
 
 This routine copies 14 bytes from the layout pointers (at the zero page)
-to the layout table. Precondition is that `PTR` points to the correct slot 
-in the layout table. Note that pointer `FRESPC` is also backed-up.
+to the layout table. It skips the 2 padding bytes. Precondition fro `BACKUP` 
+is that `PTR` points to the correct slot in the layout table. 
+Note that pointer `FRESPC` is also backed-up.
 
 ```ASM
 RESTOR   ; COPY PTR TO LAYOUT POINTERS
          LDY #13; 7 POINTERS = 14 BYTES
-RESTOR¤  LDA (PTR),Y
+RESTOR_  LDA (PTR),Y
          STA TXTTAB,Y
          DEY
-         BPL RESTOR¤
+         BPL RESTOR_
          RTS
 ```
 
-The restore is similar. Also here we have the precondition that `PTR` points 
-to the correct slot in the layout table. This restores `FRESPC`, it is 
-not part of the layout pointers formally, but restoring seems not a problem.
+The restore routine is similar. Also here we have the precondition that 
+`PTR` points to the correct slot in the layout table. This rouitine restores 
+`FRESPC`, it is not part of the layout pointers formally, but restoring seems 
+not to cause problems.
 
-Both routines need `PTR` to point the the correct location. `PTR` is 
-computed from `PIX` by routine `SETPTR`. 
+Both routines (`BACKUP` and `RESTORE`) need `PTR` to point the the 
+correct address. `PTR` is computed from `PIX` by routine `SETPTR`. 
 
 ```ASM
 SETPTR   ; PTR := @TBL[PIX]
@@ -681,14 +702,15 @@ SETPTR   ; PTR := @TBL[PIX]
 
 Since (due to the padding) a slot in the layout table is 16 bytes, 
 the computation is relatively simple: `PTR := TBL + 16*PIX`. 
-What also helps is that `PIX<8`, and since `TBL` 
-is $0F80, we add maximum $80, so there is no carry.
+What also helps is that `PIX<8`, so we maximally add $80.
+Since `TBL` is $0F80, there is no carry for the addition.
+
 For safety, `PIX` is ANDed with 7, this ensures `PTR` always points 
 inside the layout table, so that when somehow`PIX` is incorrect, we will 
 not write 14 bytes over the `USR` routine.
 
-We have now discussed all ingredients.
-This is the main program.
+With `SETPTR` completed, have discussed all ingredients.
+This is the main program for `USR()`.
 
 ```ASM
          *= $0F00
@@ -730,37 +752,46 @@ RET      LDY RES
          RTS
 ```
 
-- The `USR()` function always returns the index of the (old) current partition.
-  Therefore the first block copies `PIX` (current partition) to `RES` the
-  result that later will be returned.
+- The `USR()` function always returns the index of the old/previous partition.
+  Therefore the first block of lines copies `PIX` (current partition) to `RES` 
+  the result that later will be returned by `USR()`.
   
-- The next block converts the FAC or floating point accumulator (holding the value
-  of expression `E` When calling `USR(E)`) to an integer by calling `GETADR`.
-  Then it check that the high byte (`A`) is 0, otherwise bails out via `RET1`.
-  Then it check if the low byte (`Y`) is less then the number of partitions 
-  (`NUM`), otherwise bails out via `RET1`.
-  If all ok, the low byte is stored in `ARG`.
+- The next block of lines converts the FAC to an integer by calling `GETADR`.
+  Recall that FAC means floating point accumulator.
+  It holds the value of expression `E` when calling `USR(E)`.
   
-- The next block computes `PTR` from `PIX` and performs a backup.
+  The conversion result is checked: the high byte (`A`) shall be 0, 
+  otherwise execution bails out via `RET1`.
+  The next check requires the low byte (`Y`) to be less then the number 
+  of partitions (`NUM`). Again, otherwise execution bails out via `RET1`.
+  If both checks pass, the low byte is stored in `ARG`, and
+  execution proceeds normally.
+  
+- The next block of lines computes `PTR` from `PIX` and performs a backup
+  of the layout pointers.
 
 - Then, active index (`PTR`) is set to the new partition (`ARG`).
 
-- The following block computes `PTR` from the new `PIX` and performs a restore.
+- The following block of lines computes `PTR` from the new `PIX` 
+  and performs a restore of the layout pointers.
 
-- The last block converts the integer in `RES` to a floating point value in 
-  BASIC's FAC or floating point accumulator. As high byte (`A`) we use 0 
-  if there was no problem, or 1 if there was (USR's argument out of range).
+- The last block of lines converts the integer in `RES` to a floating point 
+  value in BASIC's FAC, which will be returned by `USR()`. As high byte (`A`) 
+  we use 0, if there was no problem, or 1 if there was (`USR(E)`'s argument 
+  `E` out of range).
 
-Note that calling `USR(8)` is always out of range. This will return the
-current active partition index (without changing to a new partition).
-It will be ORed with 256 to flag an error. In other word, this inspects
-the current partition number.
+Note that calling `USR(8)` always triggers the "partition index out of range 
+error". This will return the current active partition index without changing 
+to a new partition. The return value (old partition number) will be ORed 
+with 256 to flag the error. In other word, this BASIC line inspects the 
+current partition number.
 
 ```BAS
 PRINT USR(8) AND 7
 ```
 
-For the full source see the [listing](#file-apmusr6txt---assembly-source-for-usr) below.
+For the full assembly source see the [listing](#file-apmusr6txt---assembly-source-for-usr) below.
+
 
 ### System
 
@@ -769,29 +800,52 @@ memory footprint.
 
 ![addresses in detail](advappmngr.drawio.png)
 
+After the leading zero (at $0800) comes the basic program: $0E9b - $0800 or
+1691 byes long. This is followed by $0ED3 - $0E9B or 56 bytes of variables
+(that is, 8 variables of 7 bytes).
+
+![APM variables](vars.png)
+
+Note that the BASIC partition has $0F00 - 0x0ED3 or 45 bytes free, so not much 
+room left to add lines or variables.
+
+The assembly switcher is located at $0F00 and runs to $0F5B, 92 bytes.
+Similarly, the switcher routine has free space for $0F7C - $0F5B or 33 bytes.
+The four variables are located at $0F7C, $0F7D, $0F7E, and $0F7F,
+followed by 128 bytes for the layout table. Slot 5 of the layout table 
+has been magnified to show details.
+
+Recall that the switcher and variables ($0F00-$0FFF) page technically does
+_not_ belong to PART-0 (that ends at $0EFF). It is tagged as PART-0X 
+because functionally it extends the APM in PART-0. However, once the BASIC
+APM has run, and PART-0X is setup, there is no harm in reusing PART-0 for 
+something else.
 
 
 ## Appendix example files
 
 This document comes with a [d64](partmngr.d64) disk image.
-This can be used in VICE or e.g. copied to Kung Fu Flash.
+The image can be used in VICE or e.g. copied to Kung Fu Flash.
 
 The disk comes with three sections separated by `----` lines.
 
 ![Partition manager demo disk](demodisk.png)
 
-First section **Tools**, which can largely be ignored:
+The first section contains **tools**, which can largely be ignored:
 
 - `TMP` or Turbo Macro Pro. Assembler with which the switcher assembly code
-  was written: `APMUSR6.TMP`.
+  was written: `APMUSR6.TMP`. 
+  Available at [turbo.style64.org](https://turbo.style64.org/).
 - `TMPPREFS` or utility to configure preferences for Turbo Macro Pro. 
+  Available from same site.
 - `CBMCOMMAND.C64` utility that was used to copy various files to this disk. 
+  Available at [CDDB](https://csdb.dk/release/?id=123036).
 - `HEXDUMP` small BASIC program written by me. 
   It dumps a file from disk to the screen, in hex.
 - `MYLAYOUTVECTORS` small BASIC program written by me. 
   It dumps the current layout vectors to the screen.
   
-Second section **SPM**, files for the Simple Partition Manager:
+The second section contains **SPM** related files; for the Simple Partition Manager:
 
 - `A0` the Simple Partition Manager as discussed [above](#application-a0-partition-manager).
   See [listing](#file-a0---simple-partition-manager) below.
@@ -799,36 +853,37 @@ Second section **SPM**, files for the Simple Partition Manager:
   See [listing](#file-a1---simple-demo-app) below.
 - Note that for the second partition, we reload `A1` or use `HEXDUMP` first.
 
-Third section **APM**, files for the Advanced Partition Manager.
-The numbers in the filenames record my version number;
-I ignored them in the bullets below:
+Third section **APM**, has files for the Advanced Partition Manager.
+The numbers in the filenames record my version number:
 
-- `APMUSR.TMP` the assembler source file, to be used in TMP, for the
+- `APMUSR6.TMP` the assembler source file, to be used in TMP, for the
   assembly code to implements the switcher - triggered by `USR()`.
 
-- `APMUSR.TXT` same as `APMUSR.TMP`, but the `.TXT` is plain text and `.TMP`
+- `APMUSR6.TXT` same as `APMUSR6.TMP`, but the `.TXT` is plain text and `.TMP`
   is a proprietary binary format.
   See [listing](#file-apmusr6txt---assembly-source-for-usr) below.  
   
-- `APMUSR.LST` a list file (source and opcodes) generated by TMP during 
+- `APMUSR6.LST` a list file (source and opcodes) generated by TMP during 
   compilation.
   See [listing](#file-apmusr6lst---assembly-source-for-usr) below.  
 
-- `APMUSR.PRG` the compiled binary generated by TMP. Loads at $0F00,
-  but is included in `APM`.
+- `APMUSR6.PRG` the compiled binary generated by TMP. Loads at $0F00,
+  but is included in `APM17` using `DATA`.
   
 - `APM-PRINTTABLE` small BASIC program written by me. 
-  It dumps the layout table (with layout vectors for each partition) to the screen.
+  It dumps the layout table (with layout vectors for each partition) 
+  to the screen.
 
-- `APM` the BASIC program that implements the Advanced Partition Manager;
-  it includes `APMUSR.PRG` as DATA statements.
+- `APM17` the BASIC program that implements the Advanced Partition Manager;
+  it includes `APMUSR6.PRG` as `DATA` statements.
   See [listing](#file-apm17---advanced-partition-manager) below.  
 
-
-For easy access, the most important files are listed here.
+For easy access, the most important files are listed in the subsections below.
 
 
 ### File `A0` - Simple Partition Manager
+
+See [explanation](#application-a0-partition-manager).
 
 ```BAS
 100 PRINT "A0/SIMPLEPARTMNGR"
@@ -857,6 +912,8 @@ For easy access, the most important files are listed here.
 
 ### File `A1` - Simple demo app
 
+See [explanation](#application-a1-user-program).
+
 ```BAS
 100 N=1
 110 PRINT "A";MID$(STR$(N),2);"/USER"
@@ -874,6 +931,8 @@ For easy access, the most important files are listed here.
 
 
 ### File `APMUSR6.TXT` - assembly source for USR()
+
+See [explanation](#assembly-program-apmusr).
 
 ```ASM
          ; APMUSR.TMP V6
@@ -956,23 +1015,26 @@ SETPTR   ; PTR := @TBL[PIX]
 ;---------------------------------------
 BACKUP   ; COPY LAYOUT POINTERS TO PTR
          LDY #13; 7 POINTERS = 14 BYTES
-BACKUP¤  LDA TXTTAB,Y
+BACKUP_  LDA TXTTAB,Y
          STA (PTR),Y
          DEY
-         BPL BACKUP¤
+         BPL BACKUP_
          RTS
 ;---------------------------------------
 RESTOR   ; COPY PTR TO LAYOUT POINTERS
          LDY #13; 7 POINTERS = 14 BYTES
-RESTOR¤  LDA (PTR),Y
+RESTOR_  LDA (PTR),Y
          STA TXTTAB,Y
          DEY
-         BPL RESTOR¤
+         BPL RESTOR_
          RTS
 ;---------------------------------------
 ```
 
+
 ### File `APMUSR6.LST` - assembler output for USR()
+
+See [explanation](#assembly-program-apmusr).
 
 ```ASM
                         ; APMUSR.TMP V6
@@ -1055,24 +1117,26 @@ RESTOR¤  LDA (PTR),Y
                ;---------------------------------------
                BACKUP   ; COPY LAYOUT POINTERS TO PTR
 0F46 A0 0D              LDY #13; 7 POINTERS = 14 BYTES
-0F48 B9 2B 00  BACKUP¤  LDA TXTTAB,Y
+0F48 B9 2B 00  BACKUP_  LDA TXTTAB,Y
 0F4B 91 FD              STA (PTR),Y
 0F4D 88                 DEY
-0F4E 10 F8              BPL BACKUP¤
+0F4E 10 F8              BPL BACKUP_
 0F50 60                 RTS
                ;---------------------------------------
                RESTOR   ; COPY PTR TO LAYOUT POINTERS
 0F51 A0 0D              LDY #13; 7 POINTERS = 14 BYTES
-0F53 B1 FD     RESTOR¤  LDA (PTR),Y
+0F53 B1 FD     RESTOR_  LDA (PTR),Y
 0F55 99 2B 00           STA TXTTAB,Y
 0F58 88                 DEY
-0F59 10 F8              BPL RESTOR¤
+0F59 10 F8              BPL RESTOR_
 0F5B 60                 RTS
                ;---------------------------------------
 ```
 
 
 ### File `APM17` - Advanced Partition Manager
+
+See [explanation](#basic-program-apm).
 
 ```BAS
 100 PRINT"APM V17,2025JUL05 MCPENNINGS"
@@ -1136,8 +1200,8 @@ RESTOR¤  LDA (PTR),Y
 
 ## Appendix on file handling
 
-We hex-dump the content of file `A1`, to check its load address and line links.
-With that info, we check the behavior of BASIC's `LOAD`.
+In this appendix, we hex-dump the content of file `A1`, to check its load 
+address and line links. With that info, we check the behavior of BASIC's `LOAD`.
 
 We come to two conclusions:
 
