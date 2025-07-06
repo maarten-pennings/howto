@@ -24,6 +24,10 @@ assembly code to switch between partitions.
 This document comes with two appendices: one containing source files, and 
 one examining how `SAVE` and `LOAD` match with partitions.
 
+See the [demo video](https://youtu.be/ysc5qWT_Enk).
+
+[![Video](video.png)](https://youtu.be/ysc5qWT_Enk)
+
 
 ## Introduction
 
