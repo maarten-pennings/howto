@@ -182,6 +182,37 @@ ST is printed on line 410. It prints 64, bit 6 of `ST` indicates
 I'm a bit puzzled when to check ST, this feels a bit late (we processes the read `B$`), 
 but this way the dump has the correct amount of bytes.
 
+Here is an update of the file dump program `hexdump3`.
+
+```basic
+0 dk=8:print"hexdump3 on disk";dk
+1 input"filename";n$:t0=ti:goto10
+5 h=int(d/16):ifh>9thenh=h+7
+6 l=dand15:ifl>9thenl=l+7
+7 printchr$(48+h)chr$(48+l);:return
+10 a0=2:a1=6:z$=chr$(0):open1,dk,0,n$
+15 fora=0to170*1024:s$=" "
+20 ifa>a1thenifd=0thena0=a:a1=a+4
+25 ifa0<aanda<a1thens$="-"
+30 if(aand7)=0thend=int(a/256):gosub5:d=aand255:gosub5
+35 get#1,d$:d=asc(d$+z$)
+40 prints$;:gosub5
+45 ifd<31ord>127thend$="."
+50 c$=c$+d$
+55 if(aand7)=7thenprint" B"c$"B":c$=""
+60 ifst=0thennexta
+65 ifc$<>""thenprinttab(28)" B"c$"B"
+70 close1:print"st="st"ti="(ti-t0)/60
+```
+
+It connects the four hex numbers that start a line of BASIC with dashes.
+BASIC lines start right after the 00 byte that terminates the previous line.
+The first line of BASIC starts at offset 2, since the first two byte
+form the load address.
+
+
+![hexdump3](hexdump3.png)
+
 
 ### filecopy
 
