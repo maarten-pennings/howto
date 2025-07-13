@@ -312,9 +312,10 @@ stack frames (x saved)
   As a result all sub-expressions are always evaluated,
   so that it is not possible to write a recursive function.
 
-The implementation seems quite elaborate, for example with stack frames
-that back-up and restore the value of the function parameter. 
-Cost and gain of this feature is out of balance.
+Although the `FNF()` mechanism is kept simple, the implementation seems 
+quite elaborate, for example with stack frames that back-up and restore 
+the value of the function parameter. 
+For me, cost and gain of this feature is out of balance.
 
 I believe most BASIC programmers see functions as a "rarely used feature".
 
