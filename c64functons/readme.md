@@ -242,28 +242,27 @@ Some constructions are _not_ allowed in a function body.
   relation operator returns 0 for false or -1 for true and that can 
   be used is subsequent expressions.
   
+  In below example function `FNA3()` clips values smaller than 3, and
+  `FNB6()` clips values greater than 6.
+  
   ```bas
-  100 DEF FNCLIP0(X)= (X>=0)*X
-  110 DEF FNKLIP01(X)= (X>=0)*X-(X>1)*X
+  100 DEF FNA3(X)=-(X>=3)*X-3*(X<3)
+  110 DEF FNB6(X)=-(X<=6)*X-6*(X>6)
   120 :
-  130 FOR X=-1 TO +2 STEP 0.25
-  140 :PRINT X,FNCLIP0(X),FNKLIP01(X)
+  130 FOR X=0 TO 9
+  140 :PRINT X,FNA3(X),FNB6(X)
   150 NEXT
-  READY.
   RUN
-  -1         0         0
-  -.75       0         0
-  -.5        0         0
-  -.25       0         0
-   0         0         0
-   .25      -.25      -.25
-   .5       -.5       -.5
-   .75      -.75      -.75
-   1        -1        -1
-   1.25     -1.25      0
-   1.5      -1.5       0
-   1.75     -1.75      0
-   2        -2         0
+   0         3         0
+   1         3         1
+   2         3         2
+   3         3         3
+   4         4         4
+   5         5         5
+   6         6         6
+   7         7         6
+   8         8         6
+   9         9         6
   ```  
   
 - **Self**  
