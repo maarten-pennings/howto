@@ -2,8 +2,8 @@
 
 In this article we look at _functions_ in Commodore 64 BASIC.
 
-With functions we mean `DEF FN F(X)`, not subroutines (`GOSUB`), 
-nor built-in functions.
+In the context of this article the stabd-alone term "function" 
+refers to `FN F(X)`, not subroutines (`GOSUB`), nor built-in functions.
 
 
 ## Introduction
@@ -47,7 +47,7 @@ a signature defines the inputs and outputs of a function;
 it includes the number, types, and order of the function's arguments as 
 well as the type it returns.
 
-In C64 BASIC only one signature is allowed: float to float.
+The one signature supported in C64 BASIC is "float to float".
 
 ```bas
 100 DEF FN F()=12
@@ -101,26 +101,30 @@ list useful function definitions for each category.
 
 - **Constant**  
   `DEF FN E(X)=2.71828183`  
-  The function must have an argument, but the body does not need to use it.
+  A function must have an argument, but the body does not need to use it.
+  The example could also be done as variable `E=2.71828183`, 
+  but the function approach is a more robust against overwrites.
 
 - **Simple operators**  
   `DEF FN HEIGHT(SEC)=300-9.82*SEC*SEC/2`  
   `DEF FN SQ(x)=x^2`  
-  The body can use all built-in operators.
+  A function body can use all built-in operators (`+`, `-`, `*`, `/`, `^`) and also 
+  the relational operators (`=`, `<`, `>`, `<=`, `>=`, `<>`).
 
 - **Built-in numeric functions**  
   `DEF FN SN(A)=SIN(Π*A/180)`  
   `DEF FN LG(X)=LOG(X)/LOG(10)`  
   `DEF FN HI(B)=INT(B/16)`  
   `DEF FN LO(B)=B AND 15`  
-  The body can use the built-in functions (even multiple) like 
-  `ABS()`, `ATN()`, `COS()`, `EXP()`, `INT()`, `LOG()`, `SGN()`, 
-  `SIN()`, `SQR()`, and `TAN()`; 
+  A function body can use the built-in functions (even multiple in one body) 
+  like `ABS()`, `ATN()`, `COS()`, `EXP()`, `INT()`, `LOG()`, 
+  `SGN()`, `SIN()`, `SQR()`, and `TAN()`; 
   and also logical operators (`AND`, `OR`, `NOT`) and the constant pi.
 
 - **Built-in string functions**  
-  `DEF FN LN(X)=LEN(STR(X)-1)`  
-  It is counter intuitive, but string functions are allowed in a function 
+  `DEF FN NUMDIG(X)=LEN(STR(X)-1)`  
+  It is counter intuitive (given the restriction of only supporting 
+  float-to-float signature), but string functions are allowed in a function 
   body. The only catch, the top-level expression must return a float.
   So a string must be made numeric with e.g. `VAL()`, `LEN()`, or `ASC()`.
 
@@ -128,7 +132,7 @@ list useful function definitions for each category.
   `DEF FN FR(X)=FRE(0)-65535*(FRE(0)<0)`  
   `DEF FN DK(A)=PEEK(A)+256*PEEK(A+1)`  
   `DEF FN DICE(N)=1+INT(RND(1)*N)`  
-  Even non-mathematical functions (`FRE()`, `PEEK()`, `RND()`, `USR()`) 
+  Also the non-mathematical functions (`FRE()`, `PEEK()`, `RND()`, `USR()`) 
   are allowed in a function body.
   The function `USR()` could have (programmed) side effects.
 
@@ -147,14 +151,17 @@ list useful function definitions for each category.
   ```
 
 - **Other user functions**  
-  The body may call other user functions.  
+  A function body may call other user functions.  
   Note that in `DEF FNF(X)= ...FNG(X)...`
+  
   - `FNG()` does not need to exist when `FNF()` is _defined_ (function binding is by lookup on name during call).
   - `FNG()` must have been defined when `FNF()` is _called_.
   - The definition shall not be circular: `FNG()` shall not call `FNF()` 
     because this leads to infinite recursion.
     
-  An example, which converts bytes to hex.
+  An example, which converts bytes to hex, using nested functions 
+  (`H(B)` and `L(B)` both call `A(D)`):
+  
   ```bas
   100 DEF FN H(B)=FNA(INT(B/16))
   110 DEF FN L(B)=FNA(B AND 15)
@@ -195,7 +202,8 @@ list useful function definitions for each category.
   - In a next call to `FNF()`, the value of `A` is again looked-up, so if 
     `A` is changed the new value will be picked up.
 
-  An example, that peeks character codes or color from row `Y` on the screen.    
+  An example, that peeks character codes or color from row `Y` on the screen. 
+  
   ```bas
   100 A0= 1024:REM ADDRESS FOR CHAR MEM
   110 A1=55296:REM ADDRESS FOR COLOR MEM
