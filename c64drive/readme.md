@@ -15,15 +15,16 @@ Disk drive device numbers range from 8 up to 15.
 
 Within a drive _device_ - a physical enclosure with an incoming serial port, an outgoing serial port and a set of 
 dip switches that configure a device number, there could be two drive _units_ - a spindle and head and an opening to insert a disk. 
-When sending a command to a drive device, the command string includes a drive unit id (e.g. 0 or 1).
-If the drive unit id is absent, it usually defaults to 0.
 
 ![Serial bus](drives.drawio.png)
 
-In the past there were drive devices with two drive units. But those are rarely used.
-In the remainder of this document, we will no longer use the term "drive device" but simply "drive" or "device".
+When sending a command to a drive device, the command string includes a drive unit id (e.g. 0 or 1).
+If the drive unit id is absent, it usually defaults to 0.
+In the past there were drive devices with two drive units, but those were phased out.
 
 ![CBM 4040](CBM-4040.jpg)
+
+In the remainder of this document, we will no longer use the term "drive device" but simply "drive" or "device".
 
 Since a program might have more then one file open on a drive (remember that the disk operating system is in the drive),
 the drive needs to differentiate between them. This is done with so-called _secondary addresses_. 
@@ -47,19 +48,21 @@ OPEN 2, 8, 5, "FILENAME,SEQ,READ"
 OPEN 3, 8, 6, "FILENAME,SEQ,WRITE" 
 ```
 
-Yes that is confusing, so you see a lot of programs keeping the two handles equal (`open 15,8,15`).
+Yes having two handles is confusing, so you see a lot of programs keeping them equal (`open 15,8,15`).
 
 Three secondary addresses are special:
 - secondary address 0 is dedicated for LOAD; the file type is implicitly PRG and the mode is implicitly READ.
 - secondary address 1 is dedicated for SAVE; the file type is implicitly PRG and the mode is implicitly WRITE.
 - secondary address 15 is not for managing files, rather it allows to give _commands_ to the device.
 
+Advise: use secondary addresses 2..14 for "normal" file open (sequential, read or write).
+These need an explicit file type (`SEQ` which may be abbreviated to `S`) and mode 
+(`WRITE` or `READ` which may be abbreviated to `W` or `R`).
+
 Device commands (secondary address 15) are the way the disk operating system 
 is used. As an example, see the following "new" command, which formats a disk. 
 It assigns name `DISKNAME` (disk names have a maximum length of 16 characters) 
 and identifier `ID` (disk identifiers are exactly 2 characters) to the disk.
-
-Advise: use secondary addresses 2..14 for "normal" file open (sequential, read or write).
 
 ```
 OPEN 1, 8, 15, "N0:DISKNAME,ID" : CLOSE 1
@@ -81,18 +84,18 @@ OPEN 2,8,15:PRINT#2,"M-W";CHR$(119);CHR$(0);CHR$(2);CHR$(devnum+32);CHR$(devnum+
 ### fileexists
 
 It seems that `ST` is used for querying the system state _after_ file operations 
-(OPEN/INPUT#/GET#/PRINT#/CLOSE), [see](https://www.c64-wiki.com/wiki/STATUS). 
+(OPEN/INPUT#/GET#/PRINT#/CLOSE), see the [C64-wiki](https://www.c64-wiki.com/wiki/STATUS). 
   
 `ST` is also updated after OPEN or CLOSE, but not in a way that I expect.
 The "file exists" test on the 
 [wiki](https://www.c64-wiki.com/wiki/STATUS#:~:text=In%20Programs%3A-,10%20REM%20FILE%20TEST,-20%20OPEN%201)
-seems wrong; it does not work for me:
+seems wrong; it does not work for me.
 
-- When I open for write, using an existing filename, after `OPEN` the `ST` is 0, but the disk LED flickers, correctly indicating error.
-- Similarly, when I open for read, using a non-existing filename, after `OPEN` the `ST` is 0, but the disk LED flickers, correctly indicating error.
+- When I open a file for write, using an existing filename, after `OPEN` the `ST` is 0 (indicating no error), but the disk LED flickers, correctly indicating error.
+- Similarly, when I open a file for read, using a non-existing filename, after `OPEN` the `ST` is 0 (indicating no error), but the disk LED flickers, correctly indicating error.
 
 This [page](https://comp.sys.cbm.narkive.com/YeIrZdXd/how-to-check-for-file-s-existence-on-a-c64-disk) 
-gives me better results. I used that to write the following "file exists" program,
+gives a suggestion that seems better. I used that to write the following "file exists" program,
 using the wrong (`ST`) method and the correct (`EN`) method.
   
 ```bas
@@ -261,11 +264,12 @@ Done
 (env) C:\Repos\d64viewer\viewer>
 ```
 
-I both cases we get as first byte of the disk bock 00, indicating no
-next disk block. As second byte we have 02, which denotes the last data 
-byte in this block, which is 0D (the third and last byte of this block and file).
+I both cases we get as first byte of the disk bock 00, indicating no next disk 
+block. As second byte we have 02, which denotes the offset of the last data 
+byte in this block, which is 0D (the third and last byte of this block and 
+file).
 
-However, when I use **BASIC** to read a 0 (1) byte file file, something 
+However, when I use **BASIC** to read this 1-byte file file, something 
 unexpected happens.
 
 ```
@@ -279,8 +283,8 @@ run
 ready.
 ```
 
-It prints 4 bytes: the correct 13 (0D), but then, it seems, it reads all 
-bytes of the disk block, quoting d64viewer from above `|  00  | 00 02 0D*`.
+It prints 4 bytes: the correct 13 (0D), but after that, it seems, it reports all 
+three bytes of the disk block; quoting d64viewer from above `|  00  | 00 02 0D*`.
 
 I do not understand this.
 
