@@ -2,6 +2,12 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## Commodore 64 user defined functions
+
+A rarely used feature of the C64 is the user defined function `FNF(X)`.
+Article [c64functons](c64functons) studies how to use them.
+
+
 ## Commodore 64 memory partitioning
 
 Can we partition the C64 memory, storing two programs simultaneously?A multi-app setup?
