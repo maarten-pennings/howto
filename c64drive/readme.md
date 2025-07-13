@@ -20,8 +20,10 @@ If the drive unit id is absent, it usually defaults to 0.
 
 ![Serial bus](drives.drawio.png)
 
-In the past maybe there were drive devices with two drive units. But those no longer appear to exist - or [do they](https://bitbinders.com/products/commodore-1581dv).
+In the past there were drive devices with two drive units. But those are rarely used.
 In the remainder of this document, we will no longer use the term "drive device" but simply "drive" or "device".
+
+![CBM 4040](CBM-4040.jpg)
 
 Since a program might have more then one file open on a drive (remember that the disk operating system is in the drive),
 the drive needs to differentiate between them. This is done with so-called _secondary addresses_. 
@@ -52,9 +54,12 @@ Three secondary addresses are special:
 - secondary address 1 is dedicated for SAVE; the file type is implicitly PRG and the mode is implicitly WRITE.
 - secondary address 15 is not for managing files, rather it allows to give _commands_ to the device.
 
-Device commands are the way the disk operating system is used. As an example, see the following "new" command,
-which formats a disk. It assigns name `DISKNAME` (disk names have a maximum length of 16 characters) and 
-identifier `ID` (disk identifiers are exactly 2 characters) to the disk.
+Device commands (secondary address 15) are the way the disk operating system 
+is used. As an example, see the following "new" command, which formats a disk. 
+It assigns name `DISKNAME` (disk names have a maximum length of 16 characters) 
+and identifier `ID` (disk identifiers are exactly 2 characters) to the disk.
+
+Advise: use secondary addresses 2..14 for "normal" file open (sequential, read or write).
 
 ```
 OPEN 1, 8, 15, "N0:DISKNAME,ID" : CLOSE 1
@@ -71,6 +76,53 @@ OPEN 2,8,15:PRINT#2,"M-W";CHR$(119);CHR$(0);CHR$(2);CHR$(devnum+32);CHR$(devnum+
 
 
 ## Example basic programs
+
+
+### fileexists
+
+It seems that `ST` is used for querying the system state _after_ file operations 
+(OPEN/INPUT#/GET#/PRINT#/CLOSE), [see](https://www.c64-wiki.com/wiki/STATUS). 
+  
+`ST` is also updated after OPEN or CLOSE, but not in a way that I expect.
+The "file exists" test on the 
+[wiki](https://www.c64-wiki.com/wiki/STATUS#:~:text=In%20Programs%3A-,10%20REM%20FILE%20TEST,-20%20OPEN%201)
+seems wrong; it does not work for me:
+
+- When I open for write, using an existing filename, after `OPEN` the `ST` is 0, but the disk LED flickers, correctly indicating error.
+- Similarly, when I open for read, using a non-existing filename, after `OPEN` the `ST` is 0, but the disk LED flickers, correctly indicating error.
+
+This [page](https://comp.sys.cbm.narkive.com/YeIrZdXd/how-to-check-for-file-s-existence-on-a-c64-disk) 
+gives me better results. I used that to write the following "file exists" program,
+using the wrong (`ST`) method and the correct (`EN`) method.
+  
+```bas
+100 open 15,8,15
+110 n$="xxx":gosub 300
+120 n$="size2":gosub 300
+130 close 15
+140 end
+150 :
+300 print "file '";n$;"' exists?"
+310 open 1,8,2,n$+",seq,read"
+320 m$="absent":ifst=0thenm$="exists"
+330 print " wrong  :";m$;st
+340 input#15,en:rem ,em$,et,es
+350 m$="absent":ifen=0thenm$="exists"
+360 print " correct:";m$;en
+370 close 1:return
+```
+
+This is the result, illustrating that `ST` is not working, whereas `EN` is.
+
+```bas
+run
+file 'xxx' exists?
+ wrong  :exists 0
+ correct:absent 62
+file 'size2' exists?
+ wrong  :exists 0
+ correct:exists 0
+```
 
 
 ### filetest
@@ -93,20 +145,10 @@ Lines 2xx form the writing subroutine. Lines 3xx form the reading subroutine,
 and lines 4xx are the scratch subroutine. On 5xx we find the drive status
 reporting.
 
-Some observations
-
-- It seems that `ST` is used for querying the system state after data input 
-  (INPUT/GET) and output (PRINT); [see](https://www.c64-wiki.com/wiki/STATUS). 
-  I'm note sure of `ST` is also updated after OPEN or CLOSE.
-  
 - The C64 file state (`ST`, not to be confused with the drive status read via channel 15)
-  turns 64 when the last byte has been read. As [Bumbershoot](https://bumbershootsoft.wordpress.com/2017/09/23/c64-basic-disk-io/) 
-  states "Unlike `feof()` in C, though, ST is set on the _last legal_ read, not the _first illegal_ one."
-  The code prints a `/` before the last byte.
-  This mechanism of "last legal read" makes me wonder how that works for an empty file.
-  Unfortunately, I'm not able to generate an empty file. If I `OPEN:CLOSE`,
-  or `OPEN:PRINT3,"";:CLOSE` or even `OPEN:PRINT3,"A";:CLOSE`, I get a file of four bytes
-  x 0 2 x where x is 13 in the first two cases and 65 (A) for the third try...
+  turns 64 when the last byte has been read. As [Bumbershoot](https://bumbershootsoft.wordpress.com/2017/09/23/c64-basic-disk-io/#:~:text=Unlike%20feof()%20in%20C%2C%20though%2C%20this%20is%20is%20set%20on%20the%20last%20legal%20read%2C%20not%20the%20first%20illegal%20one.%20That%20makes%20the%20loop%20logic%20look%20a%20bit%20different%20than%20we%20might%20otherwise%20expect.)
+  states about end-of-file: "Unlike `feof()` in C, though, ST is set on the _last legal_ read, not the _first illegal_ one."
+  The code prints a `/` before the last byte. 
   
 - A sequential file is like a modern text file, but there is more than just newline 
   conversions when using INPUT.
@@ -131,6 +173,116 @@ I ran the program (with `BYTES` present from a previous run).
   We see that CRs (character 13) are inserted if we use `PRINT#` without `;`.
   We see that our patch to read the NUL character works.
   For fun: change the `;` in  a `,` in `PRINT#`. This inserts a series of spaces into the file.
+
+
+### emptyfile
+
+> Unlike `feof()` in C, though, ST is set on the _last legal_ read, not the _first illegal_ one.
+
+This mechanism of "last legal read" makes me wonder how that works for an _empty_ file.
+But as it turns out, I'm not able to generate an empty file. 
+
+If I create a file 
+with `OPEN 1,8,2,"OPENCLOSE,S,W":CLOSE 1` or 
+with `OPEN 1,8,2,"OPENPRINTCLOSE,S,W":PRINT#1,;:CLOSE 1`,
+in both cases I get a 1-byte file with a $0D (13, ^M, CR, \r).
+
+I checked this with [d64viewer](https://github.com/maarten-pennings/d64viewer).
+
+```
+(env) C:\Repos\d64viewer\viewer>run TMP-mcp-aa.d64
+d64viewer: file 'TMP-mcp-aa.d64' has 683 blocks of 256 bytes
+showing dir starts at 358 as dir [tech0 cont(17)]
+
+|block 358 zone 1/19 track 18 sector 1 type DIR------|
+| blocks | filename           | filetype | block1    |
+|--------|--------------------|----------|-----------|
+...abbreviated...
+|block 374 zone 1/19 track 18 sector 17 type DIR-----|
+|   1    | 'OPENCLOSE'        |   SEQ    | 19/07=497 |
+|   0    | 'OPENPRINTCLOSE'   |   *SEQ   | 19/08=498 |
+no next block (request was 12)
+Done
+
+(env) C:\Repos\d64viewer\viewer>run TMP-mcp-aa.d64 --tfile OPENCLOSE
+d64viewer: file 'TMP-mcp-aa.d64' has 683 blocks of 256 bytes
+showing file OPENCLOSE at 497 as hex [tech0 cont(682)]
+
+|block 497 zone 2/18 track 25 sector 7 type FIL-----------------------------|
+|offset| 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F | 0123456789ABCDEF |
+|------|-------------------------------------------------|------------------|
+|  00  | 00 02 0D*00*00*00*00*00*00*00*00*00*00*00*00*00*| °··°°°°°°°°°°°°° |
+|  10  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  20  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  30  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  40  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  50  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  60  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  70  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  80  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  90  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  A0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  B0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  C0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  D0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  E0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  F0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|------|-------------------------------------------------|------------------|
+no next block (request was 682)
+Done
+
+(env) C:\Repos\d64viewer\viewer>run TMP-mcp-aa.d64 --tfile OPENPRINTCLOSE
+d64viewer: file 'TMP-mcp-aa.d64' has 683 blocks of 256 bytes
+showing file OPENPRINTCLOSE at 498 as hex [tech0 cont(682)]
+
+|block 498 zone 2/18 track 25 sector 8 type FIL-----------------------------|
+|offset| 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F | 0123456789ABCDEF |
+|------|-------------------------------------------------|------------------|
+|  00  | 00 02 0D*00*00*00*00*00*00*00*00*00*00*00*00*00*| °··°°°°°°°°°°°°° |
+|  10  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  20  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  30  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  40  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  50  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  60  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  70  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  80  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  90  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  A0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  B0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  C0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  D0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  E0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|  F0  |*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*00*| °°°°°°°°°°°°°°°° |
+|------|-------------------------------------------------|------------------|
+no next block (request was 682)
+Done
+
+(env) C:\Repos\d64viewer\viewer>
+```
+
+I both cases we get as first byte of the disk bock 00, indicating no
+next disk block. As second byte we have 02, which denotes the last data 
+byte in this block, which is 0D (the third and last byte of this block and file).
+
+However, when I use **BASIC** to read a 0 (1) byte file file, something 
+unexpected happens.
+
+```
+100 open 1,8,2,"openclose,s,r"
+110 get#1,d$:d=asc(d$+chr$(0))
+120 print d;
+130 if st=0 then 110
+140 close 1
+run
+ 13  0  2  13
+ready.
+```
+
+It prints 4 bytes: the correct 13 (0D), but then, it seems, it reads all 
+bytes of the disk block, quoting d64viewer from above `|  00  | 00 02 0D*`.
+
+I do not understand this.
 
 
 ### filedump
@@ -181,6 +333,9 @@ ST is printed on line 410. It prints 64, bit 6 of `ST` indicates
 [end of file has been reached](https://www.c64-wiki.com/wiki/STATUS).
 I'm a bit puzzled when to check ST, this feels a bit late (we processes the read `B$`), 
 but this way the dump has the correct amount of bytes.
+
+
+### hexdump3
 
 Here is an update of the file dump program `hexdump3`.
 
