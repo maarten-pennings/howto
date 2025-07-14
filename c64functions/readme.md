@@ -51,7 +51,7 @@ The one signature supported in C64 BASIC is "float to float".
 
 ```bas
 100 DEF FN F()=12
-110 DEF FN F(X)=12      <<< only correct one
+110 DEF FN F(X)=12      <<< only supported one
 120 DEF FN F(X,Y)=12
 130 DEF FN F(X%)=12
 140 DEF FN F$(X)="12"
@@ -59,8 +59,8 @@ The one signature supported in C64 BASIC is "float to float".
 ```
 
 Of the above definitions, only the one on line 110 fits the supported 
-signature. All other definitions give an error: `syntax  error` for 
-lines 100, 120, 130, and `type mismatch  error` for 140 and 150.
+signature. All other definitions give an error: `syntax  error` (for 
+lines 100, 120, 130), or `type mismatch  error` (for lines 140 and 150).
 
 It is surprising to see two different kind of errors, and I would
 have expected that 130 gives the same error as 150.
@@ -71,14 +71,15 @@ have expected that 130 gives the same error as 150.
 The `FN` part in front of the function name is mandatory.
 But the name of the function does not have to be `F`.
 Similarly the name of the argument does not have to be `X`.
-Both can be any name that BASIC allows for a floating point. 
+Both can be any name that BASIC allows for a variable. 
 
 This means that both names are either a single letter, or 
 a single letter followed by a letter or a digit. 
-The names may have more letters or digits, but only the first two are significant.
-Names may not clash with BASIC keywords.
+The names may have more than two letters or digits, 
+but only the first two are significant.
+Names may not clash with BASIC keywords (like `SIN` or `ST`).
 
-The below program prints 10.
+The below program with long names prints 10.
 
 ```bas
 10 DEF FN FUNC23(ARG)=ARG*2
@@ -86,7 +87,7 @@ The below program prints 10.
 ```
 
 Function names are in a different name-space than variable names.
-You can have a `DEF FN LG(X)` and at the same time have a float `LG`.
+It is allowed to have a `DEF FN LG(X)` and at the same time have a float `LG`.
 This is analogues to strings (`LG$`) and integers (`LG%`) having their 
 own name space, distinct from floats. 
 See also [Implementation](#implementation).
@@ -103,16 +104,17 @@ list useful function definitions for each category.
   `DEF FN E(X)=2.71828183`  
   A function must have an argument, but the body does not need to use it.
   The example could also be done as variable `E=2.71828183`, 
-  but the function approach is a more robust against overwrites.
+  but the function approach is a bit more robust against overwrites.
 
 - **Simple operators**  
   `DEF FN HEIGHT(SEC)=300-9.82*SEC*SEC/2`  
   `DEF FN SQ(x)=x↑2`  
   `DEF FN EVEN(X)=(X AND 1)=0`  
   A function body can use all built-in operators (`+`, `-`, `*`, `/`, `↑`) and 
-  also the relational operators (`=`, `<`, `>`, `<=`, `>=`, `<>`), see example
-  `EVEN()`. Note that relational operators return a number (0 for false, 
-  and -1 for true) so that first with the mandatory float-to-float signature.
+  also the relational operators (`=`, `<`, `>`, `<=`, `>=`, `<>`).
+  For the latter, see example `EVEN()`. 
+  Note that relational operators return a number (0 for false, and -1 for true) 
+  so that fits with the mandatory float-to-float signature.
 
 - **Built-in numeric functions**  
   `DEF FN SN(A)=SIN(Π*A/180)`  
@@ -137,14 +139,16 @@ list useful function definitions for each category.
   `DEF FN DICE(N)=1+INT(RND(1)*N)`  
   Also the non-mathematical functions (`FRE()`, `PEEK()`, `RND()`, `USR()`) 
   are allowed in a function body.
-  The function `USR()` could have (programmed) side effects.
+  The function `USR()` could even have (programmed) side effects.
 
 - **System variables**   
   `DEF FN TM(X)=TI/60`  
   `DEF FN HMS(X)=VAL(TI$)`  
   The system variables `TI` and `TI$` are allowed in a function body.
   Of course `TI$` would need to be converted (`MID$`, `VAL`) to a float.
-  The third system variable, `ST`, is also supported, see below example.
+  The third system variable, `ST` (I/O status), is also supported, 
+  see below example.
+  
   ```bas
   100 DEF FN S(X)=ST
   110 OPEN 15,8,15
@@ -154,12 +158,13 @@ list useful function definitions for each category.
   ```
 
 - **Other user functions**  
-  A function body may call other user functions.  
+  A function body may also call other user functions.  
   Note that in `DEF FNF(X)= ...FNG(X)...`
   
   - `FNG()` does not need to exist when `FNF()` is _defined_ (function binding is by lookup on name during call).
   - `FNG()` must have been defined when `FNF()` is _called_.
-  - The definition shall not be circular: `FNG()` shall not call `FNF()` 
+  - The definition shall not be circular: `FNG()` shall not call 
+    (directly or indirectly) function `FNF()` 
     because this leads to infinite recursion.
     
   An example, which converts bytes to hex, using nested functions 
@@ -193,6 +198,11 @@ list useful function definitions for each category.
    48  65  49
   ```
 
+  `FNA(D)` returns the ASCII code of the hex number passed as argument.
+  Number 0 has ASCII code 48. Number 10 ($A) has ASCII code 65.
+  `FNL(B)` returns the ASCII code of the low nibble of its argument. 
+  For argument 65 ($41), the low nibble is 1, which has ASCII code 49.
+  
 - **Global variables**  
   `A=2 : DEF FN F(X)=X+A`  
   A very powerful mechanism is that function bodies have access to 
@@ -205,7 +215,9 @@ list useful function definitions for each category.
   - In a next call to `FNF()`, the value of `A` is again looked-up, so if 
     `A` is changed the new value will be picked up.
 
-  An example, that peeks character codes or color from row `Y` on the screen. 
+  Find below an example, which peeks character codes or color indices 
+  from row `Y` on the screen, `Y` being a global variable. The column 
+  `X` is passed as argument.
   
   ```bas
   100 A0= 1024:REM ADDRESS FOR CHAR MEM
@@ -229,11 +241,13 @@ list useful function definitions for each category.
    9  89  14
   ```
 
-Some constructions are _not_ allowed in a function body.
+Now that we have seen that there are several possibilities to make 
+interesting functions, let's turn to constructions that are _not_ 
+allowed in a function body.
 
 - **Print modifiers**  
   Some built-in functions are not functions but rather modifiers that 
-  only work in `PRINT` context: `TAB(0)` and `SPC(0)`. Those can not 
+  only work in `PRINT` context: `TAB()` and `SPC()`. Those can not 
   be used in a function body.
   The `POS(0)` is not bound to `PRINT`, it is allowed in a function body.
 
@@ -242,11 +256,12 @@ Some constructions are _not_ allowed in a function body.
   In other words, `IF` or `FOR` is not allowed.
   
   Note that BASIC does have the `IF` expression mechanism: every 
-  relation operator returns 0 for false or -1 for true and that can 
-  be used is subsequent expressions.
+  relational operator returns 0 for false or -1 for true and that can 
+  be used in subsequent expressions.
   
   In below example function `FNA3()` clips values smaller than 3, and
-  `FNB6()` clips values greater than 6.
+  `FNB6()` clips values greater than 6. This does require a bit of 
+  expression magic.
   
   ```bas
   100 DEF FNA3(X)=-(X>=3)*X-3*(X<3)
@@ -270,7 +285,7 @@ Some constructions are _not_ allowed in a function body.
   
 - **Self**  
   The body of a function can not include itself.
-  Since every operand is always evaluated, this would lead 
+  Since every operand is always evaluated in BASIC, this would lead 
   to infinite recursion and thus memory overflow.
   ```BAS
   100 DEF FN FAC(N)=N*FNFAC(N-1)
@@ -305,8 +320,8 @@ As _Mapping the Commodore 64_ [explains](https://archive.org/details/Compute_s_M
 
 > A function definition will use the third and fourth bytes for a pointer to the address in the BASIC program text where the function definition starts. It uses the fifth and sixth bytes for a pointer to the dependent variable (the X of FN A(X)). The final byte is not used.
 
-Armed with this knowledge, let's make a dump or the variable storage.
-We begin with creating a variable of each of the four types.
+Armed with this knowledge, let's make a dump of the variable storage.
+For testing, we begin with creating a variable of each of the four types.
 Next comes the dump routine.
 
 ```bas
@@ -339,16 +354,16 @@ B  FLOAT  140  23  240  0  0
 A  FLOAT  140  24  32  0  0
 ```
 
-- For the five bytes of `FL` see 
+- For the five content bytes of `FL` see 
   [c64usr](https://github.com/maarten-pennings/howto/tree/main/c64usr#comparison).
-- For the five bytes of `S` note that the string is indeed 3 
-  characters (`"123"`), and that it is a literal in the BASIC program. 
+- For the five content bytes of `S` note that the string is indeed 3 
+  characters long (`"123"`), and that it is a literal in the BASIC program. 
   BASIC starts at $0800, so address 8/22 for `123` makes sense. 
 - The integer `I` was assigned `34*256+17`, the dump shows both 34 and 17 
   (in the unusual high-byte/low-byte order). 
 - Finally we see `FNF()`. Again, the body is in the BASIC text, so address 
   8/56 seems plausible, and 9/118 referring to `X` seems also plausible.
-  A quick test indeed discloses the body. Note that 170 is the 
+  We do a quick test to disclose the function body. Note that 170 is the 
   [token](https://sta.c64.org/cbm64basins2.html) for `+`.
   ```
   FOR A=8*256+56 TO A+4:PRINT CHR$(PEEK(A));:NEXT
@@ -362,13 +377,12 @@ One thing is remarkable: the program is _not_ using the variable `X`.
 Still `X` occurs in the variable dump.
 My suspicion is that when computing `FNF(444)`, the BASIC interpreter 
 assigns `444` to `X`, and then simply calls the evaluator on the body,
-here `789+X`. So `X` must exist.
+here `789+X`. Variable `X` must exist for this scheme to work.
 
 What is also worth noting, is that functions are relatively dynamic; they 
 are stored like variable. This means it is easy to change them. 
-
-The following is a a-typical implementation of 
-[Collatz](https://en.wikipedia.org/wiki/Collatz_conjecture)
+The following is an a-typical (kind wording for ridiculous) implementation 
+of [Collatz](https://en.wikipedia.org/wiki/Collatz_conjecture)
 using dynamically switching functions.
 
 ```bas
