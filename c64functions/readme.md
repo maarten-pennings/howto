@@ -327,18 +327,17 @@ Next comes the dump routine.
 ```bas
 100 FL=65536
 110 S$="123"
-120 I%=34*256+17
-130 DEF FNF(X)=789+X
+120 I%=34*256+199
+130 DEF FNF3(X)=789+X
 140 :
 200 T$(0)="FLOAT":T$(1)="FN()"
 210 T$(2)="STRING":T$(3)="INT"
-220 B=0:FOR A=PEEK(45)+256*PEEK(46) TO P
-EEK(47)+256*PEEK(48)-1 STEP 7
-230 PRINT CHR$(PEEK(A)AND127);
-240 PRINT CHR$(PEEK(A+1)AND127);TAB(3);
+220 B=0:FOR A=PEEK(45)+256*PEEK(46) TO PEEK(47)+256*PEEK(48)-1 STEP 7
+230 PRINT CHR$(PEEK(A) AND 127);
+240 PRINT CHR$(PEEK(A+1) AND 127);TAB(3);
 250 PRINT T$(INT(PEEK(A)/128)+2*INT(PEEK(A+1)/128));TAB(9);
-260 FOR B=A+2 TO A+6:PRINTPEEK(B);:NEXT
-270 PRINT:NEXT A
+260 FOR B=A+2 TO A+6:PRINT PEEK(B);:NEXT:PRINT
+270 NEXT A
 ```
 
 This is the output, which matches nicely the description 
@@ -347,11 +346,11 @@ in _Mapping the Commodore 64_.
 ```bas
 FL FLOAT  145  0  0  0  0
 S  STRING 3  22  8  0  0
-I  INT    34  17  0  0  0
-F  FN()   56  8  118  9  55
+I  INT    34  199  0  0  0
+F3 FN()   58  8  84  9  55
 X  FLOAT  0  0  0  0  0
-B  FLOAT  140  23  240  0  0
-A  FLOAT  140  24  32  0  0
+B  FLOAT  140  21  208  0  0
+A  FLOAT  140  22  0  0  0
 ```
 
 - For the five content bytes of `FL` see 
@@ -359,16 +358,16 @@ A  FLOAT  140  24  32  0  0
 - For the five content bytes of `S` note that the string is indeed 3 
   characters long (`"123"`), and that it is a literal in the BASIC program. 
   BASIC starts at $0800, so address 8/22 for `123` makes sense. 
-- The integer `I` was assigned `34*256+17`, the dump shows both 34 and 17 
+- The integer `I` was assigned `34*256+199`, the dump shows both 34 and 199 
   (in the unusual high-byte/low-byte order). 
-- Finally we see `FNF()`. Again, the body is in the BASIC text, so address 
-  8/56 seems plausible, and 9/118 referring to `X` seems also plausible.
+- Finally we see `FNF3()`. Again, the body is in the BASIC text, so address 
+  8/58 seems plausible, and 9/84 referring to `X` seems also plausible.
   We do a quick test to disclose the function body. Note that 170 is the 
   [token](https://sta.c64.org/cbm64basins2.html) for `+`.
   ```
-  FOR A=8*256+56 TO A+4:PRINT CHR$(PEEK(A));:NEXT
+  FOR A=8*256+58 TO A+4:PRINT CHR$(PEEK(A));:NEXT
   789JX
-  FOR A=8*256+56 TO A+4:PRINT PEEK(A);:NEXT
+  FOR A=8*256+58 TO A+4:PRINT PEEK(A);:NEXT
   55  56  57  170  88
   ```
 
