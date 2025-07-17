@@ -401,21 +401,21 @@ RUN
 
 Assume we have a function definition for `F` using argument X,
 
-```bas
+```txt
   DEF FN F(X) = <expression in X>
 ```
 
 and a function call of `F`.
 
-```bas
-  PRINT FN F( <other expression> )
+```txt
+  ... FN F( <other expression> ) ...
 ```
 
 My guess of what is actually executed by the BASIC interpreter is
 
-```bas
+```txt
   X= <other expression>
-  PRINT <expression in X>
+  ... <expression in X> ...
 ```
 
 But as the following code shows, it is a bit more subtle.
@@ -438,18 +438,18 @@ My new guess therefore is
 ```bas
   PUSH(X)
   X= <other expression>
-  PRINT <expression in X>
+  ... <expression in X> ...
   POP(X)
 ```
 
 This time _Mapping the Commodore 64_ seems [wrong](https://archive.org/details/Compute_s_Mapping_the_Commodore_64/page/n61/mode/2up).
 It seems to describe a stack frame for `DEF`, not for a call, and it suggests a frame of 5 bytes.
-As we shall see the C64-wiki is much closer with its 16 byte stack frame).
+As we shall see the C64-wiki is much closer with its 16 byte stack frame.
 
 How do we snapshot the stack in the middle of calling a function?
 
-We misused the `USR()` function.
-When calling `USR( <expr> )` in basic this is what happens.
+We decided to misuse the `USR()` function for that.
+Recall, when calling `USR( <expr> )` in BASIC, this is what happens.
 
 - `<expr>` is evaluated, and resulting value stored in the so-called floating point accumulator 
   [FAC1](https://archive.org/details/Compute_s_Mapping_the_Commodore_64/page/n35/mode/2up)
@@ -460,9 +460,9 @@ When calling `USR( <expr> )` in basic this is what happens.
   at address 785,786
   
 - That routine is "supposed" to use FAC1, compute something, leave the result again in FAC1,
-  and `RTS` back to the basic interpreter.
+  and `RTS` back to the BASIC interpreter.
   
-- The BASIC interpreter picks up the value returned by `USR()` in FAC1 and continues with that.
+- The BASIC interpreter picks up the value returned by `USR()` in FAC1 and continues with that in the BASIC expression is was evaluating.
 
 We have written a machine language routine that receives a value in FAC1, does not 
 look at it, makes a snapshot of the entire stack (all 256 bytes), then returns.
@@ -508,20 +508,20 @@ And wrote the following BASIC program.
 ```
 
 Lines 100-120 place the `USR()` implementation at 49152.
-Line 130 write the vector for `USR()` to point to the implementation.
+Line 130 writes the vector for `USR()` to point to the just poked implementation.
 Lines 150-170 contain 3 nested functions. Function `P2(X)` computes 
 a simple polynomial of degree 2 (x²+x+1). It uses function `SQ(X)` computes 
 the square if `X`, but also calls the identity function, which is implemented
 by calling our stack snapshot routine.
 
-When we run this program we get the expected outcome.
+When we run this program we get the expected outcome (2*2+2+1=7).
 
 ```bas
 run
  7
 ```
 
-We also print three pointers: start of BASIC program (2049 or $0801),
+For analysis, we print three pointers: start of BASIC program (2049 or $0801),
 end of BASIC program and start of variables (2234 or $08BA), and 
 end of variables (2276, $08E4).
 
@@ -535,7 +535,7 @@ PRINT PEEK(47)+256*PEEK(48)
 ```
 
 We used POWERMON to dump the BASIC program and variables.
-The below listing is annotated with `*` to denote the begin and end 
+The below hex numbers are annotated with `*` to denote the begin and end 
 of the two areas (BASIC program and variables). The symbol `/` 
 separates BASIC lines respectively variables.
 
@@ -576,44 +576,59 @@ So we reordered the data, per line and per variable, and annotated the bytes.
 We skipped the first half of the program.
 
 ```txt
-      LINK  140   :
 :0863 69 08 8C 00 3A 00
-      LINK  150   DEFFN I  D  (  X  )  =  USR(  X  )       
+      LINK  140   :
+      
 :0869 7A 08 96 00 96 A5 49 44 28 58 29 B2 B7 28 58 29 00
-      LINK  160   DEFFN S  Q  (  X  )  =  FN I  D  (  X  *  X  )
+      LINK  150   DEFFN I  D  (  X  )  =  USR(  X  )       
+      
 :087A 8F 08 A0 00 96 A5 53 51 28 58 29 B2 A5 49 44 28 58 AC 58 29 00
-      LINK  170   DEFFN P  2  (  X  )  =  FN S  Q  (  X  )  +  X  +  1
+      LINK  160   DEFFN S  Q  (  X  )  =  FN I  D  (  X  *  X  )
+      
 :088F A6 08 AA 00 96 A5 50 32 28 58 29 B2 A5 53 51 28 58 29 AA 58 AA 31 00
-      LINK  180   X  =  1  :  PR FN P  2  (  2  )  :  END
+      LINK  170   DEFFN P  2  (  X  )  =  FN S  Q  (  X  )  +  X  +  1
+      
 :08A6 B8 08 B4 00 58 B2 31 3A 99 A5 50 32 28 32 29 3A 80 00
-      LINK
+      LINK  180   X  =  1  :  PR FN P  2  (  2  )  :  END
+      
 :08B8 00 00
-      A  _ 
+      LINK
+      
 :08B8 41 00 90 40 0C 00 00
-      D  _
+      A  _ 
+      
 :08C1 44 00 87 40 00 00 00
-      I  D
+      D  _
+      
 :08C8 C9 44 75 08 D1 08 B7
-      X
+      I  D
+      
 :08CF 58 00 81 00 00 00 00
-      S  Q
+      X
+      
 :08D6 D3 51 86 08 D1 08 A5
-      P  2
+      S  Q
+      
 :08DD D0 32 9B 08 D1 08 A5
+      P  2
 ```
 
-Important to Note
-- At $08B5, we see $3A or `:`, which terminates the call to `FNP2(2)`.
-- At $08A1, we see $AA or `+`, which terminates the call to `FNSQ(X)`.
-- At $088E, we see $00 (line terminator), which terminates the call to `FNID(X)`.
-- $08D1 is between 58 00, the name of variable `X`, and 81 00 00 00 00, the value of variable `X`, in floating point format.
+Note the following addresses:
 
-Recall that a number like 2 is first written in binary: 10.00000000 00000000 00000000 000000.
-Then it is normalized (decimal point moved to the left just after the first 1), adding a binary exponent: 1.00000000 00000000 00000000 0000000 E 00000001.
+- At $088E, we see $00 (line terminator, of the line starting at $087A), which terminates the call to `FNID(X)`.
+
+- At $08A1, we see $AA or `+` (line starting ar $088F), which terminates the call to `FNSQ(X)`.
+
+- At $08B5, we see $3A or `:`, which terminates the call to `FNP2(2)`, just before `END`.
+
+- $08D1 is between 58 00, the name of variable `X` starting at $08CF, and 81 00 00 00 00, the value of variable `X`, in floating point format.
+
+Recall that a number like 2 is first written in binary with a binary point: 10.00000000 00000000 00000000 000000.
+Then it is normalized (binary point moved to the left just after the first 1), adding a binary exponent (E) to register the shift: 1.00000000 00000000 00000000 0000000 E 00000001.
 In the storage format, the leading 1 is dropped, and the exponent gets $81 added (to handle negative exponents): 00000000 00000000 00000000 00000000 E 10000010.
 Finally, the exponent moves to the front: 10000010 00000000 00000000 00000000 00000000.
 In other words, 2 is encoded as 82 00 00 00 00.
-Likewise 1 is encoded as 81 00 00 00 00.
+Likewise 1 is encoded as 81 00 00 00 00. This is indeed the value of `X` as it was assigned on line 180.
 
 Next step is to use POWERMON to dump the snapshot of the stack.
 We dumped the top half, we leaft out the bottom half, since it was empty.
@@ -641,17 +656,17 @@ Note that the stack grows "down" from $200.
 In our snapshot it means it grows down from $C200.
 Since the memory dump is low to high, the stack in the dump grows up.
 
-We can not explain the top 12 bytes (B3 AD 00 B7 AA E9 A7 A4 01 01 B4 00).
+We can not explain the first 12 bytes that got pushed (B3 AD 00 B7 AA E9 A7 A4 01 01 B4 00).
 Leaving those out, and then reordering to get frames of 16 bytes gives this.
 
 ```txt
-   ret  | 00 |  ret  |  ret  | @ arg | basic | 
+   ret  | 00 |  ret  |  ret  | @ arg | basic | saved arg
   B3 AD | 00 | 8C AD | 3A B4 | D1 08 | 8E 08 | 82 00 00 00 00
   B3 AD | 00 | 8C AD | 3A B4 | D1 08 | A1 08 | 82 00 00 00 00
   B3 AD | 00 | 8C AD | 3A B4 | D1 08 | B5 08 | 81 00 00 00 00
 ```
 
-Why 16 bytes; that is what the [C64-wiki](https://www.c64-wiki.com/wiki/FN) suggests.
+Why 16 bytes; that is what the [C64-wiki](https://www.c64-wiki.com/wiki/FN) explains.
 
 > Calling a FN function consumes 16 bytes on the BASIC stack. These consists of
 > - float value (in variable encoding) of the argument (5 bytes) (in order mantissa bytes 4, 3, 2, 1 followed by the exponent byte)
@@ -667,7 +682,7 @@ in out case (slightly different ROM version)?
 
 We see
 - all the constants as C64 wiki explains;
-- the ref the the value of `X` at $08D1;
+- the ref to the value of `X` at $08D1;
 - the pointer to after the closing bracket at respectively $08B5, $08A1, $088E;
 - and the pushed value of X, namely 1, 2, and 2 in floating point format (as explained above).
 
