@@ -709,7 +709,7 @@ See the next section for more details.
 
 We have a look at the stack generated while evaluating `FNP2(2)`.
 
-The program fragment
+The program fragment (`//` are comments from this article)
 
 ```bas
 180 X=1:PRINTFNP2(2):END // EXEC_CURSOR at ":" is $08B5
@@ -722,19 +722,19 @@ X=1
 PUSH(X) // 1 in float 81 00 00 00 00
 PUSH(EXEC_CURSOR) // $08B5
   X=2
-  EVAL FNP2()
+  EVALBODY FNP2()
 POP(EXEC_CURSOR)
 POP(X)
 ```
 
-To evaluate `FNP2()` BASIC jumps to its body, this is the reason the EXEC_CURSOR 
-was pushed: so that the interpreter can resume execution.
+To evaluate the body of `FNP2()`, BASIC jumps to it.
+This is the reason the EXEC_CURSOR was pushed: so that the interpreter can resume execution.
 
 ```
 170 DEFFNP2(X)=FNSQ(X)+X+1 // EXEC_CURSOR at first "+" is $08A1
 ```
 
-The first expression of `FNP2()` is a function call to `FNSQ()`, which 
+The first expression of `FNP2()`s body is a function call to `FNSQ()`, which 
 means we see the same 6 steps being repeated.
 
 ```txt
@@ -746,7 +746,7 @@ PUSH(EXEC_CURSOR) // $08B5
   PUSH(X) // 2 in float 82 00 00 00 00
   PUSH(EXEC_CURSOR) // $08A1
     X=2
-    EVAL FNSQ()
+    EVALBODY FNSQ()
   POP(EXEC_CURSOR)
   POP(X)
   
@@ -754,7 +754,7 @@ POP(EXEC_CURSOR)
 POP(X)
 ```
 
-This is the body of `FNSQ()`.
+This is the function definition (with body) of `FNSQ()`.
 
 ```bas
 160 DEFFNSQ(X)=FNID(X*X) // EXEC_CURSOR after ")" is $088E
@@ -776,7 +776,7 @@ PUSH(EXEC_CURSOR) // $08B5
     PUSH(X) // 2 in float 82 00 00 00 00
     PUSH(EXEC_CURSOR) // $088E
       X=2
-      EVAL FNID()
+      EVALBODY FNID()
     POP(EXEC_CURSOR)
     POP(X)
 
@@ -787,9 +787,9 @@ POP(EXEC_CURSOR)
 POP(X)
 ```
 
-The body of `FNID()` doe snot call any (user) functions.
+The body of `FNID()` does not call any (user) functions.
 No more stack frame. Just a call to `USR()`, which snapshots the stack.
-What is on the stack at that moment?
+What is on the stack at the moment of snapshot?
 This is what got pushed.
 
 ```txt
@@ -802,6 +802,7 @@ PUSH(EXEC_CURSOR) // 8E 08
 ```
 
 This matches what we captured earlier, see the last two columns.
+Recall this stack grows upwards, so earlier pushes are lower.
 
 ```txt
    ret  | 00 |  ret  |  ret  | @ arg | basic | saved arg
