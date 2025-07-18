@@ -241,6 +241,9 @@ list useful function definitions for each category.
    9  89  14
   ```
 
+
+## Illegal function bodies
+
 Now that we have seen that there are several possibilities to make 
 interesting functions, let's turn to constructions that are _not_ 
 allowed in a function body.
@@ -399,6 +402,11 @@ RUN
 
 ## Execution architecture
 
+How are functions evaluated?
+
+
+### High level
+
 Assume we have a function definition for `F` using argument X,
 
 ```txt
@@ -444,7 +452,10 @@ My new guess therefore is
 
 This time _Mapping the Commodore 64_ seems [wrong](https://archive.org/details/Compute_s_Mapping_the_Commodore_64/page/n61/mode/2up).
 It seems to describe a stack frame for `DEF`, not for a call, and it suggests a frame of 5 bytes.
-As we shall see the C64-wiki is much closer with its 16 byte stack frame.
+We will make a snapshot of the stack and we will see the C64-wiki is much closer with its 16 byte stack frame.
+
+
+### Making a stack snapshot 
 
 How do we snapshot the stack in the middle of calling a function?
 
@@ -493,7 +504,7 @@ FOR A=49152 TO A+11:PRINT PEEK(A);:NEXT
  162  0  189  0  1  157  0  193  202  208  247  96
 ```
 
-And wrote the following BASIC program.
+And wrote the following BASIC snapshot program.
 
 ```bas
 100 FORA=49152TOA+11:READD:POKEA,D:NEXT
@@ -520,6 +531,8 @@ When we run this program we get the expected outcome (2*2+2+1=7).
 run
  7
 ```
+
+### Analyzing the snapshot program
 
 For analysis, we print three pointers: start of BASIC program (2049 or $0801),
 end of BASIC program and start of variables (2234 or $08BA), and 
@@ -613,15 +626,15 @@ We skipped the first half of the program.
       P  2
 ```
 
-Note the following addresses:
+Note the following addresses.
 
-- At $088E, we see $00 (line terminator, of the line starting at $087A), which terminates the call to `FNID(X)`.
+- At the end of the line starting at $087A, at **$088E**, we see $00, which terminates the call to `FNID(X)`.
 
-- At $08A1, we see $AA or `+` (line starting ar $088F), which terminates the call to `FNSQ(X)`.
+- Near the end of the line starting at $088F, at **$08A1**, we see $AA or `+`, which terminates the call to `FNSQ(X)`.
 
-- At $08B5, we see $3A or `:`, which terminates the call to `FNP2(2)`, just before `END`.
+- Near the end of the line starting at $08A6, at **$08B5**, we see $3A or `:` (just before `END`), which terminates the call to `FNP2(2)`.
 
-- $08D1 is between 58 00, the name of variable `X` starting at $08CF, and 81 00 00 00 00, the value of variable `X`, in floating point format.
+- In the line starting at $08CF, before **$08D1**, we see 58 00, the name of variable `X`, followed by 81 00 00 00 00, the value of variable `X`, in floating point format.
 
 Recall that a number like 2 is first written in binary with a binary point: 10.00000000 00000000 00000000 000000.
 Then it is normalized (binary point moved to the left just after the first 1), adding a binary exponent (E) to register the shift: 1.00000000 00000000 00000000 0000000 E 00000001.
@@ -629,6 +642,9 @@ In the storage format, the leading 1 is dropped, and the exponent gets $81 added
 Finally, the exponent moves to the front: 10000010 00000000 00000000 00000000 00000000.
 In other words, 2 is encoded as 82 00 00 00 00.
 Likewise 1 is encoded as 81 00 00 00 00. This is indeed the value of `X` as it was assigned on line 180.
+
+
+### Analyzing the stack 
 
 Next step is to use POWERMON to dump the snapshot of the stack.
 We dumped the top half, we leaft out the bottom half, since it was empty.
@@ -670,7 +686,7 @@ Why 16 bytes; that is what the [C64-wiki](https://www.c64-wiki.com/wiki/FN) expl
 
 > Calling a FN function consumes 16 bytes on the BASIC stack. These consists of
 > - float value (in variable encoding) of the argument (5 bytes) (in order mantissa bytes 4, 3, 2, 1 followed by the exponent byte)
-> - address of the position pointing to BASIC text right after the bracket (2 bytes)
+> - address of the position pointing to BASIC text ("EXEC_CURSOR") right after the bracket (2 bytes)
 > - pointer to the value of the of the argument variable (2 bytes)
 > - return address $B43A=(180, 58) from call JSR $AD8A - Confirm Result (2 bytes)
 > - return address $AD8C=(173, 140) from call JSR $AD9E - Evaluate Expression in Text (2 bytes)
@@ -683,8 +699,116 @@ in out case (slightly different ROM version)?
 We see
 - all the constants as C64 wiki explains;
 - the ref to the value of `X` at $08D1;
-- the pointer to after the closing bracket at respectively $08B5, $08A1, $088E;
+- the EXEC_CURSORs at respectively $08B5, $08A1, $088E;
 - and the pushed value of X, namely 1, 2, and 2 in floating point format (as explained above).
+
+See the next section for more details.
+
+
+### Execution model
+
+We have a look at the stack generated while evaluating `FNP2(2)`.
+
+The program fragment
+
+```bas
+180 X=1:PRINTFNP2(2):END // EXEC_CURSOR at ":" is $08B5
+```
+
+leads to the following steps of the BASIC interpreter.
+
+```txt
+X=1
+PUSH(X) // 1 in float 81 00 00 00 00
+PUSH(EXEC_CURSOR) // $08B5
+  X=2
+  EVAL FNP2()
+POP(EXEC_CURSOR)
+POP(X)
+```
+
+To evaluate `FNP2()` BASIC jumps to its body, this is the reason the EXEC_CURSOR 
+was pushed: so that the interpreter can resume execution.
+
+```
+170 DEFFNP2(X)=FNSQ(X)+X+1 // EXEC_CURSOR at first "+" is $08A1
+```
+
+The first expression of `FNP2()` is a function call to `FNSQ()`, which 
+means we see the same 6 steps being repeated.
+
+```txt
+X=1
+PUSH(X) // 1 in float 81 00 00 00 00
+PUSH(EXEC_CURSOR) // $08B5
+  X=2
+  
+  PUSH(X) // 2 in float 82 00 00 00 00
+  PUSH(EXEC_CURSOR) // $08A1
+    X=2
+    EVAL FNSQ()
+  POP(EXEC_CURSOR)
+  POP(X)
+  
+POP(EXEC_CURSOR)
+POP(X)
+```
+
+This is the body of `FNSQ()`.
+
+```bas
+160 DEFFNSQ(X)=FNID(X*X) // EXEC_CURSOR after ")" is $088E
+```
+
+The body of `FNSQ()` starts with a function call to `FNID()`, which 
+means we see again the same 6 steps being repeated.
+
+```txt
+X=1
+PUSH(X) // 1 in float 81 00 00 00 00
+PUSH(EXEC_CURSOR) // $08B5
+  X=2
+  
+  PUSH(X) // 2 in float 82 00 00 00 00
+  PUSH(EXEC_CURSOR) // $08A1
+    X=2
+
+    PUSH(X) // 2 in float 82 00 00 00 00
+    PUSH(EXEC_CURSOR) // $088E
+      X=2
+      EVAL FNID()
+    POP(EXEC_CURSOR)
+    POP(X)
+
+  POP(EXEC_CURSOR)
+  POP(X)
+  
+POP(EXEC_CURSOR)
+POP(X)
+```
+
+The body of `FNID()` doe snot call any (user) functions.
+No more stack frame. Just a call to `USR()`, which snapshots the stack.
+What is on the stack at that moment?
+This is what got pushed.
+
+```txt
+PUSH(X)           // 81 00 00 00 00
+PUSH(EXEC_CURSOR) // B5 08
+PUSH(X)           // 82 00 00 00 00
+PUSH(EXEC_CURSOR) // A1 08
+PUSH(X)           // 82 00 00 00 00
+PUSH(EXEC_CURSOR) // 8E 08
+```
+
+This matches what we captured earlier, see the last two columns.
+
+```txt
+   ret  | 00 |  ret  |  ret  | @ arg | basic | saved arg
+  B3 AD | 00 | 8C AD | 3A B4 | D1 08 | 8E 08 | 82 00 00 00 00
+  B3 AD | 00 | 8C AD | 3A B4 | D1 08 | A1 08 | 82 00 00 00 00
+  B3 AD | 00 | 8C AD | 3A B4 | D1 08 | B5 08 | 81 00 00 00 00
+```
 
 
 ## Conclusions
@@ -708,4 +832,5 @@ For me, cost and gain of this feature is out of balance.
 I believe most BASIC programmers see functions as a "rarely used feature".
 
 (end)
+
 
