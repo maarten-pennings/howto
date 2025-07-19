@@ -532,7 +532,7 @@ run
  7
 ```
 
-### Analyzing the snapshot program
+### Hex dump BASIC program
 
 For analysis, we print three pointers: start of BASIC program (2049 or $0801),
 end of BASIC program and start of variables (2234 or $08BA), and 
@@ -585,22 +585,24 @@ separates BASIC lines respectively variables.
 ```
 
 Even with the `*` and `/` annotation this is quite hard to read.
-So we reordered the data, per line and per variable, and annotated the bytes.
+So we chuncked the bytes per line and per variable.
+And we added annotation below the bytes (their meaning) and 
+above the bytes (flagged some addresses).
 We skipped the first half of the program.
 
 ```txt
 :0863 69 08 8C 00 3A 00
       LINK  140   :
-      
+                                          |0875      
 :0869 7A 08 96 00 96 A5 49 44 28 58 29 B2 B7 28 58 29 00
       LINK  150   DEFFN I  D  (  X  )  =  USR(  X  )       
-      
+                                          |0886                   |088E
 :087A 8F 08 A0 00 96 A5 53 51 28 58 29 B2 A5 49 44 28 58 AC 58 29 00
       LINK  160   DEFFN S  Q  (  X  )  =  FN I  D  (  X  *  X  )
-      
+                                          |089B             |08A1
 :088F A6 08 AA 00 96 A5 50 32 28 58 29 B2 A5 53 51 28 58 29 AA 58 AA 31 00
       LINK  170   DEFFN P  2  (  X  )  =  FN S  Q  (  X  )  +  X  +  1
-      
+                                                   |08B5
 :08A6 B8 08 B4 00 58 B2 31 3A 99 A5 50 32 28 32 29 3A 80 00
       LINK  180   X  =  1  :  PR FN P  2  (  2  )  :  END
       
@@ -615,7 +617,7 @@ We skipped the first half of the program.
       
 :08C8 C9 44 75 08 D1 08 B7
       I  D
-      
+            |08D1
 :08CF 58 00 81 00 00 00 00
       X
       
@@ -626,28 +628,51 @@ We skipped the first half of the program.
       P  2
 ```
 
-Note the following addresses.
+Note the following address(es), the start of a variable's value.
+
+- In the line starting at $08CF, storing float variable `X` (the 58 00 encodes the name), at **$08D1** we see 81 00 00 00 00, the value in floating point format.
+
+Note the following addresses, each the start of a _function body_.
+
+- In the line starting at $0869, the body of `FNID(X)` starts at **$0875**.  
+  At line $08C8 the first two bytes encode function name `ID`, the next two hold the start address $0875, 
+  and the next two point to the value of `X` $08D1. The 7th byte B7 has no meaning.
+
+- In the line starting at $087A, the body of `FNSQ(X)` starts at **$0886**.  
+  At line $08D6 the first two bytes encode function name `SQ`, the next two hold the start address $0886, 
+  and the next two point to the value of `X` $08D1. The 7th byte A5 has no meaning.
+
+- In the line starting at $088F, the body of `FNP2(X)` starts at **$089B**.
+  At line $08DD the first two bytes encode function name `P2`, the next two hold the start address $089B, 
+  and the next two point to the value of `X` $08D1. The 7th byte A5 has no meaning.
+
+Note the following addresses, each the token just after a _function call_. 
+Those will be found on the stack (see next section).
 
 - At the end of the line starting at $087A, at **$088E**, we see $00, which terminates the call to `FNID(X)`.
 
 - Near the end of the line starting at $088F, at **$08A1**, we see $AA or `+`, which terminates the call to `FNSQ(X)`.
 
-- Near the end of the line starting at $08A6, at **$08B5**, we see $3A or `:` (just before `END`), which terminates the call to `FNP2(2)`.
-
-- In the line starting at $08CF, before **$08D1**, we see 58 00, the name of variable `X`, followed by 81 00 00 00 00, the value of variable `X`, in floating point format.
-
-Recall that a number like 2 is first written in binary with a binary point: 10.00000000 00000000 00000000 000000.
-Then it is normalized (binary point moved to the left just after the first 1), adding a binary exponent (E) to register the shift: 1.00000000 00000000 00000000 0000000 E 00000001.
-In the storage format, the leading 1 is dropped, and the exponent gets $81 added (to handle negative exponents): 00000000 00000000 00000000 00000000 E 10000010.
-Finally, the exponent moves to the front: 10000010 00000000 00000000 00000000 00000000.
-In other words, 2 is encoded as 82 00 00 00 00.
-Likewise 1 is encoded as 81 00 00 00 00. This is indeed the value of `X` as it was assigned on line 180.
+- Near the end of the line starting at $08A6, at **$08B5**, we see $3A or `:` just before `END`, which terminates the call to `FNP2(2)`.
 
 
-### Analyzing the stack 
+> For the floating point storage format, recall that a number like 2 is first 
+> written in binary with a binary point: 10.00000000 00000000 00000000 000000.
+> Then it is normalized (binary point moved to the left just after the first 1), 
+> adding a binary exponent (E) to register the shift: 
+> 1.00000000 00000000 00000000 0000000 E 00000001.
+> In the storage format, the leading 1 is dropped, and the exponent gets $81 added 
+> (to handle negative exponents): 00000000 00000000 00000000 00000000 E 10000010.
+> Finally, the exponent moves to the front: 10000010 00000000 00000000 00000000 00000000.
+> In other words, 2 is encoded as 82 00 00 00 00.
+> Likewise 1 is encoded as 81 00 00 00 00. 
+
+The value 81 00 00 00 00 is indeed the value of `X` as it was assigned on line 180 and stored at $08D1.
+
+### Hex dump of the stack 
 
 Next step is to use POWERMON to dump the snapshot of the stack.
-We dumped the top half, we leaft out the bottom half, since it was empty.
+We dumped the top half only ($0180..$01FF); the bottom half ($0100..$017F) was empty.
 
 ```txt
 :C180 00 00 FD FF FF FF 00 00  .........
@@ -670,7 +695,7 @@ We dumped the top half, we leaft out the bottom half, since it was empty.
 
 Note that the stack grows "down" from $200.
 In our snapshot it means it grows down from $C200.
-Since the memory dump is low to high, the stack in the dump grows up.
+Since the memory dump is low to high, the stack in the dump visually grows up.
 
 We can not explain the first 12 bytes that got pushed (B3 AD 00 B7 AA E9 A7 A4 01 01 B4 00).
 Leaving those out, and then reordering to get frames of 16 bytes gives this.
@@ -693,8 +718,8 @@ Why 16 bytes; that is what the [C64-wiki](https://www.c64-wiki.com/wiki/FN) expl
 > - zero byte from $ADAB (1 byte)
 > - return address $ADB1=(173, 177) from all JSR $AE83 Evaluate Single Term (2 bytes)
 
-There is only one mismatch, C64 wiki says that the last push is ADB1, and that appears to be ADB3 
-in out case (slightly different ROM version)?
+There is only one mismatch, C64 wiki says that the last push is ADB1, 
+and that appears to be ADB3 in out case (slightly different ROM version)?
 
 We see
 - all the constants as C64 wiki explains;
@@ -707,9 +732,9 @@ See the next section for more details.
 
 ### Execution model
 
-We have a look at the stack generated while evaluating `FNP2(2)`.
+We study the stack generated while evaluating `FNP2(2)`.
 
-The program fragment (`//` are comments from this article)
+The following program fragment (`//` are comments from this article)
 
 ```bas
 180 X=1:PRINTFNP2(2):END // EXEC_CURSOR at ":" is $08B5
@@ -719,7 +744,7 @@ leads to the following steps of the BASIC interpreter.
 
 ```txt
 X=1
-PUSH(X) // 1 in float 81 00 00 00 00
+PUSH(X) // 1 in float is 81 00 00 00 00
 PUSH(EXEC_CURSOR) // $08B5
   X=2
   EVALBODY FNP2()
@@ -728,22 +753,23 @@ POP(X)
 ```
 
 To evaluate the body of `FNP2()`, BASIC jumps to it.
-This is the reason the EXEC_CURSOR was pushed: so that the interpreter can resume execution.
+This is the reason the EXEC_CURSOR was pushed: so that the interpreter can resume 
+execution at the right point in line 180.
 
 ```
 170 DEFFNP2(X)=FNSQ(X)+X+1 // EXEC_CURSOR at first "+" is $08A1
 ```
 
-The first expression of `FNP2()`s body is a function call to `FNSQ()`, which 
+The first expression of tye body of `FNP2()` is a function call to `FNSQ()`, which 
 means we see the same 6 steps being repeated.
 
 ```txt
 X=1
-PUSH(X) // 1 in float 81 00 00 00 00
+PUSH(X) // 1 in float is 81 00 00 00 00
 PUSH(EXEC_CURSOR) // $08B5
   X=2
   
-  PUSH(X) // 2 in float 82 00 00 00 00
+  PUSH(X) // 2 in float is 82 00 00 00 00
   PUSH(EXEC_CURSOR) // $08A1
     X=2
     EVALBODY FNSQ()
@@ -765,15 +791,15 @@ means we see again the same 6 steps being repeated.
 
 ```txt
 X=1
-PUSH(X) // 1 in float 81 00 00 00 00
+PUSH(X) // 1 in float is 81 00 00 00 00
 PUSH(EXEC_CURSOR) // $08B5
   X=2
   
-  PUSH(X) // 2 in float 82 00 00 00 00
+  PUSH(X) // 2 in float is 82 00 00 00 00
   PUSH(EXEC_CURSOR) // $08A1
     X=2
 
-    PUSH(X) // 2 in float 82 00 00 00 00
+    PUSH(X) // 2 in float is 82 00 00 00 00
     PUSH(EXEC_CURSOR) // $088E
       X=2
       EVALBODY FNID()
@@ -789,7 +815,7 @@ POP(X)
 
 The body of `FNID()` does not call any (user) functions.
 No more stack frame. Just a call to `USR()`, which snapshots the stack.
-What is on the stack at the moment of snapshot?
+What should be on the stack at the moment of snapshot?
 This is what got pushed.
 
 ```txt
@@ -802,7 +828,7 @@ PUSH(EXEC_CURSOR) // 8E 08
 ```
 
 This matches what we captured earlier, see the last two columns.
-Recall this stack grows upwards, so earlier pushes are lower.
+Recall this stack dump visually grows upwards, so earlier pushes are lower.
 
 ```txt
    ret  | 00 |  ret  |  ret  | @ arg | basic | saved arg
@@ -811,7 +837,10 @@ Recall this stack grows upwards, so earlier pushes are lower.
   B3 AD | 00 | 8C AD | 3A B4 | D1 08 | B5 08 | 81 00 00 00 00
 ```
 
+As we saw on [C64-wiki](https://www.c64-wiki.com/wiki/FN), the other pushes 
+belong to the evaluation mechanism.
 
+ 
 ## Conclusions
 
 - The signature (one float to float) is too restrictive.
