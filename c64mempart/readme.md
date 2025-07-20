@@ -205,8 +205,8 @@ Note
 - Lines 130 and 140 set the leading 0 for the other two partitions.
 - Lines 150-170 print the progtime layout pointers (to write down, needed when editing A1 or A2).
 - Lines 180-220 let the user enter `1` or `2` or something else, and activate A1 or A2, or just end A0 (to be rerun, edited, saved).
-- Lines 300-330 active A0.
-- Lines 400-430 active A1.
+- Lines 300-330 active A1.
+- Lines 400-430 active A2.
 - The activation sets `TXTTAB`, `VARTAB`, and `MEMSIZ` (then `CLR` for the other 3). 
   At first `VARTAB` at lines 310 and 410 are set to dummy values. 
   They need to be updated with the actual values once A1 and A2 are known (programmed/edited, loaded).
