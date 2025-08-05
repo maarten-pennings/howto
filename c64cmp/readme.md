@@ -34,32 +34,35 @@ What does that mean?
 The `CMP #$E0` instruction computes `A-$E0`. 
 If `A` was `E0`, the result is 0 so the `Z` flag will be set.
 If `A` is greater than `E0` the result is positive so the `N` flag will be cleared.
-If `A` is lessthan `E0` the result of the subtract is negative so the `N` flag will be set.
+If `A` is less than `E0` the result of the subtract is negative so the `N` flag will be set.
 
 Sounds good. However, we have an 8 bit CPU, so when using the 8 bits in the 
-signed interpretation, which is what we do when using `N`, _half_ of the range 
-is considered negative. Let's check that with an experiment.
+signed interpretation, which is what we do when using `N`, exactly _half_ of 
+the range is considered negative, and this might not be what you want. 
+Let's check that with an experiment.
 
 
 ## Programming the experiment
 
 I understand the theory, but let's verify that practically.
-The fun thing of an 8 bit CPU is that we can simply check all cases.
+The fun thing of an 8 bit CPU is that it is so small that we can check all cases.
 
 The following BASIC program loads the accumulator with values $00 to $FF, 
 executes a `CMP #$E0` and prints the status register. In more detail
 
-- `POKE 780,AC` loads the accumulator for use in the upcoming `SYS`.
+- `POKE 780,AC` loads the accumulator AC for use in the upcoming `SYS`; see 
+  [map](https://www.zimmers.net/anonftp/pub/cbm/c64/manuals/mapping-c64.txt#:~:text=783%20(%2430C%2D%2430F)-,Register%20Storage%20Area,-The%20BASIC%20SYS).
 - `SYS AD` runs the `CMP #$E0; RTS` stored at address `AD` (49152)
-- `P=PEEK 783` loads the program status register from the last `SYS` into `P`.
-- `P` is analyzed for 3 flags: `N`, `Z` and `C`; the `CMP` does not affect the other flags.
+- `P=PEEK(783)` loads the program status register from the last `SYS` into `P`.
+- `P` is analyzed for 3 flags: `N`, `Z` and `C`; 
+  [note](https://www.masswerk.at/6502/6502_instruction_set.html#CMP) the `CMP` does not affect the other flags.
 - Finally `AC` is printed (in hex) followed by the three flags and a space.
 
 Please note that I use the [KCS cartridge](https://nl.wikipedia.org/wiki/KCS_Power_Cartridge) because
 it supports hex expressions.
 
 By the way, the program runs the described (sub) routine three times,
-once with `CMP #$E0` but before that with `CMP #$20`, and with `CMP #$80`.
+once with operand $E0 (`CMP #$E0`) but before that with $20, and with $80.
 
 ```BASIC
 100 AD=49152:REM ADDRESS OF ASM ROUTINE
@@ -82,8 +85,8 @@ once with `CMP #$E0` but before that with `CMP #$20`, and with `CMP #$80`.
 
 ## Results of the experiment
 
-The above program prints the following results 
-(I have manually placed the three outputs side by side for this article).
+The above program prints the following results. 
+I have manually placed the three outputs side by side for this article.
 
 ```txt
 LDA #?;CMP #$20;RTS            LDA #?;CMP #$80;RTS            LDA #?;CMP #$E0;RTS
@@ -155,14 +158,14 @@ FC:N-C FD:N-C FE:N-C FF:N-C    FC:--C FD:--C FE:--C FF:--C    FC:--C FD:--C FE:-
 
 ## Discussion
 
-We note that the `N` flag does not work.
+Let's start by looking at case $E0.
 
 ### CMP #$E0
 
 Note that in the third test, `CMP #$E0`, the `Z` flag is indeed set once,
 namely when the accumulator was E0, see `E0:-ZC`. 
 As expected the `N` flag is not set; 0 is not negative.
-All following numbers also have the `N` flag cleared.
+All following numbers also have the `N` flag clear.
 If we look at all predecessors, that starts as expected:
 DF, DE, DD, DC all have the `N` flag set (`DC:N-- DD:N-- DE:N-- DF:N--`).
 But after exactly $80 predecessors, the `N` flag stops being set:
@@ -172,7 +175,8 @@ But after exactly $80 predecessors, the `N` flag stops being set:
 60:N-- 61:N-- 62:N-- 63:N--
 ```
 
-So we can not use the `N` flag for testing if the accumulator is less than E0.
+So we can not use the `N` flag for testing if the accumulator is less than E0,
+if we want to go all the way down to $00.
 
 ### CMP #$80
 
@@ -181,7 +185,7 @@ When the accumulator is $80 the `Z` is set.
 For all numbers $80 and higher `N` is clear and below $80 `N` is set.
 But this is sheer luck, because we compare to $80.
 As we mentioned before, the `N` flag is set for the $80 numbers below the 
-compare value, which here is precisely the whole range.
+compare value, which here is precisely the whole range when we compare to $80.
 
 ### CMP #$20
 
@@ -193,12 +197,15 @@ In the case `CMP #$20` we get false false negatives for the highest numbers
 
 ### What now?
 
-The `N` flag doesn't work, but `C` flags precisely what we need!
+The `N` flag doesn't work, but as we can see from the table, 
+the `C` flag is precisely what we need!
+That is, when we want to treat the accumulator as unsigned.
 
 
 ## Conclusion
 
-After compare, use the `C` flag, not the `N` flag.
+After compare, use the `C` flag when the accumulator is treated as unsigned.
+Do not use the `N` flag.
 
 The `V` flag is not affected by the compare instructions.
 See [6502.org](http://www.6502.org/tutorials/vflag.html) for details on the `V` flag.
