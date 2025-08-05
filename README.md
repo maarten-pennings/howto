@@ -2,6 +2,13 @@
 Assortment of "How to xxx" I want to remember.
 
 
+# How to use the compare instruction of the 6502?
+
+I was writing some assembly on the 6502 in the C64 (ok the 6510)
+and tripped over the compare function.
+Why doesn't that [work](c64cmp)?
+
+
 ## Commodore 64 user defined functions
 
 A rarely used feature of the C64 is the user defined function `FNF(X)`.
