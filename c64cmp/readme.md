@@ -88,7 +88,7 @@ once with operand $E0 (`CMP #$E0`) but before that with $20, and with $80.
 The above program prints the following results. 
 I have manually placed the three outputs side by side for this article.
 
-```txt
+```
 LDA #?;CMP #$20;RTS            LDA #?;CMP #$80;RTS            LDA #?;CMP #$E0;RTS
 00:N-- 01:N-- 02:N-- 03:N--    00:N-- 01:N-- 02:N-- 03:N--    00:--- 01:--- 02:--- 03:---
 04:N-- 05:N-- 06:N-- 07:N--    04:N-- 05:N-- 06:N-- 07:N--    04:--- 05:--- 06:--- 07:---
