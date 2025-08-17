@@ -2,6 +2,12 @@
 Assortment of "How to xxx" I want to remember.
 
 
+# How to use the SID of the Commodore 64?
+
+Writing a UI to control the SID registers, and using the VICE tools
+to extract the BASIC program to PC, see [c64sid](c64sid).
+
+
 # How to use the compare instruction of the 6502?
 
 I was writing some assembly on the 6502 in the C64 (ok the 6510)

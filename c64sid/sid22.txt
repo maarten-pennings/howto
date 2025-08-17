@@ -1,0 +1,257 @@
+  100 c=0:h=0:m=0:n=0:rem alloc main vars
+  102 gosub 572:rem setup
+  104 gosub 514:rem drawfix
+  106 gosub 618:rem drawitems
+  108 gosub 614:rem drawchan (cursor)
+  110 rem {rvon}main loop
+  112 gets$:ifs$=""then112
+  114 rem {rvon}key 0-7 - gate
+  116 ifs$<"0"ors$>"7"then130
+  118 i=asc(s$):m=m(4)and254:ifiand1thenm=mor1
+  120 n=m(11)and254:ifiand2thenn=nor1
+  122 o=m(18)and254:ifiand4theno=oor1
+  124 pokes+4,m:pokes+11,n:pokes+18,o
+  126 m(4)=m:m(11)=n:m(18)=o:h=4:gosub404:h=11:gosub404:h=18:gosub404:goto112
+  128 rem {rvon}key f - freq
+  130 ifs$<>"F"then136
+  132 h=c*7:m=m(h)+256*m(h+1):m=int((m+1)*1.4):ifm>65535thenm=0
+  134 goto152
+  136 ifs$<>"f"then142
+  138 h=c*7:m=m(h)+256*m(h+1):m=int(m/1.4-1):ifm<0thenm=65535
+  139 goto152
+  140 rem {rvon}key p - pwm
+  142 ifs$<>"P"then148
+  144 h=c*7+2:m=m(h)+256*m(h+1):m=m+150:ifm>4095thenm=0
+  146 goto152
+  148 ifs$<>"p"then156
+  150 h=c*7+2:m=m(h)+256*m(h+1):m=m-150:ifm<0thenm=4095
+  152 m(h+1)=int(m/256):m(h)=m-256*m(h+1):gosub400:goto112
+  154 rem {rvon}key w - waveform
+  156 ifs$<>"W"then162
+  158 h=c*7+4:m=int(m(h)/16):n=m(h)-m*16:m=m+1:ifm>15thenm=0
+  160 m(h)=m*16+n:gosub400:goto112
+  162 ifs$<>"w"then170
+  164 h=c*7+4:m=int(m(h)/16):n=m(h)-m*16:m=m-1:ifm<0thenm=15
+  166 m(h)=m*16+n:gosub400:goto112
+  168 rem {rvon}key m - mode
+  170 ifs$<>"M"then178
+  172 h=c*7+4:m=int(m(h)/16):o=m(h)-m*16:n=int(o/2):o=o-n*2
+  174 n=n+1:ifn>7thenn=0
+  176 m(h)=m*16+n*2+o:gosub400:goto112
+  178 ifs$<>"m"then188
+  180 h=c*7+4:m=int(m(h)/16):o=m(h)-m*16:n=int(o/2):o=o-n*2
+  182 n=n-1:ifn<0thenn=7
+  184 m(h)=m*16+n*2+o:gosub400:goto112
+  186 rem {rvon}key a - attack
+  188 ifs$<>"A"then194
+  190 h=c*7+5:m=int(m(h)/16):n=m(h)-m*16:m=m+1:ifm>15thenm=0
+  192 m(h)=m*16+n:gosub400:goto112
+  194 ifs$<>"a"then202
+  196 h=c*7+5:m=int(m(h)/16):n=m(h)-m*16:m=m-1:ifm<0thenm=15
+  198 m(h)=m*16+n:gosub400:goto112
+  200 rem {rvon}key d - decay
+  202 ifs$<>"D"then208
+  204 h=c*7+5:m=int(m(h)/16):n=m(h)-m*16:n=n+1:ifn>15thenn=0
+  206 m(h)=m*16+n:gosub400:goto112
+  208 ifs$<>"d"then216
+  210 h=c*7+5:m=int(m(h)/16):n=m(h)-m*16:n=n-1:ifn<0thenn=15
+  212 m(h)=m*16+n:gosub400:goto112
+  214 rem {rvon}key s - sustain
+  216 ifs$<>"S"then222
+  218 h=c*7+6:m=int(m(h)/16):n=m(h)-m*16:m=m+1:ifm>15thenm=0
+  220 m(h)=m*16+n:gosub400:goto112
+  222 ifs$<>"s"then230
+  224 h=c*7+6:m=int(m(h)/16):n=m(h)-m*16:m=m-1:ifm<0thenm=15
+  226 m(h)=m*16+n:gosub400:goto112
+  228 rem {rvon}key r - release
+  230 ifs$<>"R"then236
+  232 h=c*7+6:m=int(m(h)/16):n=m(h)-m*16:n=n+1:ifn>15thenn=0
+  234 m(h)=m*16+n:gosub400:goto112
+  236 ifs$<>"r"then244
+  238 h=c*7+6:m=int(m(h)/16):n=m(h)-m*16:n=n-1:ifn<0thenn=15
+  240 m(h)=m*16+n:gosub400:goto112
+  242 rem {rvon}key c - cutfreq
+  244 ifs$<>"C"then250
+  246 h=21:m=m(h)+256*m(h+1):m=int((m+1)*1.3):ifm>2047thenm=0
+  248 goto254
+  250 ifs$<>"c"then258
+  252 h=21:m=m(h)+256*m(h+1):m=int(m/1.3-1):ifm<0thenm=2047
+  254 m(h+1)=int(m/256):m(h)=m-256*m(h+1):gosub400:goto112
+  256 rem {rvon}key n - reson
+  258 ifs$<>"N"then264
+  260 h=23:m=int(m(h)/16):n=m(h)-m*16:m=m+1:ifm>15thenm=15
+  262 m(h)=m*16+n:gosub400:goto112
+  264 ifs$<>"n"then272
+  266 h=23:m=int(m(h)/16):n=m(h)-m*16:m=m-1:ifm<0thenm=0
+  268 m(h)=m*16+n:gosub400:goto112
+  270 rem {rvon}key i - filter
+  272 ifs$<>"I"then278
+  274 h=23:m=int(m(h)/16):n=m(h)-m*16:n=n+1:ifn>15thenn=0
+  276 m(h)=m*16+n:gosub400:goto112
+  278 ifs$<>"i"then286
+  280 h=23:m=int(m(h)/16):n=m(h)-m*16:n=n-1:ifn<0thenn=15
+  282 m(h)=m*16+n:gosub400:goto112
+  284 rem {rvon}key b - band
+  286 ifs$<>"B"then292
+  288 h=24:m=int(m(h)/16):n=m(h)-m*16:m=m+1:ifm>15thenm=0
+  290 m(h)=m*16+n:gosub400:goto112
+  292 ifs$<>"b"then300
+  294 h=24:m=int(m(h)/16):n=m(h)-m*16:m=m-1:ifm<0thenm=15
+  296 m(h)=m*16+n:gosub400:goto112
+  298 rem {rvon}key v - volume
+  300 ifs$<>"V"then306
+  302 h=24:m=int(m(h)/16):n=m(h)-m*16:n=n+1:ifn>15thenn=0
+  304 m(h)=m*16+n:gosub400:goto112
+  306 ifs$<>"v"then314
+  308 h=24:m=int(m(h)/16):n=m(h)-m*16:n=n-1:ifn<0thenn=15
+  310 m(h)=m*16+n:gosub400:goto112
+  312 rem {rvon}key q - quit
+  314 ifs$<>"q"then326
+  316 pokes+24,0:printchr$(147)"SID regs";s:print
+  318 fori=0to24:printmid$(str$(i),2)"="mid$(str$(m(i)),2)" ";
+  320 ifi-int(i/7)*7=6thenprint
+  322 next:print:end
+  324 rem {rvon}key !/"/# - chan
+  326 i=asc(s$):ifi=64theni=34:rem @="
+  328 ifi<>33andi<>34andi<>35then334
+  330 c=i-33:gosub614:goto112
+  332 rem {rvon}key e - erase
+  334 ifs$<>"e"then 340
+  336 gosub626:gosub616:goto112
+  338 rem {rvon}key x - example
+  340 ifs$<>"x"then 356
+  342 h=0:m(0)=245:m(1)=21:gosub400:rem f
+  344 h=2:m(2)=255:m(3)=7:gosub400:rem pwm
+  346 h= 5:m( 5)= 0:gosub400:rem a/d
+  348 h= 6:m(6)=240:gosub400:rem s/r
+  350 h=24:m(24)=15:gosub400:rem volume
+  351 h=4:m(4)=65:gosub400:rem gate pulse
+  352 goto 112
+  354 rem {rvon}key h - help
+  356 ifs$<>"h"then398
+  358 gosub628:goto112
+  396 rem {rvon}key unused
+  398 goto 112
+  400 rem {rvon}sub - draw(h)
+  402 pokes+h,m(h):ifm%(h+1)=0thenpokes+h+1,m(h+1)
+  404 v=int(h/7):r=h-7*v:ifv=3then474
+  406 poke781,y(r):poke782,x(v+1):poke783,0:sys65520
+  408 onr+1gosub414,410,420,410,426,450,462:return
+  410 stop
+  412 rem {rvon}draw - freq
+  414 m=m(h)+256*m(h+1):printmid$(str$(m)+"    ",2,5)"{left}{left}{left}{left}{left}{down}";
+  416 printmid$(str$(int(m*f1))+"Hz   ",2,6):return
+  418 rem {rvon}draw - pwm
+  420 m=m(h)+256*m(h+1):printmid$(str$(m)+"    ",2,5)"{left}{left}{left}{left}{left}{down}";
+  422 printmid$(str$(int(m/f2)/100)+"%    ",2,6):return
+  424 rem {rvon}draw - ctrl
+  426 f0$="g":ifm(h)and1thenf0$="G"
+  428 f1$="s":ifm(h)and2thenf1$="S"
+  430 f2$="m":ifm(h)and4thenf2$="M"
+  432 f3$="d":ifm(h)and8thenf3$="D"
+  434 s$=f3$+f2$+f1$+f0$
+  436 f0$="t":ifm(h)and16thenf0$="T"
+  438 f1$="s":ifm(h)and32thenf1$="S"
+  440 f2$="b":ifm(h)and64thenf2$="B"
+  442 f3$="n":ifm(h)and128thenf3$="N"
+  444 printmid$(str$(m(h))+"   ",2,4)"{left}{left}{left}{left}{down}";
+  446 printf3$f2$f1$f0$"."s$:return
+  448 rem {rvon}draw - ad
+  450 m=int(m(h)/16):n=m(h)-m*16
+  452 s$=mid$(str$(m(h)),2)+"="+mid$(str$(m),2)+"/"+mid$(str$(n),2)+"     "
+  454 printleft$(s$,10)"{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{down}";
+  456 s$=mid$(str$(a(m)),2)+"/"+mid$(str$(dr(n)),2)+"       "
+  458 printleft$(s$,10):return
+  460 rem {rvon}draw - sr
+  462 m=int(m(h)/16):n=m(h)-m*16
+  464 s$=mid$(str$(m(h)),2)+"="+mid$(str$(m),2)+"/"+mid$(str$(n),2)+"     "
+  466 printleft$(s$,10)"{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{down}";
+  468 s$=mid$(str$(m),2)+"/"+mid$(str$(dr(n)),2)+"       "
+  470 printleft$(s$,10):return
+  472 rem {rvon}draw - common entry
+  474 poke781,y(7+r):poke782,x(1):poke783,0:sys65520
+  476 onr+1goto482,478,488,502
+  478 stop
+  480 rem {rvon}draw - cut
+  482 m=m(h)+256*m(h+1):s$=mid$(str$(m),2)+"="+mid$(str$(int(m*5.8+30)),2)
+  484 printleft$(s$+"      ",10):return
+  486 rem {rvon}draw - reson
+  488 f0$="-":ifm(h)and1thenf0$="1"
+  490 f1$="-":ifm(h)and2thenf1$="2"
+  492 f2$="-":ifm(h)and4thenf2$="3"
+  494 f3$="-":ifm(h)and8thenf3$="X"
+  496 s$=mid$(str$(m(h)),2)+"="+mid$(str$(int(m(h)/16)),2)+"."+f3$+f2$+f1$+f0$
+  498 printleft$(s$+"    ",10):return
+  500 rem {rvon}draw - vol
+  502 f0$="l":ifm(h)and16thenf0$="L"
+  504 f1$="b":ifm(h)and32thenf1$="B"
+  506 f2$="h":ifm(h)and64thenf2$="H"
+  508 f3$="d":ifm(h)and128thenf3$="D"
+  510 s$=mid$(str$(m(h)),2)+"="+f3$+f2$+f1$+f0$+"."+mid$(str$(m(h)and15),2)
+  512 printleft$(s$+"    ",10):return
+  514 rem {rvon}sub - drawfix
+  516 poke53280,6:poke53281,6:h$=chr$(152):l$=chr$(154)
+  518 printl$chr$(14)"{clr}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{CBM-R}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{CBM-R}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{CBM-R}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}";"reg    ";
+  520 print"{SHIFT--}chan1("h$"!"l$")  {SHIFT--}chan2("h$"@"l$")  {SHIFT--}chan3("h$"#"l$")"
+  522 s$="{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-+}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-+}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-+}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}"
+  524 t$="{SHIFT--}          {SHIFT--}          {SHIFT--}"
+  526 prints$
+  528 poke781,y(0):poke782,0:poke783,0:sys65520:printh$"f"l$"req   "t$
+  530 print"       "t$:prints$
+  532 poke781,y(2):poke782,0:poke783,0:sys65520:printh$"p"l$"wm    "t$
+  534 print"       "t$:prints$
+  536 poke781,y(4):poke782,0:poke783,0:sys65520:printh$"w"l$"av."h$"m"l$"od"t$
+  538 print"gate"h$"0"l$"-"h$"7"l$t$:prints$
+  540 poke781,y(5):poke782,0:poke783,0:sys65520:printh$"A"l$"/"h$"D"l$"    "t$
+  542 print"       "t$:prints$
+  544 poke781,y(6):poke782,0:poke783,0:sys65520:printh$"S"l$"/"h$"R"l$"    "t$
+  546 print"       "t$
+  548 print"{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-+}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-+}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{CBM-E}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}"
+  550 s$="{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-+}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{CBM-W}"
+  552 t$="{SHIFT--}          {SHIFT--}"
+  554 poke781,y(7):poke782,0:poke783,0:sys65520:printh$"c"l$"utfreq"t$;
+  556 printh$"q"l$"uit "h$"e"l$"rase e"h$"x"l$"ample"
+  558 prints$h$"h"l$"elp "h$"0"l$"mute"
+  560 poke781,y(9):poke782,0:poke783,0:sys65520:print"rs"h$"n"l$".f"h$"i"l$"l"t$
+  562 prints$"best: gate as last"
+  564 poke781,y(10):poke782,0:poke783,0:sys65520:printh$"b"l$"nd."h$"v"l$"ol"t$;
+  566 print"use gray keys (shift)";
+  568 print"{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{CBM-E}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{CBM-E}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}";
+  570 gosub630:return
+  572 rem {rvon}sub - setup
+  574 dim m(24):rem mirrored sid values
+  576 :s=54272:gosub624:rem clear sid
+  578 dim m%(25):rem true if no hi byte
+  580 :fori=0to25:readm%(i):next
+  582 :data 1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,1,1
+  584 dim x(4):rem column positions
+  586 :fori=0to4:readx(i):next
+  588 :data 0,8,19,30,41
+  590 dim y(11):rem y-positions
+  592 :fori=0to11:ready(i):next
+  594 :data3,0,6,0,9,12,15,18,0,20,22,24
+  596 dim a(15):rem attack
+  598 :fori=0to15:reada(i):next
+  600 :data 2,8,16,24,38,56,68,80,100,250,500,800,1000,3000,5000,8000
+  602 dim dr(15):rem decay&release
+  604 :fori=0to15:readdr(i):next
+  606 :data 6,24,48,72,114,168,204,240,300,750,1500,2400,3000,9000,15000,24000
+  607 f1=0.05872548:f2=0.4095:rem frq,pwm
+  608 return
+  610 rem {rvon}sub - drawchan
+  614 print"{home}";:fori=1to3:printtab(x(i)+48)mid$("< ",2+(c+1=i),1);:next:return
+  616 rem {rvon}sub - drawitems
+  618 for h=0to24
+  620 :ifm%(h)thengosub400:remdraw(h)
+  622 next:return
+  624 rem {rvon}sub - clear sid
+  626 fori=0to24:m(i)=0:pokes+0,0:next:return
+  628 rem {rvon}sub - next help
+  630 poke781,24:poke782,0:poke783,0:sys65520
+  632 ifhh=0thenprint"v22 - Maarten Pennings 2025 aug 17 ";
+  634 ifhh=1thenprint"nbst= noise block sawtooth triangle";
+  636 ifhh=2thenprint"dmsg= disable modulate sync gate   ";
+  638 ifhh=3thenprint"dhbl= discon hipass bandpass lopass";
+  640 ifhh=4thenprint"ADR in millisec, S in 0/15..15/15  ";
+  642 hh=hh+1:ifhh=5thenhh=0
+  644 return
