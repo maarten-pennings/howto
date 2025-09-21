@@ -9,6 +9,7 @@ I got curious how to use the SID chip.
 
 That got me in another rabbit hole - two actually.
 First, I made a UI with which I can control the SID registers.
+
 Secondly, I found that Vice comes with `c1541.exe` and `petcat.exe`.
 Those programs help in manipulate (virtual) disks, respectively 
 convert petscii files to plain text.
@@ -20,10 +21,12 @@ I made a user interface that shows all register (fields) of the SID.
 The UI also allows to _alter_ the fields. Since there is no mouse, 
 I decided to use the keyboard. The operational keys are printed in gray.
 They work with and without shift, incrementing the field, respectively
-decrementing the field. Typically they wrap around, and for fields 
+decrementing the field. Typically the fields wrap around and for fields 
 with a big range, the increments are larger.
 
 ![UI](ui.png)
+
+To make a sound, follow this procedure. 
 
 First select a channel (1, 2, or 3); on start-up channel 1 is selected (see the 
 `<` in the top row), but by pressing SHIFT 1, 2, or 3 (`!`, `"`/`@`, or `#`) the
@@ -31,7 +34,7 @@ channel selection can be changed. The the other keys (see next paragraph)
 only change the registers of the selected channel.
 
 Pick a frequency (press `F`). There is only need for PWM duty cycle (press `P`)
-when using the block (square/pulse) waveform; but a waveform must be selected 
+when using the block (also known as square or pulse) waveform. Selecting a waveform is mandatory
 (press `W` to select Triangle, Sawtooth, Block or Noise). Attack, Decay and 
 Release timing are less relevant at first, but it is wise to set Sustain high
 (press `S`). Also set volume high (press `V`). 
@@ -133,17 +136,19 @@ Unit 9 drive 0: D64 disk image detached: sid.d64.
 ```
 
 By the way, it is also possible to skip interactive mode `c1541   editor.d64   -read sid22 sid22.prg`.
-Anyhow, with the `sid22.prg` on the PC, we can use `petcat` to convert it to text.
+
+Anyhow, with the `sid22.prg` on the PC, 
+we can use `petcat` to convert it to text.
 
 ```
 petcat.exe   -2   -o sid22.txt   sid22.prg
 ```
 
 The result is several files:
- - [`sid.d64`](sid.d64) the virtual floppy disk. Can be  mounted in VICE or e.g. 
-   [Kung Fu Flash](https://github.com/KimJorgensen/KungFuFlash).
+ - [`sid.d64`](sid.d64) the virtual floppy disk. Can be  mounted in VICE or e.g. using
+   [Kung Fu Flash](https://github.com/KimJorgensen/KungFuFlash) on a real C64.
  
- - [`sid22.prg`](sid22.prg) the BASIC program. Can also be used in VICE of Kung Fu Flash.
+ - [`sid22.prg`](sid22.prg) the BASIC program. Can also be used in VICE or on a C64 via Kung Fu Flash.
  
  - [`sid22.txt`](sid22.txt) the plain text file, nice on the PC/web.
  
