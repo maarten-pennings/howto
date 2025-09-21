@@ -1,0 +1,211 @@
+# VICE keyboard mapping file BMC64 (rpi_sym.vkm) - edited by Maarten - V8
+#
+# A Keyboard map is read in as patch to the current map.
+#
+# File format:
+# - comment lines start with '#'
+# - keyword lines start with '!keyword'
+# - normal line has 'keysym/scancode row column shiftflag'
+#   keysym's that seem to be recognized, see D:\kernel.img "line" 31064
+#   or bmc64-master\third_party\common\kbd.c function kbd_arch_keyname_to_keynum() at line 153
+#     Return BackSpace  PageUp Delete PageDown  CapsLock  Comma  comma
+#     Period period RightBracket  asterisk  Del arrowup Shift_L Shift_R Dash
+#     plus  BackQuote  arrowleft  Equals minus  SemiColon  Home  End slash
+#     BackSlash  Pound  Insert sterling  SingleQuote semicolon  Tab 
+#     Control_L  Control_R  Alt_L  Alt_R  Super_L Super_R Escape LeftBracket at 
+#     F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 ScrollLock 
+#     KP_Divide  KP_Decimal KP_Multiply KP_Subtract KP_Add KP_Enter
+#     KP_1  KP_2  KP_3  KP_4  KP_5  KP_6  KP_7  KP_8  KP_9  KP_0
+#
+# Keywords and their lines are:
+#   '!CLEAR'               clear whole table
+#   '!INCLUDE filename'    read file as mapping file
+#   '!LSHIFT row col'      left shift keyboard row/column
+#   '!RSHIFT row col'      right shift keyboard row/column
+#   '!VSHIFT shiftkey'     virtual shift key (RSHIFT or LSHIFT)
+#   '!SHIFTL shiftkey'     shift lock key (RSHIFT or LSHIFT)
+#   '!UNDEF keysym'        remove keysym from table
+#
+# Shiftflag can have the values (note: subset from VICE on PC):
+#   0      key is not shifted for this keysym/scancode = Key is not shifted on the real machine.
+#   1      key is shifted for this keysym/scancode = The key needs a shift on the real machine.
+#   2      left shift = Key is left shift
+#   4      right shift = Key is right shift
+#   8      key can be shifted or not with this keysym/scancode = Allow key to be shifted
+#   16     deshift key for this keysym/scancode = Although SHIFT might be pressed, do not press shift on the real machine.
+#   32     another definition for this keysym/scancode follows = Allow another key code to be assigned if SHIFT is pressed.
+#   64     shift lock = Key is shift lock
+#   256    key is used for an alternative keyboard mapping
+#
+# Negative row values:
+#   'keysym -1 n' joystick #1/A, direction n
+#   'keysym -2 n' joystick #2/B, direction n
+#   'keysym -3 0' first RESTORE key
+#   'keysym -3 1' second RESTORE key
+#   'keysym -4 0' 40/80 column key
+#   'keysym -4 1' CAPS (ASCII/DIN) key
+#   'keysym -5 n' joyport keypad, key n
+#
+# Joystick direction values:
+#   0      Fire
+#   1      South/West
+#   2      South
+#   3      South/East
+#   4      West
+#   5      East
+#   6      North/West
+#   7      North
+#   8      North/East
+#
+# C64 keyboard matrix:
+#         +-----+-----+-----+-----+-----+-----+-----+-----+
+#         |Col 0|Col 1|Col 2|Col 3|Col 4|Col 5|Col 6|Col 7|
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#   |Row 0| DEL |Retrn|C_L/R|  F7 |  F1 |  F3 |  F5 |C_U/D|
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#   |Row 1| 3 # |  W  |  A  | 4 $ |  Z  |  S  |  E  | S_L |
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#   |Row 2| 5 % |  R  |  D  | 6 & |  C  |  F  |  T  |  X  |
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#   |Row 3| 7 ' |  Y  |  G  | 8 ( |  B  |  H  |  U  |  V  |
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#   |Row 4| 9 ) |  I  |  J  |  0  |  M  |  K  |  O  |  N  |
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#   |Row 5|  +  |  P  |  L  |  -  | . > | : [ |  @  | , < |
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#   |Row 6|POUND|  *  | ; ] | HOME| S_R |  =  | A_UP| / ? |
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#   |Row 7| 1 ! |A_LFT| CTRL| 2 " |SPACE|  C= |  Q  | R/S |
+#   +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#
+# My mini keyboard 
+#   left  side of box in below diagram: unshifted and shifted key
+#   right side of box in below diagram: the Fn-shifted key
+#
+#   +------+------+------+------+------+------+------+------+------+------+------+------+------+------+------+
+#   |Esc   |1!  F1|2@  F2|3#  F3|4$  F4|5%  F6|6^  F6|7&  F7|8*  F8|9(  F9|0) F10|-_ F11|+= F12||\ Ins|~` Del|
+#   +------+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+---+--+------+
+#   |Tab  CAPS|  Q   |  W   |  E   |  R   |  T   |  Y   |  U   |I  PSc|OScrLk|P PBrk|[{   ↑|]}     |Del    BS|
+#   +---------+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+----+---------+
+#   | Control    |  A   |  S   |  D   |  F   |  G   |  H   |  J   |K Home|L PgUp|;:   ←|'"   →|    Return    |
+#   +------------+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+--+---+-------+------+
+#   | Shift         |  Z   |  X   |  C   |  V   |  B   |  N   |  M   |<, End|.>PgDn|/?   ↓|   Shift   |  Fn  |
+#   +------+------+-+----+-+----+-+------+------+------+------+------+----+-+----+-+---+--+----+------+------+
+#          |  Fn  | Alt  | Win  |                  Space                  | Win  | Alt |       |↑ PgUp|
+#          +------+------+------+-----------------------------------------+------+-----++------+------+------+
+#                                                                                       |← Home|↓ PgDn|→  End|
+#                                                                                       +------+------+------+
+
+# init
+!CLEAR
+!LSHIFT 1 7
+!RSHIFT 6 4
+!VSHIFT LSHIFT
+!SHIFTL LSHIFT
+
+# row 1
+Escape 7 1 8         /*          ESC -> Left Arrow   */
+1 7 0 8              /*            1 -> 1            */
+2 7 3 32             /*            2 -> 2            */
+2 5 6 16             /*            @ -> @            */
+3 1 0 8              /*            3 -> 3            */
+4 1 3 8              /*            4 -> 4            */
+5 2 0 8              /*            5 -> 5            */
+6 2 3 32             /*            6 -> 6            */
+6 6 6 16             /*            ^ -> ^            */
+7 3 0 32             /*            7 -> 7            */
+7 2 3 1              /*            & -> &            */
+8 3 3 32             /*            8 -> 8            */
+8 6 1 16             /*            * -> *            */
+9 4 0 32             /*            9 -> 9            */
+9 3 3 1              /*            ( -> (            */
+0 4 3 32             /*            0 -> 0            */
+0 4 0 1              /*            ) -> )            */
+Dash 5 3 32          /*        Minus -> Minus        */
+Dash 6 6 2           /*        Minus -> pi           */
+Equals 6 5 32        /*            = -> =            */
+Equals 5 0 16        /*            + -> +            */
+BackSlash 6 3 8      /*            \ -> CLR/HOME     */
+BackQuote 0 0 8      /*            ` -> INST/DEL     */
+
+# row 2
+Tab 7 2 8            /*          Tab -> Ctrl         */
+q 7 6 8              /*            Q -> Q            */
+w 1 1 8              /*            W -> W            */
+e 1 6 8              /*            E -> E            */
+r 2 1 8              /*            R -> R            */
+t 2 6 8              /*            T -> T            */
+y 3 1 8              /*            Y -> Y            */
+u 3 6 8              /*            U -> U            */
+i 4 1 8              /*            I -> I            */
+o 4 6 8              /*            O -> O            */
+p 5 1 8              /*            P -> P            */
+LeftBracket 5 5 33   /*            [ -> [            */
+LeftBracket 6 0 16   /*            { -> Lira         */
+RightBracket 6 2 33  /*            ] -> ]            */
+RightBracket 6 6 16  /*            } -> Up arrow     */
+Del -3 1             /*       Delete -> Restore      */
+
+# row 3
+Control_L 7 7 8      /*         CTRL -> Run/Stop     */
+#CapsLock 1 7 64     /*    Caps Lock -> Shift Lock   */ # Why doesn't this work?
+a 1 2 8              /*            A -> A            */
+s 1 5 8              /*            S -> S            */
+d 2 2 8              /*            D -> D            */
+f 2 5 8              /*            F -> F            */
+g 3 2 8              /*            G -> G            */
+h 3 5 8              /*            H -> H            */
+j 4 2 8              /*            J -> J            */
+k 4 5 8              /*            K -> K            */
+l 5 2 8              /*            L -> L            */
+SemiColon 6 2 32     /*            ; -> ;            */
+SemiColon 5 5 16     /*            : -> :            */
+SingleQuote 3 0 33   /*            ' -> '            */
+SingleQuote 7 3 1    /*            " -> "            */
+Return 0 1 8         /*       Return -> Return       */
+
+# row 4
+Shift_L 1 7 2        /*   Left Shift -> Left Shift   */
+z 1 4 8              /*            Z -> Z            */
+x 2 7 8              /*            X -> X            */
+c 2 4 8              /*            C -> C            */
+v 3 7 8              /*            V -> V            */
+b 3 4 8              /*            B -> B            */
+n 4 7 8              /*            N -> N            */
+m 4 4 8              /*            M -> M            */
+Comma 5 7 8          /*            , -> ,            */
+Period 5 4 8         /*            . -> .            */
+Slash 6 7 8          /*            / -> /            */
+Shift_R 6 4 4        /*  Right Shift -> Right Shift  */
+
+# row 5
+Super_L 7 5 0        /*      diamond -> CommodoreKey */ #new
+Space 7 4 8          /*        Space -> Space        */
+Up 0 7 1             /*           Up -> CRSR UP      */
+Down 0 7 8           /*         Down -> CRSR DOWN    */
+Left 0 2 1           /*         Left -> Left         */
+Right 0 2 8          /*        Right -> Right        */
+
+# Extra
+F1 0 4 8             /*           F1 -> F1           */
+F2 0 4 1             /*           F2 -> F2           */
+F3 0 5 8             /*           F3 -> F3           */
+F4 0 5 1             /*           F4 -> F4           */
+F5 0 6 8             /*           F5 -> F5           */
+F6 0 6 1             /*           F6 -> F6           */
+F7 0 3 8             /*           F7 -> F7           */
+F8 0 3 1             /*           F8 -> F8           */
+
+# Duplicate bindings to get to the graphic chars
+# Chars missing from first (top) row
+F9 5 0 8             /*           F9 -> +            */
+F10 5 3 8            /*          F10 -> -            */
+F11 6 0 8            /*          F11 -> Lira         */
+
+# Chars missing from second row
+CapsLock 5 6 8       /*     CapsLock -> @            */
+ScrollLock 6 1 8     /*   ScrollLock -> *            */
+BackSpace 6 6 8      /*           BS -> Up arrow     */
+
+
+# end

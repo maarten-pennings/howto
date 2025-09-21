@@ -2,6 +2,13 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## How to map keys for BMC64
+
+I made a bare-metal-C64 using a Raspbery Pi and a small USB keyboard.
+I wanted a mapping that is close to the original C64 layout.
+The [BMC64 KBD](c64-bmc64kbd) explains how I did that.
+
+
 ## How to use the SID of the Commodore 64?
 
 Writing a UI to control the SID registers, and using the VICE tools
