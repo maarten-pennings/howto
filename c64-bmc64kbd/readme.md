@@ -9,20 +9,19 @@ The BMC64 (see [GitHub](https://github.com/randyrossi/bmc64) or
 [accentual](https://accentual.com/bmc64/)) is an C64 emulator running on a 
 Raspberry Pi. It uses [VICE](https://vice-emu.sourceforge.io/) as emulator,
 which means emulation is great - up to multi kernal, PAL/NTSC, screen color 
-config, drive sound emulation, etc.
-
-The great thing about BMC64 is that it runs VICE directly ("bare metal") on 
-the Pi hardware, getting rid of the Linux layer. This means that your 
-emulated commodore boots in a couple of seconds, and that you can just 
-unplug power when you're done (no Linux cached files systems).
+config, drive sound emulation, etc. The best thing about BMC64 is that it 
+runs VICE directly ("bare metal") on the Pi hardware, getting rid of the 
+Linux layer. This means that your emulated commodore boots in a couple of 
+seconds, and that you can just unplug power when you're done.
 
 Getting started was really easy. Format an SD card, download 
 `bmc64-4.2.files.zip` from [accentual](https://accentual.com/bmc64/), unpack 
-and copy to to SD card. Get C64 roms (kernal, chargen, basic, d1541II) e.g. from 
+and copy to the SD card. Get C64 roms (kernal, chargen, basic, d1541II) e.g. from 
 [Zimmers](https://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/index.html)
 and place them in the `C64` dir of the SD card. SD card in RPi 3b+, 
 power on and go! 
 
+What is this howto about? 
 I have a small old USB keyboard laying around and want to use that for my BMC64. 
 
 ![PC keyboard](pc-keyboard.jpg)
@@ -31,16 +30,15 @@ I want the layout to be close to the real C64 keyboard.
 
 ![C64 keyboard](c64-keyboard.jpg)
 
+
+## Keyboard mapping theory
+
 The keyboard emulation works like this: whenever the user presses a key, 
 VICE receives an event. Part of the event is a value called a keysym, which is 
 unique to that key. The emulator then looks up that keysym in an internal 
 mapping table, which tells which key to press or release on the emulated keyboard.
 
 We need to define such a mapping table.
-
-
-
-## Keyboard mapping theory
 
 The BMC64 has a "meta menu" that pops up by pressing F12.
 This allows to configure your emulated computer and the attached
@@ -51,25 +49,25 @@ where we can select some file to be used as kernal rom. Likewise,
 there is also a file that defines the keyboard mapping, but the menu 
 does not allow us to select a keyboard mapping file. Instead we get an
 enumeration that we can change with cursor left and cursor right.
+An each enumerated value is associated with some specific mapping file.
 
 ![F12 meta menu](F12menu.jpg)
 
-I decided to go for setting "Symbolic", and modify that file.
-The file appears to be `"D:\C64\rpi_sym.vkm"`. Of course 
+I decided to go for setting "Symbolic". The associated file appears to 
+be `"D:\C64\rpi_sym.vkm"`. I decided to modify that file. Of course 
 I first made a copy of the original [`rpi_sym.vkm`](rpi_sym0.vkm).
 
 There are several meta commands in the file. They start with `!`.
-They mainly define where the shift keys are. The rest of the file is 
+The meta commands mainly define where the shift keys are. The rest of the file is 
 _key mappings_, one per line. Every key mapping consists of four fields. 
 The comments explain that these are `keysym/scancode row column shiftflag`. 
 I find that a bit cryptic.
 
 What it means is that the first field, keysym is a string that describes
 a key issued by the physical keyboard. It is the "source" key. The next two 
-fields are integers that describe the location (row and column) of the C64 key
+fields are integers that describe the _location_ (row and column) of the C64 key
 that we want to associate with the keysym. It is the "target" key.
-The final field describes how this mapping relates to shift, either on the
-source side or on the target side.
+The final field describes how this mapping relates to shift.
 
 
 
@@ -79,9 +77,9 @@ When running VICE on a PC there is a debug feature to easily find a keysym.
 
 ![Keysym debugging](debug.png)
 
-When you press a key, the extra debug lines in VICE, show the keysym string 
-of that key. In the above screenshot, the `Return` key was pressed and released.
-Note however, that the keysyms on BMC64 are different from the ones for VICE
+When you press a key, the extra debug lines in VICE, show the keysym string of 
+that key. In the above screenshot, the `Return` key was pressed and released. The 
+keysyms on BMC64 are largely equal, but some are different from the ones for VICE
 on PC. I'm not sure why, maybe a VICE version difference (on PC I run 3.9, 
 BMC64 uses [VICE 3.3](https://github.com/randyrossi/bmc64/tree/master/third_party/vice-3.3)).
 
@@ -115,12 +113,13 @@ This is the matrix
    |**Row 3**|   7 '   |    Y    |    G    |   8 (   |     B     |    H    |    U    |     V     |
    |**Row 4**|   9 )   |    I    |    J    |    0    |     M     |    K    |    O    |     N     |
    |**Row 5**|    +    |    P    |    L    |    -    |    . >    |   : [   |    @    |    , <    |
-   |**Row 6**|    £    |    *    |   ; ]   |CLR HOME |SHIFT (rgt)|    =    | ↑ (key) |    / ?    |
-   |**Row 7**|   1 !   | ← (key) |   CTRL  |   2 "   |   SPACE   |    C=   |    Q    | RUN STOP  |
+   |**Row 6**|    £    |    *    |   ; ]   |CLR HOME |SHIFT (rgt)|    =    | ↑ (sym) |    / ?    |
+   |**Row 7**|   1 !   | ← (sym) |   CTRL  |   2 "   |   SPACE   |    C=   |    Q    | RUN STOP  |
 
-There are two keys not in the matrix. The SHIFT LOCK key is a self-locking key 
+There are two keys missing in the matrix. The SHIFT LOCK key is a self-locking key 
 connected in parallel to the non-locking shift key. Secondly, the RESTORE key 
-is wired directly to the NMI pin of the CPU. 
+is wired directly to the NMI pin of the CPU. They might be absent in the 
+C64 row/column matrix, we still need to emulate them, just like all other keys.
 
 VICE has added extra rows with negative values for these special keys, and some others.
 
@@ -137,22 +136,28 @@ VICE has added extra rows with negative values for these special keys, and some 
 
 The shiftflags determine how VICE deals with key shifts. Quite a complex issue.
 
-First be warned the BMC64 has fewer shiftflags than VICE on PC, again, maybe 
+First be warned the BMC64 has far fewer shiftflags than VICE on PC, again, maybe 
 due to BMC64 using an older version of VICE. I believe the shiftflags in BMC64 
 are restricted to 1, 2, 4, 8, 16, 32, and 64. It seems the PC version adds
 128, 256, 512, 1024, 2048, 4096 and even 32768.
 
 - The emulator has to **de-shift** (remove the shift modifier) from some keys.  
   For example, on the PC keyboard, if you want to get a `:`, you have to 
-  press `;` and shift simultaneously. The emulator sees the events 
-  "shift pressed" and "; pressed". We want the emulator to fire 
+  press `;` and `Shift` simultaneously. The emulator sees the events 
+  "`Shift` pressed" and "`;` pressed". We want the emulator to fire 
   row 5 col 5 (`: [`), however not with shift otherwise we would get `[`.
   
   ![deshift example](shiftflags1.png)
+  
+  Typically the `Shift` key on the PC keyboard is mapped to the `SHIFT` key 
+  of the emulated C64. But for the above example, the emulated shift should be 
+  undone (By the way, this is tricky, because we start by pressing `Shift`, 
+  which will cause a `SHIFT` on the emulated C64. Only when the `;` is pressed,
+  the emulator should remove the `SHIFT` and emulate the `:` press).
 
 - The emulator has to **spoof-shift** (add a shift) for some keys.  
   For example on a PC keyboard, if you want to get a square bracket `[`, you press
-  the `[` key without shift (or you would get `{`). 
+  the `[` key without shift, or you would get `{`. 
   We want the emulator the fire  row 5 col 5 but with a spoofed shift, 
   otherwise we would get `:`
 
@@ -170,9 +175,11 @@ Some shiftflags _define_ a key
  - 64     shift lock
 
 It is possible to use one keysym with multiple shiftflags, or in other words, map one
-keysym to multiple C64 keys.
+keysym to multiple C64 keys. The following shiftflag shall be used for that.
  - 32     another definition for this keysym/scancode follows
 
+
+Shiftflags can be OR-ed together.
 
 ## My mapping
 
@@ -184,24 +191,24 @@ Also the `Windows` key (typically next to `Alt`) does not work on VICE-on-PC
 either, because Windows itself "steals" that key, e.g. Windows-E starts 
 the file explorer.
 
-However, it turns out that on BMC64, `Windows` key is free since there is no OS.
-I decided to map that to the C= key. This was important for me, because 
-the usual mapping of `Control` to C=, then `Tab` to Control, and finally `Esc` 
-to RUN/STOP sacrifices the  ← (left arrow) key which is important in 
-Turbo Macro Pro. I wanted to have the ← key, and in the correct position.
+However, it turns out that on BMC64, the `Windows` key is free since there is no OS.
+I decided to map that to the `C=` key. This was important for me, because 
+the usual mapping of `Control` to `C=`, then `Tab` to `Control`, and finally `Esc` 
+to `RUN/STOP` sacrifices the  `←` (left arrow) key which is important in 
+Turbo Macro Pro. I want to have the `←` key, and in the correct position.
 
-Below sections show the mappings graphically, one row at a time. 
-The blue lines denotes a key mapping. The 
-dot is the source side of the line. If there is a second mapping, then there 
+Below sections show the mappings graphically, one row of keys at a time. 
+The blue lines denotes a key mapping. The dot is the source side of the line. 
+If there is a second mapping, then there 
 is a dot on the first target key with a line to the second target key. 
 The lines are tagged with the shiftflags value.
 
 
 ### Row 1
 
-The most important decisions, as mentioned above, was to map `Esc` to `←` (left arrow).
-Next I have tow other positional mappings that I thought were relevant: 
-`\` to CLR/HOME and `` ` `` to INST/DEL. 
+The most important decisions, as mentioned above, was to map `Esc` to `←`.
+Next I have two other positional mappings that I thought were relevant: 
+`\` to `CLR/HOME` and `` ` `` to `INST/DEL`. 
 
 I decided to do the mappings of the shifted digits symbolic rather than 
 positional. Underscore does not exist on the C64 keyboard, I mapped that to π.
@@ -210,21 +217,21 @@ positional. Underscore does not exist on the C64 keyboard, I mapped that to π.
 
 ### Row 2
 
-Slightly scary is mapping `Tab` to CONTROL, or `Delete` to RESTORE.
+Slightly scary is mapping `Tab` to `CONTROL`, or `Delete` to `RESTORE`.
 The latter requires a negative row value.
-Curly braces do not exist on the C64 keyboard, I mapped them to £ and ↑.
+Curly braces do not exist on the C64 keyboard, I mapped them to `£` and `↑`.
 
 ![mapping row 2](map-row2.png)
 
 The `Tab` key has a dual function with `Fn` but I did not succeed in making
-it work as a SHIFT LOCK. But I don't need SHIFT LOCK so a give up after a 
+it work as a `SHIFT LOCK`. But I don't need `SHIFT LOCK` so a give up after a 
 few tries.
 
 
 ### Row 3
 
-Slightly scary is mapping `Control` to RUN/STOP.
-And we have a key for the symbols on the digits that we missed.
+Slightly scary is mapping `Control` to `RUN/STOP`.
+And we have a key (`' "`) for the symbols with two digit keys that we missed.
 
 ![mapping row 3](map-row3.png)
 
@@ -235,7 +242,7 @@ Very simple row, even the mapping of the two `Shift` keys is straightforward.
 
 ![mapping row 4](map-row4.png)
 
-The `Fn` is used in the last section for extra mappings.
+The `Fn` is explained in the last section for extra mappings.
 
 
 # Row 5
@@ -243,7 +250,7 @@ The `Fn` is used in the last section for extra mappings.
 The `Fn` is used in the last section for extra mappings.
 As mention `Alt` does not seem to work, I skipped it.
 But the `Windows` key, labeled with a diamond, also known as `Meta` or `Super`
-is available: I map it to C=.
+is available: I map it to `C=`.
 
 The cursor keys are mapped without shift.
 
@@ -252,7 +259,7 @@ The cursor keys are mapped without shift.
 
 # Extra
 
-My keyboard has an `Fn` key creating many extra keys.
+My keyboard does not have functions keys, but it has an `Fn` shift key.
 However, not all those keys occur in the keysym table, e.g. PrintScreen is missing.
 
 Of course I want the 8 function keys.
@@ -261,9 +268,9 @@ Of course I want the 8 function keys.
 
 I decided to map some other `Fn` keys to those C64 keys that do not have their own
 key on the PC keyboard, but that do have graphic characters.
-This allows me to use, e.g. Fn-F9 as the `+` key, so with 
-Windows-Fn-F9 and Shift-Fn-F9 I do get the two graphics characters 
-from the `+` key 
+This allows me to use, e.g. `Fn`+`F9` as the `+` key, so with 
+`Windows`-`Fn`-`F9` and `Shift`-`Fn`-`F9` I do get the two graphics characters 
+from the `+` key.
 
 ![key-plus](key-plus.png)
 
@@ -271,7 +278,7 @@ from the `+` key
 ## My file
 
 I stored the [original](rpi_sym0.vkm) mapping, and my latest mapping
-[v8](rpi_sym8.vkm). 
+[v8](rpi_sym8.vkm) in this repo. 
 
 
 This is the content.
