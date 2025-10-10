@@ -510,6 +510,42 @@ the function keys in my favorite cartridge the
 [Power Cartridge from KCS](https://rr.pokefinder.org/rrwiki/images/8/8f/Power_Cartridge_KCS_Instruction_Manual_dutch.pdf)
 and additional hotkeys I added in BMC64 via the Alt-F12 menu.
 
+
+## Artifacts
+
+Mapping keys like VICE does comes with artefacts. One that hits me often 
+is when I want to type a `+`. To get that key I have to press `Shift` and `= +`
+on the PC keyboard. But the `+` on the C64 is unshifted, so the mapping removes 
+the Shift on the emulated C64 keyboard. The C64 keyboard routine is not 
+atomic - it needs to scan the columns - so somtimes is still sees the `Shift`
+and later the `+`, so it produces the graphics character of that key, a
+big graphics plus.
+
+The below figure shows me pressing Shift and the multiple times hitting `= +`.
+Sometimes I get the big graphics plus.
+
+![Hitting Shift Plus](key-map-artefacts-plus.png)
+
+The timing diagram below shows in more detail the non-atomicity.
+
+![Hitting Shift Plus timing](key-map-artefacts-plus.drawio.png)
+
+This is not a BMC issue, but a VICE issue, the screenshot is actually made 
+using VICE on Windows.
+
+Another artifact is when hitting `[ {` together with the key that is mapped to 
+the Commodore key. In my BMC mapping I used the Super key, VICE for Windows 
+positional mapping uses Tab. This is contrived, why would you want to use
+`[ {` together with the Commodore key?
+
+Anyhow, on the C64, the `[` is obtained by pressing Shift with `: [`.
+In other words, an extra Shift is added on the emulated side, together 
+with the Commodore key this causes a case toggle (more precisely, character 
+set toggle).
+
+![Hitting Commodore Square-bracket timing](key-map-artefacts-sbrack.drawio.png)
+
+
 ## Links
 
 - [BMC64 sources ](https://github.com/randyrossi/bmc64)
