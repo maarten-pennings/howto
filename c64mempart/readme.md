@@ -1,5 +1,7 @@
 # C64 Memory partitioning
 
+> This article is available in Dutch as [pdf](C64-geheugen-verdelen.pdf).
+
 Can we partition the C64 memory, storing two BASIC programs simultaneously?
 A multi-app setup?
 
