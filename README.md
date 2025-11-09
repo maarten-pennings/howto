@@ -40,7 +40,7 @@ The howto [c64mempart](c64mempart) explains it.
 How are [C64 chars](c64chars) organized?
 
 
-## Solving tht Quadro puzzle
+## Solving the Quadro puzzle
 
 How to solve the [Quadro](Quadro) puzzle - by analysis.
 
