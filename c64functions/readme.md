@@ -3,23 +3,23 @@
 In this article we look at _functions_ in Commodore 64 BASIC.
 
 In the context of this article the stand-alone term "function" 
-refers to `FN F(X)`, not subroutines (`GOSUB`), nor built-in functions.
+refers to `FN F(X)`, not subroutines (`GOSUB`), nor built-in functions (`SIN(X)`).
 
 
 ## Introduction
 
 Functions in C64 BASIC use the keyword `FN`.
 
-To _call_ a function `F` with argument 3, we write `FN F(3)`.
+To _call_ a function `F` with argument `3`, we write `FN F(3)`.
 
 Before calling `F`, function `F` must be defined. 
 To _define_ a function we need a second keyword: `DEF`.
-A function definition could look like this `DEF FN F(X)=X*2`.
+A function definition could look like this `DEF FN F(X)= X*2`.
 
 Function definitions must be done in a BASIC program context.
 If typed directly, the response is `?ILLEGAL DIRECT  ERROR`.
 The reason is that the function _body_ (in our example `X*2`) must
-be stored "persistently", in the BASIC program text. Once defined,
+be stored "persistently", i.e. in the BASIC program text. Once defined,
 calls are allowed in direct mode.
 
 As usual, spaces around BASIC keywords are optional.
@@ -28,7 +28,7 @@ The former is more readable, the latter smaller and slightly faster
 (less characters for the interpreter).
 
 ```bas 
-100 DEF FN F(X)=X*2
+100 DEF FN F(X)= X*2
 110 PRINT FN F(3)
 ```
 
@@ -40,8 +40,7 @@ The former is more readable, the latter smaller and slightly faster
 
 ## Signature
 
-One of the downsides of BASIC functions is that only one _signature_ is supported.
-
+One of the downsides of BASIC functions is that only one signature is supported.
 Liberally quoting [wikipedia](https://en.wikipedia.org/wiki/Type_signature):
 a signature defines the inputs and outputs of a function;
 it includes the number, types, and order of the function's arguments as 
@@ -50,12 +49,12 @@ well as the type it returns.
 The one signature supported in C64 BASIC is "float to float".
 
 ```bas
-100 DEF FN F()=12
-110 DEF FN F(X)=12      <<< only supported one
-120 DEF FN F(X,Y)=12
-130 DEF FN F(X%)=12
-140 DEF FN F$(X)="12"
-150 DEF FN F(X$)=12
+100 DEF FN F()= 12
+110 DEF FN F(X)= 12      <<< only supported one
+120 DEF FN F(X,Y)= 12
+130 DEF FN F(X%)= 12
+140 DEF FN F$(X)= "12"
+150 DEF FN F(X$)= 12
 ```
 
 Of the above definitions, only the one on line 110 fits the supported 
@@ -79,10 +78,10 @@ The names may have more than two letters or digits,
 but only the first two are significant.
 Names may not clash with BASIC keywords (like `SIN` or `ST`).
 
-The below program with long names prints 10.
+The below program with long (function and argument) names prints 10.
 
 ```bas
-10 DEF FN FUNC23(ARG)=ARG*2
+10 DEF FN FUNC23(ARG)= ARG*2
 20 PRINT FN FUNC23(5)
 ```
 
@@ -100,57 +99,61 @@ Still, there are several possibilities to make interesting functions.
 We have tried to categorize the possibilities and to
 list useful function definitions for each category.
 
-- **Constant**  
-  `DEF FN E(X)=2.71828183`  
+- **Constants**  
+  `DEF FN E(X)= 2.71828183`  
   A function must have an argument, but the body does not need to use it.
   The example could also be done as variable `E=2.71828183`, 
   but the function approach is a bit more robust against overwrites.
 
-- **Simple operators**  
-  `DEF FN HEIGHT(SEC)=300-9.82*SEC*SEC/2`  
-  `DEF FN SQ(x)=x↑2`  
-  `DEF FN EVEN(X)=(X AND 1)=0`  
-  A function body can use all built-in operators (`+`, `-`, `*`, `/`, `↑`) and 
-  also the relational operators (`=`, `<`, `>`, `<=`, `>=`, `<>`).
-  For the latter, see example `EVEN()`. 
-  Note that relational operators return a number (0 for false, and -1 for true) 
-  so that fits with the mandatory float-to-float signature.
+- **Arithmetic operators**  
+  `DEF FN HEIGHT(SEC)= 300-9.82*SEC*SEC/2`  
+  `DEF FN SQ(X)= X↑2`  
+  A function body can use all built-in operators (`+`, `-`, `*`, `/`, `↑`).
 
 - **Built-in numeric functions**  
-  `DEF FN SN(A)=SIN(Π*A/180)`  
-  `DEF FN LG(X)=LOG(X)/LOG(10)`  
-  `DEF FN HI(B)=INT(B/16)`  
-  `DEF FN LO(B)=B AND 15`  
+  `DEF FN SN(A)= SIN(Π*A/180)`  
+  `DEF FN LG(X)= LOG(X)/LOG(10)`  
+  `DEF FN HI(B)= INT(B/16)`  
+  `DEF FN LO(B)= B AND 15`  
   A function body can use the built-in functions (even multiple in one body) 
   like `ABS()`, `ATN()`, `COS()`, `EXP()`, `INT()`, `LOG()`, 
   `SGN()`, `SIN()`, `SQR()`, and `TAN()`; 
   and also logical operators (`AND`, `OR`, `NOT`) and the constant pi.
+  Note that the logical operators operate on two numbers and return a number,
+  which fits with the mandatory float-to-float signature.
+
+- **Relational operators**  
+  `DEF FN EVEN(X)= (X AND 1)=0`  
+  `DEF FN RANGE(X)= (0<=X) AND (X<10)`  
+  There are several the relational operators (`=`, `<`, `>`, `<=`, `>=`, `<>`).
+  They return a number (0 for false, and -1 for true) ,
+  which fits with the mandatory float-to-float signature.
 
 - **Built-in string functions**  
-  `DEF FN NUMDIG(X)=LEN(STR(X)-1)`  
+  `DEF FN NUMDIG(X)= LEN(STR(X)-1)`  
   It is counter intuitive, given the restriction of only supporting 
   float-to-float signature, but string functions are allowed in a function 
   body. The only catch, the top-level expression must return a float.
   So a string must be made numeric with e.g. `VAL()`, `LEN()`, or `ASC()`.
 
 - **Built-in system functions**  
-  `DEF FN FR(X)=FRE(0)-65535*(FRE(0)<0)`  
-  `DEF FN DK(A)=PEEK(A)+256*PEEK(A+1)`  
-  `DEF FN DICE(N)=1+INT(RND(1)*N)`  
+  `DEF FN FR(X)= FRE(0)-65535*(FRE(0)<0)`  
+  `DEF FN DK(A)= PEEK(A)+256*PEEK(A+1)`  
+  `DEF FN DICE(N)= 1+INT(RND(1)*N)`  
   Also the non-mathematical functions (`FRE()`, `PEEK()`, `RND()`, `USR()`) 
   are allowed in a function body.
   The function `USR()` could even have (programmed) side effects.
 
 - **System variables**   
-  `DEF FN TM(X)=TI/60`  
-  `DEF FN HMS(X)=VAL(TI$)`  
+  `DEF FN TM(X)= TI/60`  
+  `DEF FN HMS(X)= VAL(TI$)`  
   The system variables `TI` and `TI$` are allowed in a function body.
   Of course `TI$` would need to be converted (`MID$`, `VAL`) to a float.
   The third system variable, `ST` (I/O status), is also supported, 
   see below example.
   
   ```bas
-  100 DEF FN S(X)=ST
+  100 DEF FN S(X)= ST
   110 OPEN 15,8,15
   120 INPUT#15,EN
   130 PRINT ST;FNS(0)
@@ -159,7 +162,7 @@ list useful function definitions for each category.
 
 - **Other user functions**  
   A function body may also call other user functions.  
-  Note that in `DEF FNF(X)= ...FNG(X)...`
+  Note that the rules around `DEF FNF(X)= ...FNG(X)...`:
   
   - `FNG()` does not need to exist when `FNF()` is _defined_ (function binding is by lookup on name during call).
   - `FNG()` must have been defined when `FNF()` is _called_.
@@ -167,13 +170,15 @@ list useful function definitions for each category.
     (directly or indirectly) function `FNF()` 
     because this leads to infinite recursion.
     
-  An example, which converts bytes to hex, using nested functions 
-  (`H(B)` and `L(B)` both call `A(D)`):
+  An example, which converts bytes to hex, using nested functions.
+  `H(B)` is for the high nible of `B` and `L(B)` for the low nible;
+  both call `A(D)` which converts "digit" `D` the nible to and ASCII value.
+  Unfortunately, we can not make `FN A$(D)`.
   
   ```bas
-  100 DEF FN H(B)=FNA(INT(B/16))
-  110 DEF FN L(B)=FNA(B AND 15)
-  120 DEF FN A(D)=48+D-7*(D>9):REM CONVERT 0..15 TO ASCII
+  100 DEF FN H(B)= FNA(INT(B/16))
+  110 DEF FN L(B)= FNA(B AND 15)
+  120 DEF FN A(D)= 48+D-7*(D>9):REM CONVERT 0..15 TO ASCII
   130 FOR X=12 TO 20
   140 :PRINT X;"=$";CHR$(FNH(X));CHR$(FNL(X))
   150 NEXT
@@ -190,8 +195,8 @@ list useful function definitions for each category.
    20 =$14
   ```  
 
-  It is not only allowed to nest function definitions, it is also allowed to 
-  nest function calls; see third expression below.
+  It is not only allowed to nest function _definitions_, it is also allowed to 
+  nest function _calls_; see third expression below.
   
   ```bas
   PRINT FNA(0);FNA(10);FNL(FNA(10))
@@ -204,7 +209,7 @@ list useful function definitions for each category.
   For argument 65 ($41), the low nibble is 1, which has ASCII code 49.
   
 - **Global variables**  
-  `A=2 : DEF FN F(X)=X+A`  
+  `A=2 : DEF FN F(X)= X+A`  
   A very powerful mechanism is that function bodies have access to 
   global variables. 
   
@@ -227,8 +232,8 @@ list useful function definitions for each category.
   140 :POKE A0+I,I:POKE A1+I,14
   150 NEXT I
   160 :
-  170 DEF FN CHR(X)=PEEK(A0+Y*40+X)
-  180 DEF FN COL(X)=PEEK(A1+Y*40+X)AND15
+  170 DEF FN CHR(X)= PEEK(A0+Y*40+X)
+  180 DEF FN COL(X)= PEEK(A1+Y*40+X)AND15
   190 :
   200 Y=2:FOR X=5 TO 9
   210 :PRINT X;FNCHR(X);FNCOL(X)
@@ -267,8 +272,8 @@ allowed in a function body.
   expression magic.
   
   ```bas
-  100 DEF FNA3(X)=-(X>=3)*X-3*(X<3)
-  110 DEF FNB6(X)=-(X<=6)*X-6*(X>6)
+  100 DEF FNA3(X)= -(X>=3)*X-3*(X<3)
+  110 DEF FNB6(X)= -(X<=6)*X-6*(X>6)
   120 :
   130 FOR X=0 TO 9
   140 :PRINT X,FNA3(X),FNB6(X)
@@ -291,14 +296,15 @@ allowed in a function body.
   Since every operand is always evaluated in BASIC, this would lead 
   to infinite recursion and thus memory overflow.
   ```BAS
-  100 DEF FN FAC(N)=N*FNFAC(N-1)
+  100 DEF FN FAC(N)= N*FNFAC(N-1)
   110 PRINT FNFAC(5)
   RUN
   ?OUT OF MEMORY  ERROR IN 110
   ```
   
-  If BASIC would have short circuit evaluation, like skipping evaluation of
-  expression `<expr>` in `0*<expr>`, we would have had recursion.
+  If BASIC would have _short circuit evaluation_, like skipping evaluation of
+  expression `<expr>` in `0*<expr>`, `0 AND <expr>`, or `1 OR <expr>`, we 
+  would have had recursion.
 
 
 ## Implementation
@@ -377,12 +383,15 @@ A  FLOAT  140  22  0  0  0
 One thing is remarkable: the program is _not_ using the variable `X`.
 `X` is only used as parameter of `FNF()`. 
 Still `X` occurs in the variable dump.
-My suspicion is that when computing `FNF(444)`, the BASIC interpreter 
-assigns `444` to `X`, and then simply calls the evaluator on the body,
+My suspicion is that when later computing `FNF(444)`, the BASIC interpreter 
+wants to assign `444` to `X`, and then calls the evaluator on the body,
 here `789+X`. Variable `X` must exist for this scheme to work.
 
-What is also worth noting, is that functions are relatively dynamic; they 
-are stored like variable. This means it is easy to change them. 
+
+## Dynamic behavior
+
+Functions are relatively dynamic; they are stored like variables. 
+This means it is easy to change them on the fly.
 The following is an a-typical (kind wording for ridiculous) implementation 
 of [Collatz](https://en.wikipedia.org/wiki/Collatz_conjecture)
 using dynamically switching functions.
@@ -399,6 +408,41 @@ RUN
  15  46  23  70  35  106  53  160  80  40  20  10  5  16  8  4  2  1
 ```
 
+The next example of the dynamic behavior is a program that dynamically 
+modifies itself ("self modifying code"). It defines function `F` on the 
+first line (which we know starts at address 2048). 
+Lines 200 to 250 increase address `A` by checking all tokens; when `A` 
+hits the the `=` it is incremented one more time, pointing the the `4` of 
+the body `42*x`.
+
+The next two block modify that `4`, first in a `1`, then in a `3`, each time 
+calling `F`.
+
+```bas
+LIST
+
+100 DEF FN F(X)=42*X
+110 :
+200 A=2048+1+2+2:REM START+0+LINK+LINE
+210 READ D:IF PEEK(A)<>D THEN STOP
+220 IF D<>178 THEN A=A+1:GOTO 210
+230 A=A+1:REM SKIP "="
+240 REM  DEF SPC FN SPC F (  X  )  =
+250 DATA 150,32,165,32,70,40,88,41,178
+260 :
+270 POKE A,ASC("1")
+300 PRINT "12*2=";FN F(2)
+310 POKE A,ASC("3")
+320 PRINT "32*2=";FN F(2)
+READY.
+
+RUN
+12*2= 24
+32*2= 64
+
+READY.
+```
+
 
 ## Execution architecture
 
@@ -407,13 +451,13 @@ How are functions evaluated?
 
 ### High level
 
-Assume we have a function definition for `F` using argument X,
+Assume we have a function definition for `F` using argument `X`,
 
 ```txt
   DEF FN F(X) = <expression in X>
 ```
 
-and a function call of `F`.
+and assume a function call of `F`.
 
 ```txt
   ... FN F( <other expression> ) ...
@@ -438,7 +482,7 @@ RUN
  123
 ```
 
-We see that (2+3)*2 is correctly computed,
+We see that `(2+3)*2` is correctly computed,
 but we also see that `X` is still `123` after evaluating `F`.
 
 My new guess therefore is 
@@ -453,13 +497,14 @@ My new guess therefore is
 This time _Mapping the Commodore 64_ seems [wrong](https://archive.org/details/Compute_s_Mapping_the_Commodore_64/page/n61/mode/2up).
 It seems to describe a stack frame for `DEF`, not for a call, and it suggests a frame of 5 bytes.
 We will make a snapshot of the stack and we will see the C64-wiki is much closer with its 16 byte stack frame.
+How to make a snapshot is described in the next section.
 
 
 ### Making a stack snapshot 
 
 How do we snapshot the stack in the middle of calling a function?
 
-We decided to misuse the `USR()` function for that.
+I decided to misuse the `USR()` function for that.
 Recall, when calling `USR( <expr> )` in BASIC, this is what happens.
 
 - `<expr>` is evaluated, and resulting value stored in the so-called floating point accumulator 
@@ -470,17 +515,17 @@ Recall, when calling `USR( <expr> )` in BASIC, this is what happens.
   [USRADD](https://archive.org/details/Compute_s_Mapping_the_Commodore_64/page/n85/mode/2up)
   at address 785,786
   
-- That routine is "supposed" to use FAC1, compute something, leave the result again in FAC1,
+- That routine is "supposed" to use FAC1, compute something, leave the floating point result again in FAC1,
   and `RTS` back to the BASIC interpreter.
   
-- The BASIC interpreter picks up the value returned by `USR()` in FAC1 and continues with that in the BASIC expression is was evaluating.
+- The BASIC interpreter picks up the value returned by `USR()` in FAC1 and continues with that in the BASIC expression it was evaluating.
 
-We have written a machine language routine that receives a value in FAC1, does not 
+I have written a machine language routine that receives a value in FAC1, does not 
 look at it, makes a snapshot of the entire stack (all 256 bytes), then returns.
 BASIC sees the same value come out as was passed in.
 
-We decided to store the machine language routine at $C000 (49152).
-We decided to store the stack snapshot (all 256 bytes) at $C100 .. $C200.
+I decided to store the machine language routine at $C000 (49152) 
+and to store the stack snapshot (all 256 bytes) at $C100 .. $C200.
 
 This is the routine we wrote, a simple one-page copy loop using POWERMON.
 
@@ -497,14 +542,14 @@ This is the routine we wrote, a simple one-page copy loop using POWERMON.
 *C00B.60       RTS
 ```
 
-We converted this to decimal.
+Converted to decimal gives this.
 
 ```BAS
 FOR A=49152 TO A+11:PRINT PEEK(A);:NEXT
  162  0  189  0  1  157  0  193  202  208  247  96
 ```
 
-And wrote the following BASIC snapshot program.
+The following BASIC program then makes a snapshot.
 
 ```bas
 100 FORA=49152TOA+11:READD:POKEA,D:NEXT
@@ -532,6 +577,11 @@ run
  7
 ```
 
+As a side effect of such a call, a snapshot of the stack is made.
+In the next sections, we analyze the BASIC program and variables 
+and then the stack snapshot.
+
+
 ### Hex dump BASIC program
 
 For analysis, we print three pointers: start of BASIC program (2049 or $0801),
@@ -549,8 +599,8 @@ PRINT PEEK(47)+256*PEEK(48)
 
 We used POWERMON to dump the BASIC program and variables.
 The below hex numbers are annotated with `*` to denote the begin and end 
-of the two areas (BASIC program and variables). The symbol `/` 
-separates BASIC lines respectively variables.
+of the two areas (BASIC program and variables), see lines 0800, 08B8 and 08E0. 
+The symbol `/` separates BASIC lines respectively variables.
 
 ```txt
 :0800 00*1D 08 64 00 81 41 B2  ...D..aR
@@ -585,10 +635,10 @@ separates BASIC lines respectively variables.
 ```
 
 Even with the `*` and `/` annotation this is quite hard to read.
-So we chuncked the bytes per line and per variable.
-And we added annotation below the bytes (their meaning) and 
+So I chunked the bytes per line and per variable and I added 
+annotation below the bytes (their meaning) and 
 above the bytes (flagged some addresses).
-We skipped the first half of the program.
+I skipped the first half of the program.
 
 ```txt
 :0863 69 08 8C 00 3A 00
