@@ -126,7 +126,7 @@ Unfortunately, I do not have access to pre-computed results for this exact "prin
 Therefore, while the method to solve it is clear (a backtracking search considering the specific attack pattern), stating the exact maximum number of non-attacking princesses requires performing this computation. Based on the localized attack pattern, the number will likely be higher than the 8 queens in the standard problem, but the precise value is not readily available without computation.
 
 _Doesn't sound too bad. But "while the method to solve it is clear ... stating the exact maximum number of non-attacking princesses requires performing this computation".
-Let's go for the computation then._Doesn
+Let's go for the computation then._
 
 
 ### Third prompt - getting the code
