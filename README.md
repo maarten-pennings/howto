@@ -1,5 +1,12 @@
 # How to
+
 Assortment of "How to xxx" I want to remember.
+
+
+## How to fix the RESTORE key on the C64
+
+On the older C64 you really have to quickly hammer that key.
+Here is an instruction [how to](c64RESTOREkey/readme.md) fix that.
 
 
 ## How to map keys for BMC64
