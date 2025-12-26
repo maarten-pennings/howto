@@ -2,6 +2,12 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## C64 disk drive commands
+
+[How to](c64diskcmds) manage in C64 disk drive.
+The DOS (Disk Operating System) built into the drive.
+
+
 ## How to map keys for BMC64
 
 I made a bare-metal-C64 using a Raspbery Pi and a small USB keyboard.
