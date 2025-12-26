@@ -127,6 +127,40 @@ file 'size2' exists?
  correct:exists 0
 ```
 
+### programmatic dir
+
+It is possible to read the directory programmatically.
+Just open a the file `$`; it is even possible to pass wildcards,
+just like it is possible to issue `LOAD "$0:FI*",8`.
+A funny detail, I used secondary channel 0.
+
+```bas
+100 open 2,8,0,"$":rem chan=0!
+110 rem or wildcards "$0:fi*"
+120 rem === skip loadaddr =============
+130 get#2,e$:get#2,d$
+140 rem === get link ==================
+150 get#2,e$:e=0:ife$<>""thene=asc(e$)
+160 get#2,d$:d=0:ifd$<>""thend=asc(d$)
+170 if d+e=0 then close2:end
+180 rem === get line number ===========
+190 get#2,e$:e=0:ife$<>""thene=asc(e$)
+200 get#2,d$:d=0:ifd$<>""thend=asc(d$)
+210 print mid$(str$(e+256*d),2);" ";
+220 rem === get line ==================
+230 get#2,d$:d=0:ifd$<>""thend=asc(d$)
+240 ifd>=32andd<128thenprintd$;:goto230
+250 ifd=18then print d$;:goto230
+260 ifd=0then print:goto 150
+270 print " r";hex$(d);"R";:goto230
+```
+
+The below shows the output of the program, and compares that with a standard
+directory.
+
+![dir](dir.jpg)
+
+
 
 ### filetest
 
@@ -676,6 +710,103 @@ See [here](https://www.youtube.com/watch?v=ByHdBD16DRg) or [here](https://portco
 - drive: Chinon
 - problems: none :-) sealed heads, spindle no longer belt driven, firmware bugs fixed.
 
+
+## Manage files
+
+All examples use as device number 8, which is the default for commodore drives.
+
+### Basic programs
+
+- **Directory**
+  ```
+  LOAD "$",8
+  LOAD "$0:FI*",8
+  LOAD "$0:FI*=PRG",8
+  LOAD "$0:????E*",8
+  ```
+  
+- **Save**
+  ```
+  SAVE "FILE",8
+  ```
+  **Overwrite**
+  ```
+  SAVE "@FILE",8
+  ```
+  Check differences between DISK and RAM version
+  ```
+  VERIFY "FILE",8
+  ```
+  
+- **Load**
+  ```
+  LOAD "FILE",8
+  ```
+
+
+### DOS commands
+
+The Disk Operating System (DOS) is not in the C64 but in the drive.
+So the C64 needs to send DOS commands to the drive.
+
+The commands may be long (`RENAME`) but are typically abbreviated (`R`).
+
+Commands that operate on a disk as opposed to operating on the 
+whole device need a drive unit id (`0` or `1`). Since most devices have only 
+one unit (with ID `0`), the unit may be omitted. 
+
+As a result `SCRATCH0:FILE` may be abbreviated to `S:FILE`.
+
+- **Format**  (`NEW`) 
+  ```
+  OPEN 1,8,15,"N0:diskname,id":CLOSE 1
+  ```
+  
+- **Copy** (`COPY`)
+  ```
+  OPEN 1,8,15,"C0:newfile=0:oldfile":CLOSE 1
+  ``` 
+  **Concatenate**
+  ```
+  OPEN 1,8,15,"C0:newfile=0:file1,0:file2":CLOSE 1
+  ```
+  
+- **Rename** (`RENAME`)
+  ```
+  OPEN 1,8,15,"R0:newname=oldname":CLOSE 1
+  ```
+  
+- **Delete** (`SCRATCH`)
+  ```
+  OPEN 1,8,15,"S0:filename":CLOSE 1
+  ```
+  
+  If there are "splat files" (with a `*`), don't delete them, use `VALIDATE`.
+  
+- **Validate** and collect (`VALIDATE`), this removes splat files.
+  ```
+  OPEN 1,8,15,"V0":CLOSE 1
+  ```
+
+- Reread BAM (`INITIALIZE`)
+  ```
+  OPEN 1,8,15,"I0":CLOSE 1
+  ```
+  Not to be confused with reset
+  ```
+  OPEN 1,8,15,"UJ":REM WAIT 2 second
+  CLOSE 1
+  ```
+  
+
+
+### Links
+
+A local backup of [C1541 II Manual](C1541II-manual.pdf).
+
+I found an excellent book _Inside Commodore DOS_ on the website 
+[https://project64.c64.org/](project64). 
+I made a local [backup](Inside_Commodore_DOS.pdf).
 
 
 (end)

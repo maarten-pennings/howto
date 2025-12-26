@@ -1,4 +1,5 @@
 # How to
+
 Assortment of "How to xxx" I want to remember.
 
 
@@ -6,6 +7,12 @@ Assortment of "How to xxx" I want to remember.
 
 [How to](c64diskcmds) manage in C64 disk drive.
 The DOS (Disk Operating System) built into the drive.
+
+
+## How to fix the RESTORE key on the C64
+
+On the older C64 you really have to quickly hammer that key.
+Here is an instruction [how to](c64RESTOREkey/readme.md) fix that.
 
 
 ## How to map keys for BMC64
@@ -46,7 +53,7 @@ The howto [c64mempart](c64mempart) explains it.
 How are [C64 chars](c64chars) organized?
 
 
-## Solving tht Quadro puzzle
+## Solving the Quadro puzzle
 
 How to solve the [Quadro](Quadro) puzzle - by analysis.
 
