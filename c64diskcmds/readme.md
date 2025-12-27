@@ -58,12 +58,12 @@ The directory contains these details.
   `REL` (relative, i.e. records), `USR` (?), and maybe `DEL`.
 - The last line shows the number of free blocks. A block is ¼k bytes (256 bytes).
   A disk is said to have 170 kbytes, but some blocks are reserved for the BAM 
-  (block allocation matrix) or the root directory.
+  (block allocation map) or the root directory.
   An empty disk has 644 blocks free, which is 166 kbyte.
   This disk has 1+1+1+1+3+1+1 = 9 blocks in use, so indeed 644-9 = 655 free.
 
 
-### Splat and locked files
+### Splat files
 
 Sometimes there is a directory entry with a `*` in front of the file type.
 
@@ -74,9 +74,13 @@ Sometimes there is a directory entry with a `*` in front of the file type.
 The `*` tags the file as a _splat_ file. You create a splat file by opening 
 a file, writing to the file, but not closing the file, and then resetting the 
 C64. A splat file is a file under construction, the disk administration 
-is _inconsistent_. Run the [validate](#validate) command to fix the 
-inconsistencies, do not delete the file as that might improperly free blocks
-that belong to properly closed files.
+is _inconsistent_. Run the [Validate](#validate) 
+command to fix the  inconsistencies, do not delete the file as that might 
+improperly free blocks that belong to properly closed files.
+
+
+
+### Locked files
 
 Sometimes there is a directory entry with a `<` in front of the file type.
 
@@ -97,7 +101,7 @@ CLOSE 3
 ```
 
 
-### Directory with `*`
+### Directory filter with `*`
 
 We can also add a `*` wildcard matching any sequence of characters.
 
@@ -115,7 +119,7 @@ LOAD "$0:DUM*",8
 Note that `LOAD "$0:",8` matches no file.
 
 
-### Directory with `?`
+### Directory filter with `?`
 
 We can use the `?` wildcard matching precisely one characters.
 
@@ -128,7 +132,7 @@ LOAD "$0:B????-1",8
 ```
 
 
-### Directory with `=`
+### Directory filter with `=`
 
 C64 DOS even has a file type filter `=`.
 
@@ -216,6 +220,8 @@ OPEN 3,8,15, "I0" : CLOSE 3
 OPEN 3,8,15, "I"  : CLOSE 3 : REM Implicit drive number 0
 ```
 
+It seems it is even allowed to put a space between the command and the drive number `"I 0"`.
+
 
 ### Command names
 
@@ -253,10 +259,10 @@ OPEN 15,8,15, "I0"
 Instead `GOSUB 55555` to get the drive status.
 
 
-## List of commands
+### List of commands
 
 
-### New (Format)
+#### New (Format)
 
 A disk must be newed or formatted before it can be used. 
 An example of this command is
@@ -271,7 +277,7 @@ OPEN 3,8,15, "N:DOS-TEST,01" : CLOSE 3
 OPEN 3,8,15, "N:DOS-TEST" : CLOSE 3 : REM FOR REFORMAT
 ```
 
-- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Introduction](#introduction).
+- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
 - The _command_ is `NEW`.
   It may be shortened to e.g. `N`.
 - The _drive number_ is `0`, and may be omitted.
@@ -290,10 +296,10 @@ OPEN 3,8,15, "N:DOS-TEST" : CLOSE 3 : REM FOR REFORMAT
 - The _id_ is optional when reformatting. This will erase all files, 
   change the _diskname_, but not the _id_'s (in all blocks). 
   As a result, reformat is much faster than a full format (with _id_).
-- See Section [Directory](#directory) for an example.
+- See Section [Plain directory](#plain-directory) for an example.
 
 
-### Scratch (Delete)
+#### Scratch (Delete)
 
 There is a command to scratch (delete) a file on the disk.
 An example of this command is
@@ -307,17 +313,18 @@ OPEN 3,8,15, "S0:DUMMY-1" : CLOSE 3
 OPEN 3,8,15, "S:DUMMY-1" : CLOSE 3
 ```
 
-- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Introduction](#introduction).
+- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
 - The _command_ is `SCRATCH`.
   It may be shortened to e.g. `S`.
 - The _drive number_ is `0`, and may be omitted.
 - The _file name_ is `DUMMY-1` in the example.
   It shall be an existing file name, but it may contain wild cards.
-  See the Subsections of Section [Directory](#directory) for wildcards.
+  See the Subsections of Section [Plain directory](#plain-directory) for wildcards.
   Tip: test the wildcards first in the directory command, before using them in the 
   scratch command.
-- Remember, do not use scratch when there are [splat files](#splat-and-locked-files).
-  Use the [Validate and Collect](#validate-and-collect) instead.
+- The wildcard support means you have a means to delete files with rogue characters in them (like a `,`).
+- Remember, do not use scratch when there are [splat files](#splat-files).
+  Use the [Validate](#validate) instead.
 
 Example, using the routine from Section [Drive status](#drive-status) at 55555.
 
@@ -339,10 +346,161 @@ GOSUB 55555
 ```
 
 
-## Validate and Collect
+#### Rename
 
-todo (for splat files).
+There is a command to rename a file on the disk.
+An example of this command is
 
+```basic
+OPEN 3,8,15, "RENAME0:NEWNAME=OLDNAME" : CLOSE 3
+```
+
+```basic
+OPEN 3,8,15, "R0:NEWNAME=OLDNAME" : CLOSE 3
+OPEN 3,8,15, "R:NEWNAME=OLDNAME" : CLOSE 3
+```
+
+- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
+- The _command_ is `RENAME`.
+  It may be shortened to e.g. `R`.
+- The _drive number_ is `0`, and may be omitted.
+- The _file name_ of the file to be renamed is `OLDNAME` in the example.
+- The _file name_ of the file will be changed to `NEWNAME` in this example.
+- The rename command does not seem to support wildcards.
+
+
+#### Copy
+
+There is a command to copy a file on the disk.
+An example of this command is
+
+```basic
+OPEN 3,8,15, "COPY0:NEWFILE=0:OLDFILE" : CLOSE 3
+```
+
+```basic
+OPEN 3,8,15, "COPY0:NEWFILE=OLDFILE" : CLOSE 3
+OPEN 3,8,15, "C0:NEWFILE=OLDFILE" : CLOSE 3
+OPEN 3,8,15, "C:NEWFILE=OLDFILE" : CLOSE 3
+```
+
+- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
+- The _command_ is `COPY`.
+  It may be shortened to e.g. `C`.
+- The _drive number_ is `0`, and may be omitted, also for the old file.
+- It is not possible to copy from disk to disk, unless you have a dual drive device.
+  To copy from disk to disk you need a external utility.
+- The _file name_ of the file to be copied is `OLDFILE` in the example.
+- The _file name_ of the new file will be `NEWFILE` in this example.
+- The copy command does not seem to support wildcards.
+- Copy creates new file; this means it searches for a free slot in the directory. 
+  If you delete the old file afterwards (freeing that directory slot), you have 
+  effectively moved the file in the directory. 
+
+
+#### Concatenate
+
+The copy command can be used to concatenate files.
+The comma is used to separate the constituent files.
+
+```basic
+OPEN 3,8,15, "COPY0:NEWFILE=0:OLDFILEA,0:OLDFILEB,0:OLDFILEC" : CLOSE 3
+OPEN 3,8,15, "C:NEWFILE=OLDFILEA,OLDFILEB,OLDFILEC" : CLOSE 3
+```
+
+- All files on the same disk.
+- This does not work for PRG files (e.g. BASIC files) since 
+  they have a header (the load address). The header of the second (and third) file
+  will not be removed by the concatenate, resulting in a file that can not be executed.
+
+
+#### Validate
+
+When a file is opened for write, and bytes are being written, the DOS allocates 
+disk blocks ("sectors") to write those files to. Each disk block has a link 
+to the next block. This chain is made consistent when the file is `CLOSE`d, 
+but while writing the links might be dangling.
+If the disk is removed from the drive, the drive is re-initialized, 
+reset, power cycled, etc, the chain for that file is broken, and the file 
+is called a ["splat file"](#splat-files).
+
+Do not delete a splat file, rather perform a Validate operation 
+on the disk.
+
+An example of this command is
+
+```basic
+OPEN 3,8,15, "VALIDATE0" : CLOSE 3
+```
+
+```basic
+OPEN 3,8,15, "V0" : CLOSE 3
+OPEN 3,8,15, "V" : CLOSE 3
+```
+
+- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
+- The _command_ is `VALIDATE`.
+  It may be shortened to e.g. `V`.
+- The _drive number_ is `0`, and may be omitted.
+- Use this to delete splat files.
+
+
+#### Initialize
+
+There is a command to initialize a disk.
+This causes a re-read of the BAM or Block Availability Map.
+The initialize function is performed automatically when a disk is inserted,
+using the optical write-protect sensor, so there is no need in practice
+to issue this command.
+
+An example of this command is
+
+```basic
+OPEN 3,8,15, "INITIALIZE0" : CLOSE 3
+```
+
+```basic
+OPEN 3,8,15, "I0" : CLOSE 3
+OPEN 3,8,15, "I" : CLOSE 3
+```
+
+- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
+- The _command_ is `INITIALIZE`.
+  It may be shortened to e.g. `I`.
+- The _drive number_ is `0`, and may be omitted.
+- Do not issue this commands when there are open files.
+- Do not confuse Initialize with [Reset](#reset-and-version).
+
+
+#### Reset and Version
+
+There is a command to reset the drive.
+After a cold boot or a reset, a read of the disk status returns the DOS version
+("error" 73).
+
+An example of this command is
+
+```basic
+OPEN 3,8,15, "UJ" : CLOSE 3
+```
+
+- For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
+- The _command_ is `UJ`.
+  The `U` stands for `USER`, it has sub commands `J` causes the reset.
+  In this case the long name (`USER`) does not seem to work.
+- Executing the reset takes time: wait 2 seconds before giving a next command.
+- Do not confuse Reset with [Initialize](#initialize).
+
+```basic
+100 OPEN 3,8,15, "UJ"
+110 FOR I=0 TO 1500:NEXT I
+120 INPUT#3,EN,EM$,ET,ES
+130 PRINT EM$
+140 CLOSE 3
+
+Run
+CBM DOS V2.6 1541
+```
 
 
 ## Files
