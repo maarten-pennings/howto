@@ -226,15 +226,6 @@ OPEN 3,8,15, "I"  : CLOSE 3 : REM Implicit drive number 0
 It seems it is even allowed to put a space between the command and the drive number `"I 0"`.
 
 
-### Command names
-
-The commands were given names by Commodore around 1975.
-The names Commodore picked are not always the names we use today.
-For example, we say _delete_ a file, not _scratch_ a file.
-In the sections below, we use the Commodore names, but show also, 
-between brackets the modern name.
-
-
 ### Drive status
 
 When a command results in an error condition, the drive LED will flicker. 
