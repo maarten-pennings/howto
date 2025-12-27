@@ -13,7 +13,8 @@ For a more generic discussion of the C64 drives see a related
 ## Directory 
 
 The C64 drive doesn't model "asking for a directory" as a command,
-instead it models it as "loading a file". 
+instead it models it as "loading a file"; or to be more precise as 
+"loading a program", which cab be `LIST`ed.
 
 
 ### Plain directory
@@ -38,6 +39,7 @@ LIST
 
 The `$` is the "file name" for the directory; 
 a C64 drive only has one directory, the root directory.
+There are no sub directories.
 
 Naturally, we could add the drive number.
   
@@ -45,8 +47,8 @@ Naturally, we could add the drive number.
 LOAD "$0",8
 ```
 
-The directory contains these details.
-- The initial `0` means this is the directory for drive number 0.
+The directory - the `LIST`ing - contains these details.
+- The initial `0` on the first line means this is the directory for drive number 0.
 - Between quotes (and in reverse video) we see the 16 characters that
   make up the _diskname_ (`DOS-TEST`).
 - After the name we see the two characters of the disk _id_ (`01`),
@@ -62,6 +64,14 @@ The directory contains these details.
   An empty disk has 644 blocks free, which is 166 kbyte.
   This disk has 1+1+1+1+3+1+1 = 9 blocks in use, so indeed 644-9 = 655 free.
 
+It is possible to read the directory programmatically; since we 
+load a program we use secondary channel 0.
+
+```basic
+OPEN 3,8,0,"$" : REM SECONDARY CHANEL IS 0 
+GET#3, ...
+CLOSE 3
+```
 
 ### Splat files
 
@@ -91,15 +101,6 @@ Sometimes there is a directory entry with a `<` in front of the file type.
 The `<` tags the file as a _locked_ file. Locked files can not be deleted with 
 the scratch command, you need a disk tool for that.
 
-It is possible to read the directory programmatically; since we 
-load a program we use secondary channel 0.
-
-```basic
-OPEN 3,8,0,"$" : REM SECONDARY CHANEL IS 0 
-GET#3, ...
-CLOSE 3
-```
-
 
 ### Directory filter with `*`
 
@@ -117,6 +118,8 @@ LOAD "$0:DUM*",8
 ```
 
 Note that `LOAD "$0:",8` matches no file.
+
+Note also that the number of free blocks is not influenced by the filter.
 
 
 ### Directory filter with `?`
@@ -326,7 +329,8 @@ OPEN 3,8,15, "S:DUMMY-1" : CLOSE 3
 - Remember, do not use scratch when there are [splat files](#splat-files).
   Use the [Validate](#validate) instead.
 
-Example, using the routine from Section [Drive status](#drive-status) at 55555.
+Example, following the wildcard tip, and using the routine at lines 5555 from 
+Section [Drive status](#drive-status) to get the amount of deleted files.
 
 ```basic
 LOAD "$0:BASIC*",8
@@ -341,6 +345,7 @@ LIST
 655 BLOCKS FREE.
 
 OPEN 15,8,15, "S0:BASIC*"
+
 GOSUB 55555
  1 FILES SCRATCHED 2  0
 ```
@@ -364,8 +369,8 @@ OPEN 3,8,15, "R:NEWNAME=OLDNAME" : CLOSE 3
 - The _command_ is `RENAME`.
   It may be shortened to e.g. `R`.
 - The _drive number_ is `0`, and may be omitted.
-- The _file name_ of the file to be renamed is `OLDNAME` in the example.
-- The _file name_ of the file will be changed to `NEWNAME` in this example.
+- The _file name_ of the file to be renamed is `OLDNAME` in the example. It comes second.
+- The _file name_ of the file will be changed to `NEWNAME` in this example. It comes first.
 - The rename command does not seem to support wildcards.
 
 
@@ -389,9 +394,9 @@ OPEN 3,8,15, "C:NEWFILE=OLDFILE" : CLOSE 3
   It may be shortened to e.g. `C`.
 - The _drive number_ is `0`, and may be omitted, also for the old file.
 - It is not possible to copy from disk to disk, unless you have a dual drive device.
-  To copy from disk to disk you need a external utility.
-- The _file name_ of the file to be copied is `OLDFILE` in the example.
-- The _file name_ of the new file will be `NEWFILE` in this example.
+  On a single drive unit device, to copy from disk to disk, you need an external utility.
+- The _file name_ of the file to be copied is `OLDFILE` in the example. It comes second.
+- The _file name_ of the new file will be `NEWFILE` in this example. It comes first.
 - The copy command does not seem to support wildcards.
 - Copy creates new file; this means it searches for a free slot in the directory. 
   If you delete the old file afterwards (freeing that directory slot), you have 
@@ -409,9 +414,10 @@ OPEN 3,8,15, "C:NEWFILE=OLDFILEA,OLDFILEB,OLDFILEC" : CLOSE 3
 ```
 
 - All files on the same disk.
-- This does not work for PRG files (e.g. BASIC files) since 
-  they have a header (the load address). The header of the second (and third) file
-  will not be removed by the concatenate, resulting in a file that can not be executed.
+- The concatenate copies all bytes in all files.
+  As a result, concatenate of PRG files like BASIC files results in a file that can not be executed.
+  Program files have a header (the load address) and those will be copied to 
+  offsetting the second (and later) files.
 
 
 #### Validate
@@ -476,7 +482,8 @@ OPEN 3,8,15, "I" : CLOSE 3
 
 There is a command to reset the drive.
 After a cold boot or a reset, a read of the disk status returns the DOS version
-("error" 73).
+("error" 73), so an explicit reset offers a means to get the DOS version 
+at any time.
 
 An example of this command is
 
@@ -486,8 +493,8 @@ OPEN 3,8,15, "UJ" : CLOSE 3
 
 - For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
 - The _command_ is `UJ`.
-  The `U` stands for `USER`, it has sub commands `J` causes the reset.
-  In this case the long name (`USER`) does not seem to work.
+  The `U` stands for `USER`, it has sub commands, and sub command `J` causes the reset.
+- In this command the long name (`USER`) does not seem to work.
 - Executing the reset takes time: wait 2 seconds before giving a next command.
 - Do not confuse Reset with [Initialize](#initialize).
 
@@ -555,5 +562,6 @@ todo: verify
 
 ### Files via LOAD
 
+todo
 
 (end)
