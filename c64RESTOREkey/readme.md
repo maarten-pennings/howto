@@ -8,7 +8,7 @@ On the older C64 you really have to quickly hammer that key.
 This is not by design (prevent accidental soft reset).
 It is caused by a small design error.
 
-## fix
+## Fix: C38
 
 The culprit is capacitor C38. You find it in the lower left corner.
 On newer boards it is still on the left, but higher towards the center.
