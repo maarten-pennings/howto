@@ -14,7 +14,7 @@ For a more generic discussion of the C64 drives see a related
 
 The C64 drive doesn't model "asking for a directory" as a command,
 instead it models it as "loading a file"; or to be more precise as 
-"loading a program", which cab be `LIST`ed.
+"loading a program", which can be `LIST`ed.
 
 
 ### Plain directory
@@ -86,7 +86,7 @@ a file, writing to the file, but not closing the file, and then resetting the
 C64. A splat file is a file under construction, the disk administration 
 is _inconsistent_. Run the [Validate](#validate) 
 command to fix the  inconsistencies, do not delete the file as that might 
-improperly free blocks that belong to properly closed files.
+free blocks that belong to properly closed (other) files.
 
 
 
@@ -196,6 +196,7 @@ disk drive typically has device number 8, a second typically 9, but 10 and 11
 are also used. How to send the command to a different device than 8 in case of 
 the wedge depends on the wedge software. In case of the KCS power software 
 I believe it is _not_ possible to send a command to a different device than 8.
+But please prove me wrong by submitting an issue with the method.
 
 In the classical and abridged variants we see that `15` is used as secondary 
 channel. That is a _must have_. Commands must be send to secondary channel 15.
@@ -268,7 +269,7 @@ OPEN 3,8,15, "NEW0:DOS-TEST,01" : CLOSE 3
 ```basic
 OPEN 3,8,15, "N0:DOS-TEST,01" : CLOSE 3
 OPEN 3,8,15, "N:DOS-TEST,01" : CLOSE 3
-OPEN 3,8,15, "N:DOS-TEST" : CLOSE 3 : REM FOR REFORMAT
+OPEN 3,8,15, "N:DOS-TEST" : CLOSE 3 : REM WITHOUT ID FOR REFORMAT
 ```
 
 - For the _file number_,  _device number_ and _secondary address_ (`3,8,15`) see [Sending commands](#sending-commands).
@@ -287,7 +288,7 @@ OPEN 3,8,15, "N:DOS-TEST" : CLOSE 3 : REM FOR REFORMAT
 - A brand new disk must be formatted before use.
 - A previously formatted disk may be formatted again. It will erase all files,
   change the _diskname_ and the _id_ (in all disk blocks).
-- The _id_ is optional when reformatting. This will erase all files, 
+- The _id_ is optional when _reformatting_. This will erase all files, 
   change the _diskname_, but not the _id_'s (in all blocks). 
   As a result, reformat is much faster than a full format (with _id_).
 - See Section [Plain directory](#plain-directory) for an example.
@@ -391,7 +392,7 @@ OPEN 3,8,15, "C:NEWFILE=OLDFILE" : CLOSE 3
 - The copy command does not seem to support wildcards.
 - Copy creates new file; this means it searches for a free slot in the directory. 
   If you delete the old file afterwards (freeing that directory slot), you have 
-  effectively moved the file in the directory. 
+  effectively moved the file entry in the directory list. 
 
 
 #### Concatenate
@@ -509,7 +510,7 @@ The C64 does not have a "touch" command to create an empty file.
 But we can use a file-write for that.
 
 ```basic
-OPEN 3,8,6, "0:DUMMY-1,SEQ,WRITE" : CLOSE 3
+OPEN 3,8,6, "0:DUMMY-1,SEQUENTIAL,WRITE" : CLOSE 3
 ```
 
 - The C64 _file number_ is `3`. 
