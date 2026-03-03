@@ -3,6 +3,18 @@
 Assortment of "How to xxx" I want to remember.
 
 
+## C64 development
+
+It is possible to develop on the C64 itself.
+For BASIC that is possibly the best solution.
+For assembly it starts to be less than ideal, 
+if only because a bad program may crash your C64, 
+corrupting your work.
+
+The [C64 development](c64development) explains how to
+develop assembler and BASIC on a PC, and test it in VICE.
+
+
 ## C64 disk drive commands
 
 [How to](c64diskcmds) manage in C64 disk drive.
