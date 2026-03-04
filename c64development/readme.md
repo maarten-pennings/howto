@@ -16,20 +16,20 @@ I use WSL (Windows Subsystem for Linux) for automation:
 
 I use Windows for testing and debugging
 - Running the VICE _GUI_ to test the two .prg files in an emulated C64.
-- I typically auto-mount the [KCS power cartridge](https://rr.pokefinder.org/wiki/Power_Cartridge). 
-  It supports hex commands in BASIC and includes a machine language "monitor".
-  The Binaries section of the above page links to the cartridge image.
-  In VICE use File > Attach cartridge image ... to mount it, set the check-mark to set it as default.
-  
 
 I'm assuming that if your development system is Ubuntu or Mac, the last step can also be
-executed in your development system.
+executed in the same system.
 
 
 ## Install
 
-If Windows is your development system, first install WSL.
-I did this some time ago, so these steps are a bit of a guess:
+If, like me, Windows is your development system, you need WSL for the 
+automation part.
+
+
+### WSL
+
+I did the WSL install some time ago, so these steps are a bit of a guess:
 - Run `cmd.exe` (or PowerShell) as admin and issue `wsl --install`.
 - Reboot, Ubuntu starts (if not, find it in Start) and you have to create an username/password 
   typically different from your Windows' one.
@@ -42,9 +42,23 @@ We need a couple of automation tools in WSL:
   This installs the complete VICE toolset, we only use `petcat` and `c1541`.
 
 
+### Windows
+
+For Windows we just need VICE
+
+- Get it from [sourceforge](https://vice-emu.sourceforge.io/index.html#download).
+  VICE recommends the GTK3 version so get "Download VICE 3.10 (64bit GTK3)".
+
+- I typically auto-mount the [KCS power cartridge](https://rr.pokefinder.org/wiki/Power_Cartridge). 
+  It supports hex commands in BASIC and includes a machine language "monitor".
+  The Binaries section of the above page links to the cartridge image.
+  In VICE use File > Attach cartridge image ... to mount it, set the check-mark to set it as default.
+
+
 ## Source files
 
-I have written two example source files: assembly and BASIC.
+I have written two example source files: one in assembly and one in BASIC.
+
 
 ### Assembly
 
