@@ -9,7 +9,7 @@ This is my setup.
 
 I use WSL (Windows Subsystem for Linux) for automation:
 - An assembler (`64tass`) to convert an .asm text file to a C64 .prg file.
-- Using a VICE _tool_ (`petcat`) to convert a BASIC text file to a C64 BASIC .prg file.
+- Using a VICE _tool_ (`petcat`) to convert a text file to a C64 BASIC .prg file, i.e. plain text to tokens.
   The purpose of this BASIC program is to test the assembly routine.
 - Using a VICE _tool_ (`c1541`) to create a .d64 disk image (loadable in VICE) from the two .prg files.
 - With the `make` tool the above steps are automated.
@@ -64,7 +64,7 @@ RTS
 The `64tass` assembler will convert this to a .prg file.
 An interesting observation is that the assembler will not only compile 
 the source text to a list of bytes, it will actually generate a .prg file:
-a list of bytes prefixed with a load address; C000 in our case.
+a list of bytes _prefixed with a load address_, C000 in our case.
 
 
 ### BASIC
@@ -74,7 +74,7 @@ This may be edited with a tool like notepad.
 We use `petcat` from VICE to convert this to a C64 .prg file.
 
 This program is a bit more complicated, but we feel it is a typical setup: 
-it loads the assembly sub-routine, then runs it, as a test.
+it loads the assembly subroutine, then runs it. This mimics a test process.
 
 ```bas
 10 if a=1 then 60:rem restart
@@ -88,10 +88,10 @@ it loads the assembly sub-routine, then runs it, as a test.
 90 end
 ```
 
-Note that we use _lower case_. C64 BASIC will list it as uppercase.
+Note that we must use _lower case_ in the .bas file. C64 BASIC will list it as uppercase.
 
 When running this BASIC program, the variable `a` on line 10 will be created
-and initialized to 0, so the jump 60 will not happen.
+and initialized to 0, so the jump to line 60 will not happen.
 
 Line 20 prints the action that is taken instead: loading the assembly subroutine.
 That actually happens on line 30, setting the load flag `a` to 1.
@@ -105,15 +105,18 @@ specified program, it issues a `RUN`, however without clearing variables
 (which might not work if the second program overlaps with the first).
 
 So after line 30, line 10 will execute (again), which now does jump to 60.
-The second part of our program prints it will call the assembly sub,
-then it calls it (49152=$C000), prints we're back in basic and finally
+The second part of our program prints it will call the assembly subroutine,
+then it calls it (49152=$C000), prints we are back in basic and finally
 ends the program.
 
 
 ## Generating .prg files.
 
 We are using two tools to convert the sources to .prg files.
-Recall that the C64 (the 6502) is little endian.
+
+This section shows some 2-byte hex numbers, recall that the C64, 
+or better phrased the 6502, is little endian machine. In other words
+the number C000 is stored as 00 C0.
 
 
 ### Assembly
@@ -127,8 +130,8 @@ Details are in the [Makefile](makefile).
 
 The generated .prg file is only 8 bytes.
 First the load address (red box).
-Next come three instructions, `LDA #$01` in green,
-`STA $D020` in blue and `RTS` in yellow.
+Next come three instructions, `LDA #$01` in a green,
+`STA $D020` in a blue and `RTS` in a yellow box.
 
 ![Generated binary](images/border-sub.prg.png)
 
@@ -142,19 +145,20 @@ The `-w2` selects C64 BASIC 2.0; see the [Makefile](makefile).
 	petcat  -w2  -o build/border.prg  --  src/border.bas
 ```
 
-The generated .prg file also starts with a load address, in our case 0801 (red box).
+The generated .prg file also starts with a load address, namely the 0801 (red box).
 This allows for a load to specific address as in `LOAD "BORDER",8,1`.
 A plain load `LOAD "BORDER",8` will also work, since BASIC interpreter will 
-then load to the start of BASIC, which also happens to be 0801.
+then load to the start of BASIC, which happens to be 0801 on the C64.
 
-Observe that the BASIC text is a list of lines (the green boxes show the link to the 
-address of the next line). The blue boxes encircle the line numbers. 
+Observe that the BASIC text is a _list_ of lines; the green boxes show the link to 
+(tha address of) the next line. The blue boxes encircle the line numbers. Then 
+each line is a series of bytes terminated with a 00. The bytes are a mix of 
+literal program text and tokens. On offset 6 we see `8b`, the token for `if` 
+(see [list](https://www.c64-wiki.com/wiki/BASIC_token)). This is followed by 
+`20` (space), `41` (variable name `A`) and another token `b2` for `=`, the equals operator.
 
 ![Generated binary](images/border.prg.png)
 
-The BASIC text is tokenized.
-For example on offset 6 we see `8B`, the token for `if` 
-(see [list](https://www.c64-wiki.com/wiki/BASIC_token)).
 
 
 ## Running the code
@@ -163,10 +167,11 @@ We deliberately made a "complex" setup with a BASIC program loading another file
 It is possible to double click on a .prg file to start VICE (if the extension association is registered).
 It is also possible to drag&drop a .prg file on an already started VICE.
 
-However for our complex setup that doesn't work, one program needs another.
-The solution is to create a C64 disk image with the tool `c1541`.
+However for our complex setup that doesn't work, one program needs the other.
+The solution is to create a C64 _disk image_ with both files on it. 
+We use the tool `c1541` for that.
 We create a new disk, format it and save the two .prg files on it.
-See the [Makefile](makefile) for details.
+See the [Makefile](makefile) for the exact arguments.
 
 ```make
 	c1541 -format "border-dsk,bd" d64 build/border-dsk.d64 \
