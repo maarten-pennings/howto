@@ -16,10 +16,7 @@ I use WSL (Windows Subsystem for Linux) for automation:
 
 I use Windows for testing and debugging
 - Running the VICE _GUI_ to test the two .prg files in an emulated C64.
-
-I'm assuming that if your development system is Ubuntu or Mac, the last step can also be
-executed in the same system.
-
+- You can also run the VICE _GUI_ in WSL if you use WSL2. Some extra installs are needed.
 
 ## Install
 
@@ -39,7 +36,20 @@ We need a couple of automation tools in WSL:
 - The make utility `sudo apt-get install make`.
 - An assembler for the C64, e.g. `sudo apt-get install 64tass`.
 - Some C64 file management tools `sudo apt-get install vice`.
-  This installs the complete VICE toolset, we only use `petcat` and `c1541`.
+  This installs the complete VICE toolset, we use `petcat` and `c1541`.
+- If you want to run VICE on the WSL2, you need to install the Commodore 64 binaries as well.
+  I copied them from my windows VICE.
+  ```
+  cd ~
+  rmdir -p .local/share/vice/C64
+  cd .local/share/vice/C64
+  cp  /mnt/c/programs/GTK3VICE-3.10-win64/C64/kernal-901227-03.bin  .
+  cp  /mnt/c/programs/GTK3VICE-3.10-win64/C64/basic-901226-01.bin  .
+  cp  /mnt/c/programs/GTK3VICE-3.10-win64/C64/chargen-901225-01.bin  .
+  ```
+  Start VICE with `x64sc` or use `x64sc -verbose` to see which files are loaded.
+
+  ![VICE in WSL2](images/vice-wsl2.png)
 
 
 ### Windows
@@ -207,8 +217,7 @@ as we can see in the screenshot. Finally,
 ![Executing](images/vice.png)
 
 It is also possible to add the following line to the makefile to
-start VICE automatically as part of make. For me that doesn't work:
-I did not succeed in starting Ubuntu VICE via WSL.
+start VICE automatically as part of make. This does require that VICE is working in WSL.
 
 ```make
 	x64sc -autostart build/border-dsk.d64
