@@ -37,11 +37,12 @@ We need a couple of automation tools in WSL:
 - An assembler for the C64, e.g. `sudo apt-get install 64tass`.
 - Some C64 file management tools `sudo apt-get install vice`.
   This installs the complete VICE toolset, we use `petcat` and `c1541`.
-- If you want to run VICE on the WSL2, you need to install the Commodore 64 binaries as well.
-  I copied them from my windows VICE.
+- If you want to run VICE 3.10 on the WSL2, you need to install the Commodore 64 binaries as well.
+  I copied them from my windows VICE. **Note** the `C64` directory is with uppercase `C`.
+  
   ```
   cd ~
-  rmdir -p .local/share/vice/C64
+  mkdir -p .local/share/vice/C64
   cd .local/share/vice/C64
   cp  /mnt/c/programs/GTK3VICE-3.10-win64/C64/kernal-901227-03.bin  .
   cp  /mnt/c/programs/GTK3VICE-3.10-win64/C64/basic-901226-01.bin  .
@@ -50,6 +51,8 @@ We need a couple of automation tools in WSL:
   Start VICE with `x64sc` or use `x64sc -verbose` to see which files are loaded.
 
   ![VICE in WSL2](images/vice-wsl2.png)
+
+- **Note** For VICE 3.9, the three files need to be renamed to `kernal`, `basic`, and `chargen`.
 
 
 ### Windows
