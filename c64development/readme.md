@@ -52,7 +52,15 @@ We need a couple of automation tools in WSL:
 
   ![VICE in WSL2](images/vice-wsl2.png)
 
-- **Note** For VICE 3.9, the three files need to be renamed to `kernal`, `basic`, and `chargen`.
+- **Note** For older VICE versions, the three files need to be renamed to `kernal`, `basic`, and `chargen`.
+- You might also want to copy a drive ROM
+  ```
+  cd ~
+  mkdir -p .local/share/vice/DRIVES
+  cd .local/share/vice/DRIVES
+  cp  /mnt/c/programs/GTK3VICE-3.10-win64/DRIVES/dos1541ii-251968-03.bin  .
+  ```
+- **Note** For older VICE versions, the disk rom needs to be renamed to `d1541II`.
 
 
 ### Windows
@@ -222,9 +230,18 @@ as we can see in the screenshot. Finally,
 It is also possible to add the following line to the makefile to
 start VICE automatically as part of make. This does require that VICE is working in WSL.
 
-```make
+```
 	x64sc -autostart build/border-dsk.d64
 ```
 
+To mount a printer and start a program from a d64 file
 
+```
+PRINTER4 = -prtxtdev1 "printer.log"  -pr4txtdev 0  -pr4output text  -pr4drv ascii  -device4  1  -iecdevice4  -virtualdev4
+DISK8 = -drive8type 1542  -autostart bld/test.d64:test
+OTHER = -warp  -limitcycles 5999000
+test: build/test.d64
+	rm -f printer.log
+	x64sc  $(DISK8) $(PRINTER4) $(OTHER)
+```
 (end)
