@@ -251,7 +251,98 @@ as we can see in the screenshot. Finally,
 ![Executing](images/vice.png)
 
 
-## Experiment 2: compile and test
+
+## Experiment 2: compile and automated test
+
+In this second experiment, we go one step further, also automate the testing.
+We run the C64 software on the emulator (VICE), but do not print to the 
+screen but to the printer. We instruct VICE to save the printer output to a 
+file.
+
+
+### Configuring the printer
+
+It turned out quite a challenge to configure a printer in VICE.
+And the WSL version is running behind (VICE 3.6.1 vs VICE 3.9).
+Find printer configuration under Preferences > Settings > Peripheral devices > Printer.
+
+![Default printer config (WSL; VICE 3.6.1)](images/vice-printer-wsl2.png)
+
+![Default printer config (Windows; VICE 3.9)](images/vice-printer-win.png)
+
+We can configure 5 emulated printers (green box): four printers 
+connected to IEC Serial bus, and one connected to the User port.
+The IEC printers (like disk drives) have an address; the screenshots
+show the default printer address 4 (note the highlighted tab).
+
+We can configure 3 physical printers (blue box).
+These can be a file, or a printer connected the the host computer.
+
+To configuring the printer we need the VICE command line manual.
+The [TOC](https://vice-emu.sourceforge.io/vice_toc.html) directs us to 
+section [6.12.2 Printer settings](https://vice-emu.sourceforge.io/vice_6.html).
+Don't use the "resources" but the "command-line options" (6.12.2.2).
+
+- We need to set the "Printer [text|output] devices" for VICE (blue box).
+  This is the "physical" printer connected to the host computer running VICE.
+  In our case, we will use a "file" as physical device.
+  
+  The command line option `-prtxtdev1 printer.log` configures printer 
+  device #1 as (the file) `printer.log`.
+
+- The option `-pr4txtdev 0` configures the "Output device" 
+  (column 4 in green box) for printer 4, to the just created device. 
+  The UI uses device 1, 2, 3, the command line 0, 1, 2.
+
+- The "Output mode" (column 3 in green box) is Text for us. This creates 
+  a text file with the printed characters in it. Graphics creates a png file 
+  with drawings of the characters. We add `-pr4output text`.
+
+- The "Driver" (column 2 in green box) is ASCII for us.  
+  We do not have a real printer connected to the host, we print to a file.
+  Therefore we do not need a driver. We add `-pr4drv ascii`.
+  
+- The "Emulation type" (column 1 in green box) is File system access.
+  We add `-device4  1` (option 1, 0-based).
+  We also enable the virtual device `-virtualdev4`
+
+This is the complete command line
+
+```
+x64sc  -prtxtdev1 printer.log  -pr4txtdev 0  -pr4output text  -pr4drv ascii  -device4 1  -virtualdev4
+```
+
+
+![Our printer config (WSL; VICE 3.6.1)](images/vice-printer-wsl2-configured.png)
+
+
+### Testing the printer
+
+When we start VICE with the above command line parameters, and then run the 
+following BASIC program, we get a file `printer.log` in the directory 
+where we started VICE.
+
+```
+10 open 4,4,4
+20 print#4,"hello, world!"
+30 print#4,"second line"
+40 close 4
+```
+
+This is the hexdump of the generated file.
+
+```
+maarten@Desktop-Maarten:/mnt/c/Repos/howto/c64development$ hd printer.log
+00000000  48 45 4c 4c 4f 2c 20 57  4f 52 4c 44 21 0a 53 45  |HELLO, WORLD!.SE|
+00000010  43 4f 4e 44 20 4c 49 4e  45 0a                    |COND LINE.|
+0000001a
+```
+
+Notice the line ending: 0x0A (character 10 or linefeed).
+
+
+### todo
+
 
 It is also possible to add the following line to the makefile to
 start VICE automatically as part of make. This does require that VICE is working in WSL.
@@ -263,7 +354,7 @@ start VICE automatically as part of make. This does require that VICE is working
 To mount a printer and start a program from a d64 file
 
 ```
-PRINTER4 = -prtxtdev1 "printer.log"  -pr4txtdev 0  -pr4output text  -pr4drv ascii  -device4  1  -iecdevice4  -virtualdev4
+PRINTER4 = -prtxtdev1 printer.log  -pr4txtdev 0  -pr4output text  -pr4drv ascii  -device4  1  -virtualdev4
 DISK8 = -drive8type 1542  -autostart bld/test.d64:test
 OTHER = -warp  -limitcycles 5999000
 test: build/test.d64
