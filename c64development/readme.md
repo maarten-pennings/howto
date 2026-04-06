@@ -1,6 +1,6 @@
 # C64 development
 
-This how-to explains how to develop C64 software on a PC.
+This how-to explains how to develop C64 software on a Windows PC.
 
 
 ## Introduction
@@ -8,20 +8,32 @@ This how-to explains how to develop C64 software on a PC.
 This is my setup.
 
 I use WSL (Windows Subsystem for Linux) for automation:
-- An assembler (`64tass`) to convert an .asm text file to a C64 .prg file.
-- Using a VICE _tool_ (`petcat`) to convert a text file to a C64 BASIC .prg file, i.e. plain text to tokens.
+- An assembler (`64tass`) to convert an .asm text file to a C64 `.prg` file.
+- Using a VICE _tool_ (`petcat`) to convert a text file to a C64 BASIC `.prg` file, i.e. plain text to tokens.
   The purpose of this BASIC program is to test the assembly routine.
-- Using a VICE _tool_ (`c1541`) to create a .d64 disk image (loadable in VICE) from the two .prg files.
+- Using a VICE _tool_ (`c1541`) to create a `.d64` disk image (loadable in VICE) from the two `.prg` files.
 - With the `make` tool the above steps are automated.
-
-I use Windows for testing and debugging
-- Running the VICE _GUI_ to test the two .prg files in an emulated C64.
-- You can also run the VICE _GUI_ in WSL if you use WSL2. Some extra installs are needed.
+- To test the compiled assembler or tokenized basic, we mount the `.d64` in VICE, the C64 emulator.
+  We can install VICE in Windows and mount the `.d64` file generated in WSL.
+  It is also possible to run the VICE _GUI_ in WSL (you need WSL2 and some extra installs are required).
 
 ## Install
 
 If, like me, Windows is your development system, you need WSL for the 
 automation part.
+
+
+### Windows
+
+For Windows we just need the VICE emulator.
+
+- Get it from [sourceforge](https://vice-emu.sourceforge.io/index.html#download).
+  VICE recommends the GTK3 version so get "Download VICE 3.10 (64bit GTK3)".
+
+- I typically auto-mount the [KCS power cartridge](https://rr.pokefinder.org/wiki/Power_Cartridge). 
+  It supports hex commands in BASIC and includes a machine language "monitor".
+  The Binaries section of the above page links to the cartridge image.
+  In VICE use File > Attach cartridge image ... to mount it, set the check-mark to set it as default.
 
 
 ### WSL
@@ -37,8 +49,17 @@ We need a couple of automation tools in WSL:
 - An assembler for the C64, e.g. `sudo apt-get install 64tass`.
 - Some C64 file management tools `sudo apt-get install vice`.
   This installs the complete VICE toolset, we use `petcat` and `c1541`.
-- If you want to run VICE 3.10 on the WSL2, you need to install the Commodore 64 binaries as well.
-  I copied them from my windows VICE. **Note** the `C64` directory is with uppercase `C`.
+
+Instead of running the VICE emulator under Windows, we can also run it under WSL.
+- The `sudo apt-get install vice` from previous step installed the emulator.
+- The WSL VICE install does not include the Commodore 64 binaries 
+  (kernal, basic, charrom). 
+  
+  I copied the C64 binaries  from my windows VICE; on my machine 
+  that is located in `c:\programs\GTK3VICE-3.10-win64`, mounted in WSL as 
+  `cp /mnt/c/programs/GTK3VICE-3.10-win64`. That is the source of the binaries,
+  the destination is a subdir `.local/share/vice/C64` in my WSL home directory.
+  These are the commands I used.
   
   ```
   cd ~
@@ -48,32 +69,30 @@ We need a couple of automation tools in WSL:
   cp  /mnt/c/programs/GTK3VICE-3.10-win64/C64/basic-901226-01.bin  .
   cp  /mnt/c/programs/GTK3VICE-3.10-win64/C64/chargen-901225-01.bin  .
   ```
-  Start VICE with `x64sc` or use `x64sc -verbose` to see which files are loaded.
+
+  **Note** the `C64` directory is with uppercase `C`.
+
+- For older VICE versions, the three files need to be renamed 
+  to `kernal`, `basic`, and `chargen`.
+
+ - Start VICE in WSL with with `x64sc` or use `x64sc -verbose` to see 
+   which files are loaded.
 
   ![VICE in WSL2](images/vice-wsl2.png)
 
-- **Note** For older VICE versions, the three files need to be renamed to `kernal`, `basic`, and `chargen`.
-- You might also want to copy a drive ROM
+- You probably also want to copy a 1541-II drive ROM.
+  Like the C64, the 1541-II has ROM, and the WSL emulator needs a copy.
+
   ```
   cd ~
   mkdir -p .local/share/vice/DRIVES
   cd .local/share/vice/DRIVES
   cp  /mnt/c/programs/GTK3VICE-3.10-win64/DRIVES/dos1541ii-251968-03.bin  .
   ```
+  
 - **Note** For older VICE versions, the disk rom needs to be renamed to `d1541II`.
 
-
-### Windows
-
-For Windows we just need VICE
-
-- Get it from [sourceforge](https://vice-emu.sourceforge.io/index.html#download).
-  VICE recommends the GTK3 version so get "Download VICE 3.10 (64bit GTK3)".
-
-- I typically auto-mount the [KCS power cartridge](https://rr.pokefinder.org/wiki/Power_Cartridge). 
-  It supports hex commands in BASIC and includes a machine language "monitor".
-  The Binaries section of the above page links to the cartridge image.
-  In VICE use File > Attach cartridge image ... to mount it, set the check-mark to set it as default.
+This concludes the install. Now let's write and test some software.
 
 
 ## Source files
