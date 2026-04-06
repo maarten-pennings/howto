@@ -96,12 +96,14 @@ Instead of running the VICE emulator under Windows, we can also run it under WSL
 This concludes the install. Now let's write and test some software.
 
 
-## Source files
+## Experiment 1: compile and run
 
-I have written two example source files: one in assembly and one in BASIC.
+For the first experiment, I have written two example source files: 
+one in assembly and one in BASIC. We are going to write a makefile to convert
+these to `.prg` files on virtual disk (a `.d64` file).
 
 
-### Assembly
+### Assembly source file
 
 The first file is an assembly file [`border-sub.asm`](src/border-sub.asm).
 We kept it simple; it just changes the border color (at address $D020) 
@@ -116,17 +118,19 @@ STA $D020
 RTS
 ```        
 
-The `64tass` assembler will convert this to a .prg file.
+The `64tass` assembler will convert this to a `.prg` file.
 An interesting observation is that the assembler will not only compile 
-the source text to a list of bytes, it will actually generate a .prg file:
+the source text to a list of bytes, it will actually generate a `.prg` file:
 a list of bytes _prefixed with a load address_, C000 in our case.
 
 
-### BASIC
+### BASIC source file
 
 The other file is a BASIC _text_ file [`border.bas`](src/border.bas).
 This may be edited with a tool like notepad.
-We use `petcat` from VICE to convert this to a C64 .prg file.
+We use `petcat` from VICE to convert this to a C64 `.prg` file.
+This means that strings like `print` are converted to a print token 
+(byte 153; see [list](https://www.c64-wiki.com/wiki/BASIC_token)).
 
 This program is a bit more complicated, but we feel it is a typical setup: 
 it loads the assembly subroutine, then runs it. This mimics a test process.
@@ -143,7 +147,7 @@ it loads the assembly subroutine, then runs it. This mimics a test process.
 90 end
 ```
 
-Note that we must use _lower case_ in the .bas file. C64 BASIC will list it as uppercase.
+Note that we must use _lower case_ in the `.bas` file. C64 BASIC will list it as uppercase.
 
 When running this BASIC program, the variable `a` on line 10 will be created
 and initialized to 0, so the jump to line 60 will not happen.
@@ -157,7 +161,7 @@ at the address specified in its header. In our case that will be C000.
 
 C64 BASIC has a bit funny implementation of `LOAD` when used in a program: after loading the 
 specified program, it issues a `RUN`, however without clearing variables 
-(which might not work if the second program overlaps with the first).
+(which might not work if the second program is longer than the first).
 
 So after line 30, line 10 will execute (again), which now does jump to 60.
 The second part of our program prints it will call the assembly subroutine,
@@ -165,49 +169,45 @@ then it calls it (49152=$C000), prints we are back in basic and finally
 ends the program.
 
 
-## Generating .prg files.
+### Assembly source to `.prg`
 
-We are using two tools to convert the sources to .prg files.
+> Recall that the C64, or better phrased, the 6502, is little endian machine. 
+> In other words a number like C000 is stored as 00 C0.
 
-This section shows some 2-byte hex numbers, recall that the C64, 
-or better phrased the 6502, is little endian machine. In other words
-the number C000 is stored as 00 C0.
-
-
-### Assembly
 
 To convert [`border.asm`](src/border-sub.asm) to a .prg file, we use `64tass`.
-Details are in the [Makefile](makefile).
+Details are in the [Makefile](src/Makefile).
 
 ```make
 	64tass  src/border-sub.asm  -o build/border-sub.prg
 ```
 
-The generated .prg file is only 8 bytes.
+The generated `.prg` file is only 8 bytes.
 First the load address (red box).
 Next come three instructions, `LDA #$01` in a green,
-`STA $D020` in a blue and `RTS` in a yellow box.
+`STA $D020` in a blue, and finally `RTS` in a yellow box.
 
 ![Generated binary](images/border-sub.prg.png)
 
 
-### BASIC 
+### BASIC source to `.prg`
 
-To convert [`border.bas`](src/border.bas) to a .prg file, we use `petcat`.
-The `-w2` selects C64 BASIC 2.0; see the [Makefile](makefile).
+To convert [`border.bas`](src/border.bas) to a `.prg` file, we use `petcat`.
+The `-w2` selects C64 BASIC 2.0; see the [Makefile](src/Makefile).
 
 ```make
-	petcat  -w2  -o build/border.prg  --  src/border.bas
+	petcat  -w2  -o build/border.prg  --  border.bas
 ```
 
-The generated .prg file also starts with a load address, namely the 0801 (red box).
+The generated `.prg` file also starts with a load address, namely the 0801 (red box).
 This allows for a load to specific address as in `LOAD "BORDER",8,1`.
 A plain load `LOAD "BORDER",8` will also work, since BASIC interpreter will 
 then load to the start of BASIC, which happens to be 0801 on the C64.
 
 Observe that the BASIC text is a _list_ of lines; the green boxes show the link to 
-(tha address of) the next line. The blue boxes encircle the line numbers. Then 
-each line is a series of bytes terminated with a 00. The bytes are a mix of 
+(the address of) the next line. The blue boxes encircle the line numbers 
+(in reverse video the line number in decimal). Each line is a series of bytes 
+terminated with a 00 (yellow box). The bytes are a mix of 
 literal program text and tokens. On offset 6 we see `8b`, the token for `if` 
 (see [list](https://www.c64-wiki.com/wiki/BASIC_token)). This is followed by 
 `20` (space), `41` (variable name `A`) and another token `b2` for `=`, the equals operator.
@@ -216,17 +216,17 @@ literal program text and tokens. On offset 6 we see `8b`, the token for `if`
 
 
 
-## Running the code
+### Creating a virtual disk
 
 We deliberately made a "complex" setup with a BASIC program loading another files.
-It is possible to double click on a .prg file to start VICE (if the extension association is registered).
-It is also possible to drag&drop a .prg file on an already started VICE.
+It is possible to double click on a `.prg` file to start VICE (if the extension association is registered).
+It is also possible to drag&drop a `.prg` file on an already started VICE.
 
 However for our complex setup that doesn't work, one program needs the other.
 The solution is to create a C64 _disk image_ with both files on it. 
 We use the tool `c1541` for that.
-We create a new disk, format it and save the two .prg files on it.
-See the [Makefile](makefile) for the exact arguments.
+We create a new disk, format it and save the two `.prg` files on it.
+See the [Makefile](src/Makefile) for the exact arguments.
 
 ```make
 	c1541 -format "border-dsk,bd" d64 build/border-dsk.d64 \
@@ -234,18 +234,24 @@ See the [Makefile](makefile) for the exact arguments.
         -write build/border-sub.prg  "border-sub"
 ```
 
-We can now double-click the .d64 file and VICE starts, mounts it,
-and loads and runs the first .prg file on the disk. 
+
+### Running the program
+
+We can now double-click the `.d64` file and VICE starts, mounts it,
+and loads and runs the first `.prg` file on the disk. 
 On the screenshot below, we see the `LOAD"*",8,1` and the `RUN` 
-caused by double clicking the .d64 disk file.
+caused by double clicking the `.d64` disk file.
 
 Next we see the `LOAD` message from line 20 of our BASIC program.
 This causes a re-run, which jumps to line 60, printing that an
 assembly call will be made. The call is made which makes the border white 
 as we can see in the screenshot. Finally, 
-`80 print "back in basic."` is excuted.
+`80 print "back in basic."` is executed.
 
 ![Executing](images/vice.png)
+
+
+## Experiment 2: compile and test
 
 It is also possible to add the following line to the makefile to
 start VICE automatically as part of make. This does require that VICE is working in WSL.
