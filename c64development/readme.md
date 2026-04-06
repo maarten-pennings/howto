@@ -105,7 +105,7 @@ these to `.prg` files on virtual disk (a `.d64` file).
 
 ### Assembly source file
 
-The first file is an assembly file [`border-sub.asm`](src/border-sub.asm).
+The first file is an assembly file [`border-sub.asm`](src1/border-sub.asm).
 We kept it simple; it just changes the border color (at address $D020) 
 to white (color $01). This program is compiled for location $C000,
 this is where the C64 has a 4k byte "gap" between the BASIC interpreter 
@@ -126,7 +126,7 @@ a list of bytes _prefixed with a load address_, C000 in our case.
 
 ### BASIC source file
 
-The other file is a BASIC _text_ file [`border.bas`](src/border.bas).
+The other file is a BASIC _text_ file [`border.bas`](src1/border.bas).
 This may be edited with a tool like notepad.
 We use `petcat` from VICE to convert this to a C64 `.prg` file.
 This means that strings like `print` are converted to a print token 
@@ -175,11 +175,11 @@ ends the program.
 > In other words a number like C000 is stored as 00 C0.
 
 
-To convert [`border.asm`](src/border-sub.asm) to a .prg file, we use `64tass`.
-Details are in the [Makefile](src/Makefile).
+To convert [`border.asm`](src1/border-sub.asm) to a .prg file, we use `64tass`.
+Details are in the [Makefile](src1/Makefile).
 
 ```make
-	64tass  src/border-sub.asm  -o build/border-sub.prg
+	64tass  border-sub.asm  -o build/border-sub.prg
 ```
 
 The generated `.prg` file is only 8 bytes.
@@ -192,8 +192,8 @@ Next come three instructions, `LDA #$01` in a green,
 
 ### BASIC source to `.prg`
 
-To convert [`border.bas`](src/border.bas) to a `.prg` file, we use `petcat`.
-The `-w2` selects C64 BASIC 2.0; see the [Makefile](src/Makefile).
+To convert [`border.bas`](src1/border.bas) to a `.prg` file, we use `petcat`.
+The `-w2` selects C64 BASIC 2.0; see the [Makefile](src1/Makefile).
 
 ```make
 	petcat  -w2  -o build/border.prg  --  border.bas
@@ -226,7 +226,7 @@ However for our complex setup that doesn't work, one program needs the other.
 The solution is to create a C64 _disk image_ with both files on it. 
 We use the tool `c1541` for that.
 We create a new disk, format it and save the two `.prg` files on it.
-See the [Makefile](src/Makefile) for the exact arguments.
+See the [Makefile](src1/Makefile) for the exact arguments.
 
 ```make
 	c1541 -format "border-dsk,bd" d64 build/border-dsk.d64 \
