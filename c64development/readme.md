@@ -294,11 +294,11 @@ Don't use the "resources" but the "command-line options" (6.12.2.2).
   (column 4 in green box) for printer 4, to the just created device. 
   The UI uses device 1, 2, 3, the command line 0, 1, 2.
 
-- The "Output mode" (column 3 in green box) is Text for us. This creates 
-  a text file with the printed characters in it. Graphics creates a png file 
-  with drawings of the characters. We add `-pr4output text`.
+- The "Output mode" (column 3 in green box) is "Text" for us. This creates 
+  a text file with the printed characters in it. "Graphics" would create 
+  a png file with drawings of the characters. We add `-pr4output text`.
 
-- The "Driver" (column 2 in green box) is ASCII for us.  
+- The "Driver" (column 2 in green box) is ASCII for us. 
   We do not have a real printer connected to the host, we print to a file.
   Therefore we do not need a driver. We add `-pr4drv ascii`.
   
