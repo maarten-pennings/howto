@@ -344,17 +344,46 @@ maarten@Desktop-Maarten:/mnt/c/Repos/howto/c64development$ hd printer.log
 Notice the line ending: 0x0A (character 10 or linefeed).
 
 
+### Configuring the drive
+
+The emulated C64, VICE, needs a disk drive so that it can load the "SUT" 
+(Software Under Test) and the test programs. 
+
+This proves to be easier than the printer.
+
+- Select which driver to emulate. We pick the latest C64 drive, the 1541-II.
+  As the [manual](https://vice-emu.sourceforge.io/vice_6.html#SEC112) explains,
+  we need to add the option `-drive8type 1542`. It is assumed that the 
+  1541-II ROM is [installed](#wsl).
+
+- To start a program automatically, pass `-autostart disk.d64:prog`, where 
+  `-disk.d64` is the name of a virtual disk and `prog` is the name of a 
+  program on that disk ([manual](https://vice-emu.sourceforge.io/vice_2.html#SEC50))
+
+
+### Run and stop
+
+There is one more problem, how do we stop VICE, once a test program is 
+completed? The test program is (typically) BASIC, and what can it "call"
+to shut down VICE (and stay truly C64 compatible)?
+
+I was assuming there would be a virtual IEC device or some memory mapped 
+device where the BASIC program could send some messages (`POKE`s) to, and 
+that this would virtually "cut the power" of the C64. I could not find 
+such a thing.
+
+- The advise is to use `-limitcycles xxx`, which automatically exits 
+  the emulator after xxx number of cycles. Recall that the C64 runs at 1 MHz,
+  so `-limitcycles 5999000` is nearly 6 seconds 
+  ([manual](https://vice-emu.sourceforge.io/vice_2.html#SEC50))
+
+- Since we are testing, we want results as soon as possible. 
+  The argument `-warp` ([manual](https://vice-emu.sourceforge.io/vice_6.html#SEC92))
+  enables running as fast as the emulator can.
+  
+
 ### todo
 
-
-It is also possible to add the following line to the makefile to
-start VICE automatically as part of make. This does require that VICE is working in WSL.
-
-```
-	x64sc -autostart build/border-dsk.d64
-```
-
-To mount a printer and start a program from a d64 file
 
 ```
 PRINTER4 = -prtxtdev1 printer.log  -pr4txtdev 0  -pr4output text  -pr4drv ascii  -device4  1  -virtualdev4
@@ -364,4 +393,5 @@ test: build/test.d64
 	rm -f printer.log
 	x64sc  $(DISK8) $(PRINTER4) $(OTHER)
 ```
+
 (end)
