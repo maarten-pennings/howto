@@ -254,7 +254,7 @@ as we can see in the screenshot. Finally,
 
 ## Experiment 2: compile and automated test
 
-In this second experiment, we go one step further, also automate the testing.
+In this second experiment, we go one step further, also automate the _testing_.
 We run the C64 software on the emulator (VICE), but do not print to the 
 screen but to the printer. We instruct VICE to save the printer output to a 
 file.
@@ -265,23 +265,25 @@ file.
 It turned out quite a challenge to configure a printer in VICE.
 And the WSL version is running behind (VICE 3.6.1 vs VICE 3.9).
 Find printer configuration under Preferences > Settings > Peripheral devices > Printer.
+Below is a screenshot from VICE 3.6.1 under WSL, followed by a screenshot of VICE 3.9 under Windows.
 
 ![Default printer config (WSL; VICE 3.6.1)](images/vice-printer-wsl2.png)
 
 ![Default printer config (Windows; VICE 3.9)](images/vice-printer-win.png)
 
-We can configure 5 emulated printers (green box): four printers 
+We can configure 5 _emulated_ printers (green box): four printers 
 connected to IEC Serial bus, and one connected to the User port.
-The IEC printers (like disk drives) have an address; the screenshots
-show the default printer address 4 (note the highlighted tab).
+The IEC printers (like disk drives) have an address from 4 to 7.
+The screenshots show that we configure the default printer 
+(note the highlighted tab); the printer on IEC address 4.
 
-We can configure 3 physical printers (blue box).
-These can be a file, or a printer connected the the host computer.
+We can configure 3 _physical_ printers (blue box).
+These can be a file, or a printer connected to the host computer.
 
-To configuring the printer we need the VICE command line manual.
+To configuring the printer we need to consult the VICE command line manual.
 The [TOC](https://vice-emu.sourceforge.io/vice_toc.html) directs us to 
-section [6.12.2 Printer settings](https://vice-emu.sourceforge.io/vice_6.html).
-Don't use the "resources" but the "command-line options" (6.12.2.2).
+section [6.12.2 Printer settings](https://vice-emu.sourceforge.io/vice_6.html#SEC117).
+Don't use the "resources" (6.12.2.1) but the "command-line options" (6.12.2.2).
 
 - We need to set the "Printer [text|output] devices" for VICE (blue box).
   This is the "physical" printer connected to the host computer running VICE.
@@ -302,8 +304,8 @@ Don't use the "resources" but the "command-line options" (6.12.2.2).
   We do not have a real printer connected to the host, we print to a file.
   Therefore we do not need a driver. We add `-pr4drv ascii`.
   
-- The "Emulation type" (column 1 in green box) is File system access.
-  We add `-device4  1` (option 1, 0-based).
+- The "Emulation type" (column 1 in green box) is "File system access".
+  We add `-device4 1` (option 1, 0-based).
   We also enable the virtual device `-virtualdev4`
 
 This is the complete command line
@@ -312,6 +314,7 @@ This is the complete command line
 x64sc  -prtxtdev1 printer.log  -pr4txtdev 0  -pr4output text  -pr4drv ascii  -device4 1  -virtualdev4
 ```
 
+If we then inspect the printer settings we get
 
 ![Our printer config (WSL; VICE 3.6.1)](images/vice-printer-wsl2-configured.png)
 
@@ -323,7 +326,7 @@ following BASIC program, we get a file `printer.log` in the directory
 where we started VICE.
 
 ```
-10 open 4,4,4
+10 open 4,4
 20 print#4,"hello, world!"
 30 print#4,"second line"
 40 close 4
