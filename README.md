@@ -3,68 +3,6 @@
 Assortment of "How to xxx" I want to remember.
 
 
-## C64 development
-
-It is possible to develop on the C64 itself.
-For BASIC that is possibly the best solution.
-For assembly it starts to be less than ideal, 
-if only because a bad program may crash your C64, 
-corrupting your work.
-
-The [C64 development](c64development) explains how to
-develop assembler and BASIC on a PC, and test it in VICE.
-
-
-## C64 disk drive commands
-
-[How to](c64diskcmds) manage in C64 disk drive.
-The DOS (Disk Operating System) built into the drive.
-
-
-## How to fix the RESTORE key on the C64
-
-On the older C64 you really have to quickly hammer that key.
-Here is an instruction [how to](c64RESTOREkey/readme.md) fix that.
-
-
-## How to map keys for BMC64
-
-I made a bare-metal-C64 using a Raspbery Pi and a small USB keyboard.
-I wanted a mapping that is close to the original C64 layout.
-The [BMC64 KBD](c64-bmc64kbd) explains how I did that.
-
-
-## How to use the SID of the Commodore 64?
-
-Writing a UI to control the SID registers, and using the VICE tools
-to extract the BASIC program to PC, see [c64sid](c64sid).
-
-
-## How to use the compare instruction of the 6502?
-
-I was writing some assembly on the 6502 in the C64 (ok the 6510)
-and tripped over the compare function.
-Why doesn't that [work](c64cmp)?
-
-
-## Commodore 64 user defined functions
-
-A rarely used feature of the C64 is the user defined function `FNF(X)`.
-Article [c64functions](c64functions) studies how to use them.
-
-
-## Commodore 64 memory partitioning
-
-Can we partition the C64 memory, storing two programs simultaneously?A multi-app setup?
-No multitasking, we activate one, run it, activate another and run it.
-The howto [c64mempart](c64mempart) explains it.
-
-
-## Commodore 64 characters
-
-How are [C64 chars](c64chars) organized?
-
-
 ## Solving the Quadro puzzle
 
 How to solve the [Quadro](Quadro) puzzle - by analysis.
@@ -76,34 +14,10 @@ How to [flash](ESPwebflash) an ESP32 without installing the Arduino IDE or
 Espressif's IDF (IoT Development Framework).
 
 
-## Commodore 64 USR() function
-
-How to make the `USR()` function work. Plus, as bonus, a return-to-TMP easily.
-See [c64usr](c64usr).
-
-
 ## Gemini
 
 Most of the questions I asked Gemini and the likes (ChatGPT) did not lead to a satisfactory answer.
 Marc gave me a puzzle, and this time Gemini did not let me [down](Gemini8princesses).
-
-
-## Commodore 64 string storage
-
-How does the C64 store strings. Section [C64strings](C64strings) explains this.
-
-
-## Commodore 64 drives
-
-The 1541 disk drive for the commodore 64 is "smart".
-This [how to](c64drive) explains what that means.
-
-
-## Remapping keys in VICE
-
-I was playing with VICE the C64 (Commodore 64) emulator.
-In Turbo Macro Pro, the `←` key is used extensively, so I wanted to remap that to an easy key.
-See [how to](ViceKeyboardRemap/readme.md) do that yourself.
 
 
 ## Get a map file in Arduino for ESP
@@ -211,6 +125,98 @@ For an example and explanation see [esp32-fast-gpio](esp32-fast-gpio/esp32-fast-
 ## Fast GPIO writes on an ATMEGA
 Set or clear ATMEGA GPIO pins via direct register access; this is much faster than via the Arduino API.
 For an example and explanation see [atmega-fast-gpio](atmega-fast-gpio/atmega-fast-gpio.md).
+
+
+# C64
+
+These howto's still need to move the the 
+[C64 specific howto repo](https://github.com/maarten-pennings/C64howto).
+
+
+## C64 development
+
+It is possible to develop on the C64 itself.
+For BASIC that is possibly the best solution.
+For assembly it starts to be less than ideal, 
+if only because a bad program may crash your C64, 
+corrupting your work.
+
+The [C64 development](c64development) explains how to
+develop assembler and BASIC on a PC, and test it in VICE.
+
+
+## C64 disk drive commands
+
+[How to](c64diskcmds) manage in C64 disk drive.
+The DOS (Disk Operating System) built into the drive.
+
+
+## How to fix the RESTORE key on the C64
+
+On the older C64 you really have to quickly hammer that key.
+Here is an instruction [how to](c64RESTOREkey/readme.md) fix that.
+
+
+## How to map keys for BMC64
+
+I made a bare-metal-C64 using a Raspbery Pi and a small USB keyboard.
+I wanted a mapping that is close to the original C64 layout.
+The [BMC64 KBD](c64-bmc64kbd) explains how I did that.
+
+
+## How to use the SID of the Commodore 64?
+
+Writing a UI to control the SID registers, and using the VICE tools
+to extract the BASIC program to PC, see [c64sid](c64sid).
+
+
+## How to use the compare instruction of the 6502?
+
+I was writing some assembly on the 6502 in the C64 (ok the 6510)
+and tripped over the compare function.
+Why doesn't that [work](c64cmp)?
+
+
+## Commodore 64 user defined functions
+
+A rarely used feature of the C64 is the user defined function `FNF(X)`.
+Article [c64functions](c64functions) studies how to use them.
+
+
+## Commodore 64 memory partitioning
+
+Can we partition the C64 memory, storing two programs simultaneously?A multi-app setup?
+No multitasking, we activate one, run it, activate another and run it.
+The howto [c64mempart](c64mempart) explains it.
+
+
+## Commodore 64 characters
+
+How are [C64 chars](c64chars) organized?
+
+
+## Commodore 64 USR() function
+
+How to make the `USR()` function work. Plus, as bonus, a return-to-TMP easily.
+See [c64usr](c64usr).
+
+
+## Commodore 64 string storage
+
+How does the C64 store strings. Section [C64strings](C64strings) explains this.
+
+
+## Commodore 64 drives
+
+The 1541 disk drive for the commodore 64 is "smart".
+This [how to](c64drive) explains what that means.
+
+
+## Remapping keys in VICE
+
+I was playing with VICE the C64 (Commodore 64) emulator.
+In Turbo Macro Pro, the `←` key is used extensively, so I wanted to remap that to an easy key.
+See [how to](ViceKeyboardRemap/readme.md) do that yourself.
 
 
 (end)
