@@ -248,7 +248,7 @@ The `Fn` is explained in the last section for extra mappings.
 # Row 5
 
 The `Fn` is used in the last section for extra mappings.
-As mention `Alt` does not seem to work, I skipped it.
+As mentioned `Alt` does not seem to work, I skipped it.
 But the `Windows` key, labeled with a diamond, also known as `Meta` or `Super`
 is available: I map it to `C=`.
 
@@ -500,8 +500,8 @@ BackSpace 6 6 8      /*           BS -> Up arrow     */
 
 ## My Keyboard
 
-The result is this keyboard. I glued some stickers on key caps, which needs
-a better solution. 
+The result is this keyboard. I glued some stickers on key caps; 
+this needs a better solution. 
 
 ![key-plus](label-keyboard.jpg)
 
