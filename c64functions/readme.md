@@ -130,7 +130,7 @@ list useful function definitions for each category.
   which fits with the mandatory float-to-float signature.
 
 - **Built-in string functions**  
-  `DEF FN NUMDIG(X)= LEN(STR(X))-1`  
+  `DEF FN NUMDIG(X)= LEN(STR$(X))-1`  
   It is counter intuitive, given the restriction of only supporting 
   float-to-float signature, but string functions are allowed in a function 
   body. The only catch, the top-level expression must return a float.
