@@ -85,7 +85,7 @@ the gate of channel 1).
 My second rabbit hole was file transfers between 
 [VICE](https://vice-emu.sourceforge.io/) a real C64 and this web page.
 I discovered that VICE comes with two tools.
-One `c1531.exe` to manipulate disk images, and `petcat.exe` to convert 
+One `c1541.exe` to manipulate disk images, and `petcat.exe` to convert 
 a BASIC program to a plain text file.
 Both are found in the `bin` directory (`C:\Programs\GTK3VICE-3.9-win64\bin`).
 
