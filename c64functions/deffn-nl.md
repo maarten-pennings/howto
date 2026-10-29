@@ -3,7 +3,7 @@
 Maarten Pennings MCC#07
 
 
-# Functions in BASIC
+# Functies in BASIC
 
 In dit artikel bekijken we _functies_ in Commodore 64 BASIC.
 
@@ -234,7 +234,7 @@ Hieronder staan voorbeelden uitgesplitst in categorieën.
   ```
 
 
-## Verboden functie _ body_
+## Verboden functie _body_
 
 Er zijn ook constructies niet toegstaan in een functie _body_ die we daar 
 wel zouden kunnen verwachten.
