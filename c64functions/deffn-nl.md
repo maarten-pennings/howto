@@ -377,12 +377,13 @@ stackframe plaatst.
 - Dat de hele _body_ op één regel moet staan is een behoorlijke beperking.
   Ook dat statements niet zijn toegestaan is jammer.
   
-Hoeweel het `FNF()` mechanisme erg beperkt is lijkt de implementatie 
+Hoewel het `FNF()` mechanisme erg beperkt is lijkt de implementatie 
 behoorlijk ingewikkeld, kijk bijvoorbeeld naar het 16-byte stackframe.
 
-Mijn conclusie is dat voor dit feature de opbrengst niet in balans is
-met de implementatie kosten. Ik denk dat de meeste BASIC-programmeurs 
-_gebruikers functies_ beschouwen als een "zelden gebruikte feature".
+Mijn conclusie is dat voor dit feature de opbrengst voor de 
+BASIC-programmeur niet in balans is met de (kernal) implementatie 
+kosten. Ik denk dat de meeste BASIC-programmeurs _gebruikers functies_ 
+beschouwen als een "zelden gebruikte feature".
 
 
 ## Ten slotte 
