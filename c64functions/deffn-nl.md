@@ -296,7 +296,7 @@ een tabel aangemaakt van (scalaire) variabelen (arrays komen daar weer achter).
 De variabelen tabel bevat _records_ van 7 bytes: 
 2 bytes voor de naam van de variabele en 5 bytes vooor de waarde.
 De 2 bytes voor de naam zijn eigenlijk 7 bits voor de eerste letter en 7 bits 
-voor de tweede letter (of 0 als die er niet is) plus 2 bytes voor het type.
+voor de tweede letter (of 0 als die er niet is) plus 2 bits voor het type.
 
 Er zijn vier types: float, string, integer, ... en gebruikers functie.
 Voor een gebruikers functie zijn de 5 bytes voor de waarde als volgt:
