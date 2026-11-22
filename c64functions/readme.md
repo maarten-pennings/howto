@@ -5,6 +5,8 @@ In this article we look at _functions_ in Commodore 64 BASIC.
 In the context of this article the stand-alone term "function" 
 refers to `FN F(X)`, not subroutines (`GOSUB`), nor built-in functions (`SIN(X)`).
 
+There is a summary in [Dutch](deffn-nl.md).
+
 
 ## Introduction
 

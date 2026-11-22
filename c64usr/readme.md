@@ -4,6 +4,8 @@ This document explains how to implement a `USR()` function on the C64. We implem
 
 It also shows a trick from Robin "8-Bit Show And Tell" how to easily return to Turbo Macro Pro.
 
+There is a summary in [Dutch](usr-nl.md).
+
 
 ## Introduction
 
