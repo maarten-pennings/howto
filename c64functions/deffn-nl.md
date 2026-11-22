@@ -10,27 +10,27 @@ In dit artikel bekijken we _gebruikers functies_ in Commodore 64 BASIC.
 Met _gebruikers functie_ bedoelen we hier `FN F(X)`, niet subroutines (`GOSUB`), 
 en ook niet de ingebouwde functies (zoals `SIN(X)` of `USR(X)`).
 
-We zullen in dit artikel vaak "functie" schijven als we "gebruikers functie" bedoelen.
+We zullen in dit artikel soms "functie" schijven als we "gebruikers functie" bedoelen.
 
 
-## Introduction
+## Introductie
 
-Gebruikers functies in C64 BASIC gebruiken het keywoord `FN`.
+Gebruikers functies in C64 BASIC gebruiken het keyword `FN`.
 
 Om een functie `F` _aan te roepen_ met argument `3`, schrijven we `FN F(3)`.
 
 Voor we een gebruikers functie kunnen aanroepen moet hij _gedefinieerd_ zijn.
-Daarvoor hebben we een tweede keywoord nodig `DEF`.
+Daarvoor hebben we een tweede keyword nodig `DEF`.
 Een gebruikers functie definitie zou er zo uit kunnen zien `DEF FN F(X)= X*2`.
 
 Functie definities moeten in een programma staan.
 Zonder regel nummer krijgen we de foutmelding `?ILLEGAL DIRECT  ERROR`.
-Dat is logisch omdat de code ("_body_") van de gebruikers functie 
+Dat is logisch omdat de definitie, de code, de _body_, van de gebruikers functie 
 (in ons voorbeeld `X*2`) 
 persistent bewaard moet worden, zodat hij uitgevoerd kan worden.
 Eenmaal gedefinieerd zijn aanroepen in directe mode wel toegestaan.
 
-Zoals altijd zijn spaties rond keywoorden optioneel.
+Zoals altijd zijn spaties rond BASIC _keywords_ optioneel.
 De volgende twee fragmenten zijn dus gelijk.
 De eerste is leesbaarder, de tweede wat korter en iets sneller.
 
@@ -64,7 +64,7 @@ De enige functie signatuur in C64 BASIC is float naar float
 150 DEF FN F(X$)= 12     | fout: argument verkeerd type (string)
 ```
 
-Van de functie definities hierboven heeft er maar een de goede signatuur, die op regel 110.
+Van de functie definities hierboven heeft er maar één de goede signatuur, die op regel 110.
 Alle andere geven een foutmelding `syntax  error` (voor regels 100, 120, 130), 
 of `type mismatch  error` (voor regels 140 en 150). Opmerkelijk dat er verschillende 
 foutmelding komen, helemaal voor 130 en 150.
@@ -80,9 +80,9 @@ Beide kunnen een naam hebben zoals die is toegestaan voor een variabele in BASIC
 Beide namen bestaan dus uit een losse letter, of een letter gevolgd 
 door een letter of een cijfer. Namen mogen langer zijn, 
 maar alleen de eerste twee karakters tellen.
-Namen mogen geen BASIC keywoord bevatten (zoals `ST`).
+Namen mogen geen BASIC keyword bevatten (zoals `ST`).
 
-Hieronder een voorbeeld met lange namen.
+Hieronder een voorbeeld met langere namen.
 
 ```basic
 10 DEF FN MY1FUNC(ARG)= ARG*2
@@ -110,23 +110,25 @@ Hieronder staan voorbeelden uitgesplitst in categorieën.
 - **Rekenkundige operatoren**  
   `DEF FN HEIGHT(SEC)= 300-9.82*SEC*SEC/2`  
   `DEF FN SQ(X)= X↑2`  
+  `DEF FN LO(B)= B AND 15`  
   Een functie _body_ mag alle BASIC operatoren gebruiken (`+`, `-`, `*`, `/`, `↑`).
+  Andere voorbeelden zijn de logische operatoren (`AND`, `OR`, `NOT`).
+  Merk op dat de logische operatoren werken op twee integers (floats) en een integer (float) opleveren.
 
 - **Rekenkundige functies**  
   `DEF FN SN(A)= SIN(Π*A/180)`  
   `DEF FN LG(X)= LOG(X)/LOG(10)`  
   `DEF FN HI(B)= INT(B/16)`  
-  `DEF FN LO(B)= B AND 15`  
   Een functie _body_ mag de ingebouwde functies gebruiken, zelfs meerdere keren in een body.
   Voorbeelden zijn `ABS()`, `ATN()`, `COS()`, `EXP()`, `INT()`, `LOG()`, `SGN()`, `SIN()`, `SQR()`, en `TAN()`.
-  Andere voorbeelden zijn de logische operatoren (`AND`, `OR`, `NOT`) en de constante pi (`π`).
-  Merk op dat de logische operatoren werken op twee floats/integers en een float opleveren.
+  Ook de constante pi (`π`) is toegestaan.
 
 - **Relationele operatoren**  
   `DEF FN EVEN(X)= (X AND 1)=0`  
   `DEF FN RANGE(X)= (0<=X) AND (X<10)`  
   Er zijn verschillende relationele operatoren (`=`, `<`, `>`, `<=`, `>=`, `<>`).
-  Die leveren ook een float maar alleen `0` voor _false_, en  `-1` voor _true_.
+  Die leveren ook een float, maar in tegenstelling tot de logische operatoren, 
+  alleen `0` voor _false_, en  `-1` voor _true_.
 
 - **String functies**  
   `DEF FN NUMDIG(X)= LEN(STR$(X))-1`  
@@ -143,22 +145,22 @@ Hieronder staan voorbeelden uitgesplitst in categorieën.
   zijn toegestaan in een functie _body_.
   De functie `USR()` kan zelfs zij-effecten hebben.
 
-- **Systeem variablen**   
+- **Systeem variabelen**   
   `DEF FN TM(X)= TI/60`  
   `DEF FN HMS(X)= VAL(TI$)`  
   De systeem variabelen `TI` en `TI$` zijn toegestaan in een functie _body_.
   Natuurlijk moet `TI$` geconverteerd worden (`MID$`, `VAL`) naar float.
-  De derde systeem variabele, `ST` (I/O status), is ook toegstaan.
+  De derde systeem variabele, `ST` (I/O status), is ook toegestaan.
   
 - **Andere gebruikers functies**  
   Een gebruikers functie mag andere gebruikers functies aanroepen.
-  Dit zijn de regels voor `DEF FNF(X)= ...FNG(X)...`:
+  Dit zijn de regels voor `DEF FN F(X)= ... FN G(X) ...`:
   
-  - `FNG()` hoeft niet te bestaan als `FNF()` gedefinieerd wordt 
+  - `FN G()` hoeft niet te bestaan als `FN F()` gedefinieerd wordt 
     (de functie wordt opgezocht bij aanroep).
-  - `FNG()` moet bestaan als `FNF()` aangeroepen wordt.
+  - `FN G()` moet bestaan als `FN F()` aangeroepen wordt.
   - De definitie mag niet circulair zijn:
-    `FNG()` mag `FNF()` niet aanroepen (direct of indirect)
+    `FN G()` mag `FN F()` niet aanroepen (direct of indirect)
     want dit zou tot oneindige recursie leiden.
     
   Het volgende voorbeeld converteert bytes naar hex, gebruikmakend 
@@ -168,8 +170,8 @@ Hieronder staan voorbeelden uitgesplitst in categorieën.
   cijfer (0..15) naar ASCII. Helaas mogen we geen `A$(D)` maken.
   
   ```bas
-  100 DEF FN H(B)= FNA(INT(B/16))
-  110 DEF FN L(B)= FNA(B AND 15)
+  100 DEF FN H(B)= FN A(INT(B/16))
+  110 DEF FN L(B)= FN A(B AND 15)
   120 DEF FN A(D)= 48+D-7*(D>9):REM CONVERT 0..15 TO ASCII
   130 FOR X=13 TO 19
   140 :PRINT X;"=$";CHR$(FNH(X));CHR$(FNL(X))
@@ -198,9 +200,9 @@ Hieronder staan voorbeelden uitgesplitst in categorieën.
   Een erg krachtig mechanisme is dat een functie _body_ toegang heeft tot 
   alle globale variabelen. De regels zijn
   
-  - `A` hoeft niet te bestaan als `FNF()` gedefinieerd wordt
+  - `A` hoeft niet te bestaan als `FN F()` gedefinieerd wordt
     (de variabele wordt opgezocht bij aanroep).
-  - `A` moet bestaan als `FNF()` aangeroepen wordt.
+  - `A` moet bestaan als `FN F()` aangeroepen wordt.
 
   Het voorbeeld hieronder `PEEK`-t de karakter code en de karakter kleur
   van het karakter op scherm positie `X`,`Y`. Hierbij is `X` het argument
@@ -231,11 +233,11 @@ Hieronder staan voorbeelden uitgesplitst in categorieën.
 
 ## Verboden functie _body_
 
-Er zijn ook constructies niet toegstaan in een functie _body_ die we daar mogelijk 
-wel zouden kunnen verwachten.
+Er zijn ook constructies niet toegestaan in een functie _body_ die we daar mogelijk 
+wel zouden willen.
 
 - **Print helpers**  
-  Sommige ingebouwde functies zijn eigenlijk geen functies 
+  Sommige ingebouwde functies zijn eigenlijk geen functies hoewel ze er wel zo uitzien; 
   ze werken alleen in de context van `PRINT`; we hebben het over 
   `TAB()` en `SPC()`. De functie `POS(0)` staat los van `PRINT`, 
   die is wel toegestaan.
@@ -244,16 +246,16 @@ wel zouden kunnen verwachten.
   Een functie _body_ moet een _expressie_ zijn, geen _statement_.
   Dus `IF` en `FOR` zijn niet toegestaan.
 
-  Maar BASIC heeft wel een `IF` expressie mechansime:
+  BASIC heeft wel een `IF` expressie mechanisme:
   elke relationele operator levert 0 of -1 op, en dat kan gebruikt 
   worden in de omliggende expressie.
 
-  In het onderstaande voorbeeld, clipt `FNA3()` waardes kleiner dan 3, 
-  en `FNB6()` clipt waardes groter dan 6.
+  In het onderstaande voorbeeld, begrenst `FN A3()` waardes kleiner dan 3, 
+  en `FN B6()` begrenst waardes groter dan 6.
   
   ```bas
-  100 DEF FNA3(X)= -(X>=3)*X-3*(X<3)
-  110 DEF FNB6(X)= -(X<=6)*X-6*(X>6)
+  100 DEF FN A3(X)= -(X>=3)*X-3*(X<3)
+  110 DEF FN B6(X)= -(X<=6)*X-6*(X>6)
   120 :
   130 FOR X=0 TO 9
   140 :PRINT X,FNA3(X),FNB6(X)
@@ -271,16 +273,16 @@ wel zouden kunnen verwachten.
    9         9         6
   ```  
   
-- **Zelf**  
+- **Zichzelf**  
   Een functie _body_ mag niet naar zichzelf verwijzen.
   In C64 BASIC wordt elke functie altijd uitgevoerd - in sommige 
-  talen wordt `F(3)` niet uitgevoerd in een expressie zoals `0*F(3)`.
+  talen wordt `F(3)` niet uitgevoerd in een expressie zoals `0*F(3)` of `0 AND F(3)`.
   In C64 BASIC wel. Daarom leiden zulke expressie tot oneindige recursie 
   en dus een run-time error (stack overflow).
 
   ```BASIC
-  100 DEF FN FAC(N)= N*FNFAC(N-1)
-  110 PRINT FNFAC(5)
+  100 DEF FN FAC(N)= N * FN FAC(N-1)
+  110 PRINT FN FAC(5)
   RUN
   ?OUT OF MEMORY  ERROR IN 110
   ```
@@ -289,14 +291,15 @@ wel zouden kunnen verwachten.
 ## De definitie
 
 Als we de C64 opstarten is er ongeveer 38 kB RAM vrij.
-Als we daarna een programma intypen (of laden), gaat dat ten koste van die 38 kB.
+Als we een programma intypen (of laden), gaat dat ten koste van die 38 kB.
 Als we daarna het programma runnen, wordt er achter het programma, in de vrije RAM
-een tabel aangemaakt van (scalaire) variabelen (arrays komen daar weer achter).
+een tabel aangemaakt van (scalaire) variabelen (arrays komen daar weer achter, 
+en string waardes daar weer achter).
 
 De variabelen tabel bevat _records_ van 7 bytes: 
-2 bytes voor de naam van de variabele en 5 bytes vooor de waarde.
+2 bytes voor de naam van de variabele en 5 bytes voor de waarde.
 De 2 bytes voor de naam zijn eigenlijk 7 bits voor de eerste letter en 7 bits 
-voor de tweede letter (of 0 als die er niet is) plus 2 bits voor het type.
+voor de tweede letter plus 2 bits voor het type van de variabele.
 
 Er zijn vier types: float, string, integer, ... en gebruikers functie.
 Voor een gebruikers functie zijn de 5 bytes voor de waarde als volgt:
@@ -304,7 +307,7 @@ Voor een gebruikers functie zijn de 5 bytes voor de waarde als volgt:
 een pointer naar de argument variabele. Het vijfde byte wordt niet gebuikt.
 
 Met andere woorden, een gebruikers functie deelt een aantal eigenschappen 
-met gewone variabelen (eigen namespace, opzoeken bij gebruik, kunnen overschreven worden).
+met gewone variabelen (eigen namespace, opzoeken bij gebruik, overschreven kunnen worden).
 
 
 ## De aanroep
@@ -362,26 +365,26 @@ weer terug gezet worden naar de aanroep.
 Aangezien de ene gebruikers functie een andere gebruikers functie 
 kan aanroepen moet de programma wijzer manipulatie ook via de stack.
 C64-wiki legt uit dat een gebruikers functie aanroep een 16-byte
-stackframe plaatst.
+stack frame nodig heeft.
 
 
 ## Conclusies
 
 - De signatuur (één float naar één float) is erg beperkend.
-  Meer dan één argument toestaan zou een verbetering zijn (`FNLOG(X,B)`).
-  Strings als uitvoer toestaan zou een verbetering zijn (`FNHEX$()`).
+  Meer dan één argument toestaan zou een verbetering zijn (`FN LOG(X,B)`).
+  Strings als uitvoer toestaan zou een verbetering zijn (`FN HEX$()`).
   
 - Er is geen "short-circuit evaluation" in BASIC.
-  Elke subexpressie wordt altijd berekend en dus is er geen recursie mogelijk.
+  Elke sub-expressie wordt altijd berekend en dus is er geen recursie mogelijk.
 
 - Dat de hele _body_ op één regel moet staan is een behoorlijke beperking.
   Ook dat statements niet zijn toegestaan is jammer.
   
-Hoewel het `FNF()` mechanisme erg beperkt is lijkt de implementatie 
-behoorlijk ingewikkeld, kijk bijvoorbeeld naar het 16-byte stackframe.
+Hoewel het `FN F()` mechanisme erg beperkt is lijkt de implementatie 
+behoorlijk ingewikkeld, kijk bijvoorbeeld naar het 16-byte stack frame.
 
 Mijn conclusie is dat voor dit feature de opbrengst voor de 
-BASIC-programmeur niet in balans is met de (kernal) implementatie 
+BASIC-programmeur niet in balans is met de (interpreter) implementatie 
 kosten. Ik denk dat de meeste BASIC-programmeurs _gebruikers functies_ 
 beschouwen als een "zelden gebruikte feature".
 
@@ -389,7 +392,7 @@ beschouwen als een "zelden gebruikte feature".
 ## Ten slotte 
 
 Dit artikel is een verkorte Nederlandse versie van een Engels artikel.
-Dat bevat meer details en bijvoorbeeld een uitgebreide stack analyze.
+Dat bevat meer details en bijvoorbeeld een uitgebreide stack analyse.
 
 [https://github.com/maarten-pennings/howto/tree/main/c64functions](https://github.com/maarten-pennings/howto/tree/main/c64functions)
 
